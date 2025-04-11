@@ -1,0 +1,24 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: MobilePay Vipps Payment\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2024-03-20 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Norwegian Bokmål\n"
+"Language: nb_NO\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "MobilePay by Vipps Payment Provider"
+msgstr "MobilePay av Vipps Betalingstilbyder"
+
+msgid "Capture on Delivery"
+msgstr "Reserver ved levering"
+
+msgid "Payment processing failed: %s"
+msgstr "Betalingen kunne ikke behandles: %s"
+
+msgid "Refund requested from Odoo"
+msgstr "Refusjon forespurt fra Odoo"

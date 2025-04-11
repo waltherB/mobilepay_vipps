@@ -1,0 +1,8 @@
+<odoo>
+    <record id="payment_provider_vipps" model="payment.provider">
+        <field name="name">MobilePay by Vipps</field>
+        <field name="code">vipps</field>
+        <field name="state">enabled</field>
+        <field name="image">data:image/png;base64,...</field>
+    </record>
+</odoo>
