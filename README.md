@@ -1,3 +1,8 @@
+# NOT WORKING !!!!!! Just Playing around testing integrations !!!!!!!!
+
+
+
+
 # MobilePay by Vipps Payment Provider for Odoo 17 CE
 
 [![License: LGPL-3](https://img.shields.io/badge/License-LGPL--3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
