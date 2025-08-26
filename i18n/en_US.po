@@ -11,14 +11,327 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "MobilePay by Vipps Payment Provider"
-msgstr "MobilePay by Vipps Payment Provider"
+#. module: mobilepay_vipps
+#: model:payment.provider,name:mobilepay_vipps.payment_provider_vipps
+msgid "Vipps/MobilePay"
+msgstr "Vipps/MobilePay"
 
-msgid "Capture on Delivery"
-msgstr "Capture on Delivery"
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Environment Configuration"
+msgstr "Environment Configuration"
 
-msgid "Payment processing failed: %s"
-msgstr "Payment processing failed: %s"
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Test Environment"
+msgstr "Test Environment"
 
-msgid "Refund requested from Odoo"
-msgstr "Refund requested from Odoo"
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Production Environment"
+msgstr "Production Environment"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Use this for development and testing. Test payments will not process real money."
+msgstr "Use this for development and testing. Test payments will not process real money."
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Real payments will be processed. Ensure all testing is complete before enabling."
+msgstr "Real payments will be processed. Ensure all testing is complete before enabling."
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "API Credentials"
+msgstr "API Credentials"
+
+#. module: mobilepay_vipps
+#: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_merchant_serial_number
+msgid "Merchant Serial Number"
+msgstr "Merchant Serial Number"
+
+#. module: mobilepay_vipps
+#: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_subscription_key
+msgid "Subscription Key"
+msgstr "Subscription Key"
+
+#. module: mobilepay_vipps
+#: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_client_id
+msgid "Client ID"
+msgstr "Client ID"
+
+#. module: mobilepay_vipps
+#: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_client_secret
+msgid "Client Secret"
+msgstr "Client Secret"
+
+#. module: mobilepay_vipps
+#: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_environment
+msgid "Environment"
+msgstr "Environment"
+
+#. module: mobilepay_vipps
+#: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_capture_mode
+msgid "Capture Mode"
+msgstr "Capture Mode"
+
+#. module: mobilepay_vipps
+#: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_collect_user_info
+msgid "Collect User Information"
+msgstr "Collect User Information"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Credential Validation"
+msgstr "Credential Validation"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Validate Credentials"
+msgstr "Validate Credentials"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Re-validate Credentials"
+msgstr "Re-validate Credentials"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Payment Configuration"
+msgstr "Payment Configuration"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Manual capture is required for ecommerce compliance"
+msgstr "Manual capture is required for ecommerce compliance"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Collect customer information during payment for improved profiles"
+msgstr "Collect customer information during payment for improved profiles"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Manual Capture"
+msgstr "Manual Capture"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Payments will be authorized but not captured until you manually capture them or ship the order. This complies with legal requirements for ecommerce."
+msgstr "Payments will be authorized but not captured until you manually capture them or ship the order. This complies with legal requirements for ecommerce."
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Automatic Capture"
+msgstr "Automatic Capture"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Payments will be immediately captured upon authorization. Only use this for Point of Sale transactions."
+msgstr "Payments will be immediately captured upon authorization. Only use this for Point of Sale transactions."
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Security Configuration"
+msgstr "Security Configuration"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Documentation &amp; Support"
+msgstr "Documentation & Support"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Getting Started"
+msgstr "Getting Started"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Ready"
+msgstr "Ready"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Vipps/MobilePay is configured and ready to process payments."
+msgstr "Vipps/MobilePay is configured and ready to process payments."
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Configuration Required"
+msgstr "Configuration Required"
+
+#. module: mobilepay_vipps
+#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+msgid "Please configure and validate your API credentials above."
+msgstr "Please configure and validate your API credentials above."
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Merchant Serial Number must be a numeric value with at least 6 digits"
+msgstr "Merchant Serial Number must be a numeric value with at least 6 digits"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Client ID must be at least 10 characters long"
+msgstr "Client ID must be at least 10 characters long"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Missing required fields: %s"
+msgstr "Missing required fields: %s"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Success"
+msgstr "Success"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Vipps/MobilePay credentials validated successfully!"
+msgstr "Vipps/MobilePay credentials validated successfully!"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Validation Failed"
+msgstr "Validation Failed"
+
+#. module: mobilepay_vipps
+#: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_webhook_secret
+msgid "Webhook Secret"
+msgstr "Webhook Secret"
+
+#. module: mobilepay_vipps
+#: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_credentials_validated
+msgid "Credentials Validated"
+msgstr "Credentials Validated"
+
+#. module: mobilepay_vipps
+#: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_last_validation_error
+msgid "Last Validation Error"
+msgstr "Last Validation Error"
+
+#. module: mobilepay_vipps
+#: model:ir.cron,name:mobilepay_vipps.ir_cron_vipps_token_refresh
+msgid "Vipps/MobilePay: Refresh Access Tokens"
+msgstr "Vipps/MobilePay: Refresh Access Tokens"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "This method can only be called on Vipps payment providers"
+msgstr "This method can only be called on Vipps payment providers"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "No access token received from Vipps API"
+msgstr "No access token received from Vipps API"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Authentication failed. Please validate your credentials."
+msgstr "Authentication failed. Please validate your credentials."
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Invalid request: %s"
+msgstr "Invalid request: %s"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Conflict: %s"
+msgstr "Conflict: %s"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Vipps service temporarily unavailable. Please try again later."
+msgstr "Vipps service temporarily unavailable. Please try again later."
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "API error: %s (TraceId: %s)"
+msgstr "API error: %s (TraceId: %s)"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Request timeout. Please try again."
+msgstr "Request timeout. Please try again."
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Connection error. Please check your internet connection."
+msgstr "Connection error. Please check your internet connection."
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Maximum retry attempts exceeded."
+msgstr "Maximum retry attempts exceeded."
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Webhook secret must be at least 32 characters long for security"
+msgstr "Webhook secret must be at least 32 characters long for security"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Webhook secret should contain mixed case letters, numbers, and special characters"
+msgstr "Webhook secret should contain mixed case letters, numbers, and special characters"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Connection Test Successful"
+msgstr "Connection Test Successful"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Connection Test Failed"
+msgstr "Connection Test Failed"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Webhook Secret Generated"
+msgstr "Webhook Secret Generated"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "New webhook secret has been generated and saved securely."
+msgstr "New webhook secret has been generated and saved securely."
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Vipps Integration Compliance Status"
+msgstr "Vipps Integration Compliance Status"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Vipps API Health Status"
+msgstr "Vipps API Health Status"
+
+#. module: mobilepay_vipps
+#: code:addons/mobilepay_vipps/models/payment_provider.py:0
+#, python-format
+msgid "Health Status Error"
+msgstr "Health Status Error"
