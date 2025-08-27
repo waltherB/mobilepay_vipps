@@ -5,12 +5,12 @@
         <!-- Payment Icons -->
         <record id="payment_icon_vipps" model="payment.icon">
             <field name="name">Vipps</field>
-            <field name="image" type="base64" file="payment_vipps_mobilepay/static/src/img/vipps_icon.png"/>
+            <field name="image" type="base64" file="mobilepay_vipps/static/src/img/vipps_icon.png"/>
         </record>
         
         <record id="payment_icon_mobilepay" model="payment.icon">
             <field name="name">MobilePay</field>
-            <field name="image" type="base64" file="payment_vipps_mobilepay/static/src/img/mobilepay_icon.png"/>
+            <field name="image" type="base64" file="mobilepay_vipps/static/src/img/mobilepay_icon.png"/>
         </record>
         
         <!-- Default Payment Provider (disabled by default) -->
@@ -32,7 +32,7 @@
             <field name="support_tokenization">False</field>
             <field name="module_id" ref="base.module_payment_vipps_mobilepay"/>
             <field name="module_state">installed</field>
-            <field name="image_128" type="base64" file="payment_vipps_mobilepay/static/description/icon.png"/>
+            <field name="image_128" type="base64" file="mobilepay_vipps/static/description/icon.png"/>
         </record>
         
         <!-- Default Configuration Values -->

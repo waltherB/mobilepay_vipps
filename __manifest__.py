@@ -111,18 +111,18 @@ Website: https://github.com/waltherB/mobilepay_vipps
     ],
     'assets': {
         'web.assets_frontend': [
-            'payment_vipps_mobilepay/static/src/css/payment_form.css',
-            'payment_vipps_mobilepay/static/src/js/payment_form.js',
+            'mobilepay_vipps/static/src/css/payment_form.css',
+            'mobilepay_vipps/static/src/js/payment_form.js',
         ],
         'point_of_sale.assets': [
-            'payment_vipps_mobilepay/static/src/css/pos_payment.css',
-            'payment_vipps_mobilepay/static/src/js/pos_payment.js',
-            'payment_vipps_mobilepay/static/src/js/pos_payment_screen.js',
-            'payment_vipps_mobilepay/static/src/xml/pos_payment_screen.xml',
+            'mobilepay_vipps/static/src/css/pos_payment.css',
+            'mobilepay_vipps/static/src/js/pos_payment.js',
+            'mobilepay_vipps/static/src/js/pos_payment_screen.js',
+            'mobilepay_vipps/static/src/xml/pos_payment_screen.xml',
         ],
         'web.assets_backend': [
-            'payment_vipps_mobilepay/static/src/css/backend.css',
-            'payment_vipps_mobilepay/static/src/js/backend.js',
+            'mobilepay_vipps/static/src/css/backend.css',
+            'mobilepay_vipps/static/src/js/backend.js',
         ],
     },
     'demo': [
