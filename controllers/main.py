@@ -149,9 +149,9 @@ class VippsController(http.Controller):
                 _logger.warning("No transaction found for webhook reference %s", reference)
                 return request.make_response('Not Found: Transaction not found', status=404)
             
-            # Process webhook
+            # Process webhook using Odoo 17's notification system
             try:
-                transaction._handle_webhook(webhook_data)
+                transaction._process_notification_data(webhook_data)
                 
                 # Log successful processing
                 if webhook_id:

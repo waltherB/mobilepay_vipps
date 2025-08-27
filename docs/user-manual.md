@@ -326,9 +326,9 @@ A: Check your API credentials, webhook configuration, and contact support if iss
 ## Need More Help?
 
 ### Resources
-- **Video Tutorials**: [Link to video library]
-- **Community Forum**: [Link to community discussions]
-- **Developer Documentation**: [Link to technical docs]
+- **Documentation**: [Complete user documentation](README.md)
+- **Community Forum**: User discussions and support
+- **Developer Documentation**: [API Integration Guide](api-integration.md)
 
 ### Support Channels
 - **Email Support**: support@yourcompany.com

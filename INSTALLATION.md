@@ -64,10 +64,10 @@ The following Odoo modules must be installed:
 1. **Download Module**
    ```bash
    # Clone from repository
-   git clone https://github.com/your-org/odoo-vipps-mobilepay.git
+   git clone https://github.com/waltherB/mobilepay_vipps.git
    
    # Or download and extract ZIP file
-   wget https://github.com/your-org/odoo-vipps-mobilepay/archive/main.zip
+   wget https://github.com/waltherB/mobilepay_vipps/archive/main.zip
    unzip main.zip
    ```
 

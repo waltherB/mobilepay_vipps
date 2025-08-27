@@ -368,7 +368,7 @@ For detailed information, see PRODUCTION_READINESS.md.
             "python_version": "3.8+",
             "license": "LGPL-3.0",
             "author": "Vipps/MobilePay Integration Team",
-            "website": "https://github.com/your-org/odoo-vipps-mobilepay",
+            "website": "https://github.com/waltherB/mobilepay_vipps",
             "description": "Complete Vipps/MobilePay payment integration for Odoo with eCommerce and POS support",
             "features": [
                 "eCommerce payment integration",
@@ -445,7 +445,7 @@ For detailed information, see PRODUCTION_READINESS.md.
 - **Community**: GitHub Issues and Discussions
 - **Professional**: Contact certified Odoo partners
 
-For the latest updates, visit: https://github.com/your-org/odoo-vipps-mobilepay
+For the latest updates, visit: https://github.com/waltherB/mobilepay_vipps
 """
         
         with open(self.package_dir / 'README.txt', 'w') as f:
@@ -644,9 +644,9 @@ Planned for future releases:
 
 For detailed information, see the complete documentation in the `documentation/` directory.
 
-**Download**: [Latest Release](https://github.com/your-org/odoo-vipps-mobilepay/releases/latest)
-**Documentation**: [Online Docs](https://github.com/your-org/odoo-vipps-mobilepay/tree/main/docs)
-**Support**: [GitHub Issues](https://github.com/your-org/odoo-vipps-mobilepay/issues)
+**Download**: [Latest Release](https://github.com/waltherB/mobilepay_vipps/releases/latest)
+**Documentation**: [Online Docs](https://github.com/waltherB/mobilepay_vipps/tree/main/docs)
+**Support**: [GitHub Issues](https://github.com/waltherB/mobilepay_vipps/issues)
 """
         
         # Save release notes

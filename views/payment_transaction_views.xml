@@ -8,12 +8,12 @@
         <field name="inherit_id" ref="payment.payment_transaction_form"/>
         <field name="arch" type="xml">
             <xpath expr="//sheet" position="inside">
-                <div class="oe_button_box" name="button_box" attrs="{'invisible': [('provider_code', '!=', 'vipps')]}">
+                <div class="oe_button_box" name="button_box" invisible="provider_code != 'vipps'">
                     <button name="action_view_user_information" 
                             type="object" 
                             class="oe_stat_button" 
                             icon="fa-user"
-                            attrs="{'invisible': [('vipps_user_details', '=', False)]}">
+                            invisible="not vipps_user_details">
                         <div class="o_field_widget o_stat_info">
                             <span class="o_stat_text">User Info</span>
                         </div>
@@ -22,7 +22,7 @@
             </xpath>
             
             <xpath expr="//group[@name='payment_details']" position="after">
-                <group string="Vipps Details" attrs="{'invisible': [('provider_code', '!=', 'vipps')]}">
+                <group string="Vipps Details" invisible="provider_code != 'vipps'">
                     <group>
                         <field name="vipps_payment_reference" readonly="1"/>
                         <field name="vipps_psp_reference" readonly="1"/>
@@ -37,7 +37,7 @@
                 </group>
                 
                 <group string="User Information" 
-                       attrs="{'invisible': ['|', ('provider_code', '!=', 'vipps'), ('vipps_user_details', '=', False)]}">
+                       invisible="provider_code != 'vipps' or not vipps_user_details">
                     <div class="alert alert-info" role="alert">
                         <strong>User Information Collected:</strong> This transaction includes customer data 
                         collected with consent during the payment process. 

@@ -43,10 +43,10 @@
                             <field name="user_agent"/>
                         </group>
                     </group>
-                    <group string="Additional Information" attrs="{'invisible': [('additional_info', '=', False)]}">
+                    <group string="Additional Information" invisible="not additional_info">
                         <field name="additional_info" nolabel="1"/>
                     </group>
-                    <group string="Error Details" attrs="{'invisible': [('error_message', '=', False)]}">
+                    <group string="Error Details" invisible="not error_message">
                         <field name="error_message" nolabel="1"/>
                     </group>
                 </sheet>
@@ -98,7 +98,7 @@
                 <field name="next_rotation_date"/>
                 <field name="status"/>
                 <field name="auto_rotate"/>
-                <button name="action_rotate_credentials" string="Rotate Now" type="object" class="btn-primary" attrs="{'invisible': [('status', 'not in', ['pending', 'overdue'])]}"/>
+                <button name="action_rotate_credentials" string="Rotate Now" type="object" class="btn-primary" invisible="status not in ['pending', 'overdue']"/>
             </tree>
         </field>
     </record>
@@ -109,7 +109,7 @@
         <field name="arch" type="xml">
             <form string="Credential Rotation Configuration">
                 <header>
-                    <button name="action_rotate_credentials" string="Rotate Credentials" type="object" class="btn-primary" attrs="{'invisible': [('status', 'not in', ['pending', 'overdue'])]}"/>
+                    <button name="action_rotate_credentials" string="Rotate Credentials" type="object" class="btn-primary" invisible="status not in ['pending', 'overdue']"/>
                     <field name="status" widget="badge" decoration-success="status=='active'" decoration-info="status=='disabled'" decoration-warning="status=='pending'" decoration-danger="status=='overdue'"/>
                 </header>
                 <sheet>
@@ -126,11 +126,11 @@
                             <field name="next_rotation_date"/>
                         </group>
                     </group>
-                    <div class="alert alert-info" attrs="{'invisible': [('auto_rotate', '=', True)]}">
+                    <div class="alert alert-info" invisible="auto_rotate">
                         <strong>Manual Rotation:</strong> Credentials will not be automatically rotated. 
                         You will receive notifications when rotation is due, but must manually trigger the rotation.
                     </div>
-                    <div class="alert alert-warning" attrs="{'invisible': [('auto_rotate', '=', False)]}">
+                    <div class="alert alert-warning" invisible="not auto_rotate">
                         <strong>Automatic Rotation:</strong> Credentials will be automatically rotated according to the schedule. 
                         Ensure you have proper backup and rollback procedures in place.
                     </div>
@@ -235,7 +235,7 @@
                     <group string="Event Details">
                         <field name="details" nolabel="1"/>
                     </group>
-                    <group string="Raw Event Data" attrs="{'invisible': [('event_data', '=', False)]}">
+                    <group string="Raw Event Data" invisible="not event_data">
                         <field name="event_data" nolabel="1" widget="text"/>
                     </group>
                 </sheet>
@@ -325,10 +325,10 @@
                             <field name="logs_deleted"/>
                         </group>
                     </group>
-                    <group string="Notes" attrs="{'invisible': [('notes', '=', False)]}">
+                    <group string="Notes" invisible="not notes">
                         <field name="notes" nolabel="1"/>
                     </group>
-                    <group string="Detailed Report" attrs="{'invisible': [('enforcement_report', '=', False)]}">
+                    <group string="Detailed Report" invisible="not enforcement_report">
                         <field name="enforcement_report" nolabel="1" widget="text"/>
                     </group>
                 </sheet>

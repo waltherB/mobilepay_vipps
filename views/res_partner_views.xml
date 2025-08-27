@@ -9,7 +9,7 @@
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
                 <page string="Vipps Data" name="vipps_data" 
-                      attrs="{'invisible': [('vipps_user_info_collected', '=', False)]}">
+                      invisible="not vipps_user_info_collected">
                     <group>
                         <group string="Data Collection Status">
                             <field name="vipps_user_info_collected" readonly="1"/>
@@ -28,7 +28,7 @@
                                 type="object" 
                                 class="oe_stat_button" 
                                 icon="fa-list"
-                                attrs="{'invisible': [('vipps_data_collection_count', '=', 0)]}">
+                                invisible="vipps_data_collection_count == 0">
                             <field name="vipps_data_collection_count" widget="statinfo" 
                                    string="Collections"/>
                         </button>
@@ -41,7 +41,7 @@
                                         string="Export Customer Data" 
                                         type="object" 
                                         class="btn btn-secondary"
-                                        attrs="{'invisible': [('vipps_user_info_collected', '=', False)]}"
+                                        invisible="not vipps_user_info_collected"
                                         help="Export all collected Vipps data for GDPR compliance"/>
                             </div>
                             <div class="col-md-6">
@@ -49,7 +49,7 @@
                                         string="Delete Customer Data" 
                                         type="object" 
                                         class="btn btn-danger"
-                                        attrs="{'invisible': [('vipps_user_info_collected', '=', False)]}"
+                                        invisible="not vipps_user_info_collected"
                                         help="Permanently delete all collected Vipps data"/>
                             </div>
                         </div>
@@ -59,7 +59,7 @@
                                         string="Record Consent" 
                                         type="object" 
                                         class="btn btn-success"
-                                        attrs="{'invisible': [('vipps_data_consent_given', '=', True)]}"
+                                        invisible="vipps_data_consent_given"
                                         help="Record customer consent for data collection"/>
                             </div>
                             <div class="col-md-6">
@@ -67,7 +67,7 @@
                                         string="Opt Out" 
                                         type="object" 
                                         class="btn btn-warning"
-                                        attrs="{'invisible': [('vipps_data_consent_given', '=', False)]}"
+                                        invisible="not vipps_data_consent_given"
                                         help="Opt customer out of future data collection"/>
                             </div>
                         </div>

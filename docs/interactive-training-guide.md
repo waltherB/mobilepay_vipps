@@ -24,7 +24,7 @@ By completing this training program, participants will be able to:
 
 ### Training Methodology
 Our interactive training combines:
-- **Visual Learning**: Step-by-step screenshots and videos
+- **Visual Learning**: Step-by-step screenshots and documentation
 - **Hands-on Practice**: Simulated payment scenarios
 - **Interactive Quizzes**: Knowledge validation checkpoints
 - **Real-world Scenarios**: Practical problem-solving exercises
@@ -1135,7 +1135,7 @@ d) "You can use cash if you prefer"
 #### Practical Assessment Tools
 **Features**:
 - Checklist-based evaluation
-- Video recording capability
+- Screen capture capability
 - Peer assessment options
 - Manager evaluation forms
 - Self-assessment tools
@@ -1165,7 +1165,7 @@ d) "You can use cash if you prefer"
 **Content**:
 - Searchable FAQ database
 - Step-by-step procedures
-- Video tutorials
+- Interactive tutorials
 - Troubleshooting guides
 - Best practice articles
 

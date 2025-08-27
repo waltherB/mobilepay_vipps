@@ -24,7 +24,7 @@
                         </group>
                     </group>
                     
-                    <group string="Export Preview" attrs="{'invisible': [('export_data', '=', False)]}">
+                    <group string="Export Preview" invisible="not export_data">
                         <field name="export_data" widget="text" readonly="1" nolabel="1"/>
                     </group>
                     
@@ -97,7 +97,7 @@
                             string="Delete Data" 
                             type="object" 
                             class="btn-danger"
-                            attrs="{'invisible': [('confirm_deletion', '=', False)]}"/>
+                            invisible="not confirm_deletion"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>

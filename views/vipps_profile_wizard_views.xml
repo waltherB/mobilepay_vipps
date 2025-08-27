@@ -17,7 +17,7 @@
                         <group>
                             <field name="provider_id" invisible="1"/>
                             <field name="profile_scope" widget="radio"/>
-                            <field name="custom_scopes" attrs="{'invisible': [('profile_scope', '!=', 'custom')], 'required': [('profile_scope', '=', 'custom')]}"/>
+                            <field name="custom_scopes" invisible="profile_scope != 'custom'" required="profile_scope == 'custom'"/>
                         </group>
                         <group>
                             <field name="data_retention_days"/>

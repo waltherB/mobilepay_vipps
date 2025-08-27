@@ -27,7 +27,7 @@ Edit `production_config.json` with your actual production values:
 ```json
 {
   "odoo": {
-    "version": "16.0",
+    "version": "17.0",
     "database_url": "postgresql://odoo_user:password@localhost:5432/production_db",
     "workers": 4,
     "data_dir": "/opt/odoo/data"

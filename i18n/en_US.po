@@ -334,4 +334,245 @@ msgstr "Vipps API Health Status"
 #: code:addons/mobilepay_vipps/models/payment_provider.py:0
 #, python-format
 msgid "Health Status Error"
-msgstr "Health Status Error"
+msgstr "Health Status Error"# A
+dditional Essential Translations
+
+msgid "Customer QR Code"
+msgstr "Customer QR Code"
+
+msgid "Customer scans QR code with their mobile app"
+msgstr "Customer scans QR code with their mobile app"
+
+msgid "Phone Number"
+msgstr "Phone Number"
+
+msgid "Send push message to customer's phone"
+msgstr "Send push message to customer's phone"
+
+msgid "Shop Number"
+msgstr "Shop Number"
+
+msgid "Customer enters shop number in their app"
+msgstr "Customer enters shop number in their app"
+
+msgid "Shop QR Code"
+msgstr "Shop QR Code"
+
+msgid "Customer scans shop-specific QR code"
+msgstr "Customer scans shop-specific QR code"
+
+msgid "Customer Phone Number"
+msgstr "Customer Phone Number"
+
+msgid "Manual Shop Number"
+msgstr "Manual Shop Number"
+
+msgid "Manual Shop QR"
+msgstr "Manual Shop QR"
+
+msgid "Please enter a valid Nordic phone number (8 digits)"
+msgstr "Please enter a valid Nordic phone number (8 digits)"
+
+msgid "Payment creation failed"
+msgstr "Payment creation failed"
+
+msgid "Failed to start payment"
+msgstr "Failed to start payment"
+
+msgid "Payment completed successfully!"
+msgstr "Payment completed successfully!"
+
+msgid "Payment was cancelled or failed"
+msgstr "Payment was cancelled or failed"
+
+msgid "Payment timed out"
+msgstr "Payment timed out"
+
+msgid "Payment cancelled"
+msgstr "Payment cancelled"
+
+msgid "Failed to cancel payment"
+msgstr "Failed to cancel payment"
+
+msgid "Payment verified and completed!"
+msgstr "Payment verified and completed!"
+
+msgid "Initializing payment..."
+msgstr "Initializing payment..."
+
+msgid "Waiting for customer action..."
+msgstr "Waiting for customer action..."
+
+msgid "Processing payment..."
+msgstr "Processing payment..."
+
+msgid "Verifying payment..."
+msgstr "Verifying payment..."
+
+msgid "Finalizing..."
+msgstr "Finalizing..."
+
+msgid "Payment completed"
+msgstr "Payment completed"
+
+msgid "Connected"
+msgstr "Connected"
+
+msgid "Checking..."
+msgstr "Checking..."
+
+msgid "Reconnecting..."
+msgstr "Reconnecting..."
+
+msgid "Connection Error"
+msgstr "Connection Error"
+
+msgid "Disconnected"
+msgstr "Disconnected"
+
+msgid "Vipps/MobilePay Payment"
+msgstr "Vipps/MobilePay Payment"
+
+msgid "Choose how the customer will complete their payment"
+msgstr "Choose how the customer will complete their payment"
+
+msgid "Start Payment"
+msgstr "Start Payment"
+
+msgid "Starting..."
+msgstr "Starting..."
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Payment in Progress"
+msgstr "Payment in Progress"
+
+msgid "remaining"
+msgstr "remaining"
+
+msgid "Scan QR Code"
+msgstr "Scan QR Code"
+
+msgid "Ask the customer to scan this QR code with their Vipps/MobilePay app"
+msgstr "Ask the customer to scan this QR code with their Vipps/MobilePay app"
+
+msgid "Push Message Sent"
+msgstr "Push Message Sent"
+
+msgid "Ask the customer to check their phone and approve the payment"
+msgstr "Ask the customer to check their phone and approve the payment"
+
+msgid "Enter Shop Number"
+msgstr "Enter Shop Number"
+
+msgid "Ask the customer to:"
+msgstr "Ask the customer to:"
+
+msgid "Open their Vipps/MobilePay app"
+msgstr "Open their Vipps/MobilePay app"
+
+msgid "Confirm the payment amount"
+msgstr "Confirm the payment amount"
+
+msgid "Scan Shop QR Code"
+msgstr "Scan Shop QR Code"
+
+msgid "Retry"
+msgstr "Retry"
+
+msgid "Processing..."
+msgstr "Processing..."
+
+msgid "Elapsed:"
+msgstr "Elapsed:"
+
+msgid "Remaining:"
+msgstr "Remaining:"
+
+msgid "Attempt:"
+msgstr "Attempt:"
+
+msgid "Waiting for customer to complete payment..."
+msgstr "Waiting for customer to complete payment..."
+
+msgid "Payment Verification"
+msgstr "Payment Verification"
+
+msgid "Verify with the customer that the payment has been completed"
+msgstr "Verify with the customer that the payment has been completed"
+
+msgid "Customer Confirmed Payment"
+msgstr "Customer Confirmed Payment"
+
+msgid "Show Payment Proof"
+msgstr "Show Payment Proof"
+
+msgid "Cancel Payment"
+msgstr "Cancel Payment"
+
+msgid "Back"
+msgstr "Back"
+
+msgid "Payment Completed!"
+msgstr "Payment Completed!"
+
+msgid "The payment has been successfully processed."
+msgstr "The payment has been successfully processed."
+
+msgid "Continue"
+msgstr "Continue"
+
+msgid "Try Again"
+msgstr "Try Again"
+
+msgid "Amount:"
+msgstr "Amount:"
+
+msgid "Reference:"
+msgstr "Reference:"
+
+msgid "Created"
+msgstr "Created"
+
+msgid "Authorized"
+msgstr "Authorized"
+
+msgid "Captured"
+msgstr "Captured"
+
+msgid "Cancelled"
+msgstr "Cancelled"
+
+msgid "Refunded"
+msgstr "Refunded"
+
+msgid "Expired"
+msgstr "Expired"
+
+msgid "Aborted"
+msgstr "Aborted"
+
+msgid "Terminated"
+msgstr "Terminated"
+
+msgid "Web Redirect"
+msgstr "Web Redirect"
+
+msgid "QR Code"
+msgstr "QR Code"
+
+msgid "Push Message"
+msgstr "Push Message"
+
+msgid "Success"
+msgstr "Success"
+
+msgid "Validation Failed"
+msgstr "Validation Failed"
+
+msgid "Connection Test Successful"
+msgstr "Connection Test Successful"
+
+msgid "Connection Test Failed"
+msgstr "Connection Test Failed"

@@ -329,10 +329,26 @@ class PaymentProvider(models.Model):
     @api.model
     def _get_supported_currencies(self):
         """Return supported currencies for Vipps/MobilePay"""
-        supported_currencies = super()._get_supported_currencies()
         if self.code == 'vipps':
-            return ['NOK', 'DKK', 'EUR']
-        return supported_currencies
+            supported_currencies = ['NOK', 'DKK', 'EUR', 'SEK']
+            return self.env['res.currency'].search([('name', 'in', supported_currencies)])
+        return super()._get_supported_currencies()
+    
+    @api.model
+    def _get_supported_countries(self):
+        """Return supported countries for Vipps/MobilePay"""
+        if self.code == 'vipps':
+            supported_countries = ['NO', 'DK', 'FI', 'SE']
+            return self.env['res.country'].search([('code', 'in', supported_countries)])
+        return super()._get_supported_countries()
+    
+    @api.model
+    def _get_default_payment_method_codes(self):
+        """Return default payment method codes"""
+        codes = super()._get_default_payment_method_codes()
+        if self.code == 'vipps':
+            codes.extend(['vipps', 'mobilepay'])
+        return codes
 
     def _get_vipps_api_url(self):
         """Return the appropriate API base URL based on environment"""

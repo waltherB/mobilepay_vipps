@@ -5,16 +5,16 @@
         <field name="inherit_id" ref="payment.payment_provider_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='code']" position="after">
-                <div attrs="{'invisible': [('code', '!=', 'vipps')]}">
+                <div invisible="code != 'vipps'">
                     
                     <!-- Environment Selection -->
                     <group string="Environment Configuration" col="2">
                         <field name="vipps_environment" widget="radio" options="{'horizontal': true}"/>
-                        <div colspan="2" class="alert alert-info" attrs="{'invisible': [('vipps_environment', '!=', 'test')]}">
+                        <div colspan="2" class="alert alert-info" invisible="vipps_environment != 'test'">
                             <strong>Test Environment:</strong> Use this for development and testing. 
                             Test payments will not process real money.
                         </div>
-                        <div colspan="2" class="alert alert-warning" attrs="{'invisible': [('vipps_environment', '!=', 'production')]}">
+                        <div colspan="2" class="alert alert-warning" invisible="vipps_environment != 'production'">
                             <strong>Production Environment:</strong> Real payments will be processed. 
                             Ensure all testing is complete before enabling.
                         </div>
@@ -45,16 +45,16 @@
                                 string="Validate Credentials" 
                                 type="object" 
                                 class="btn-primary"
-                                attrs="{'invisible': [('vipps_credentials_validated', '=', True)]}"/>
+                                invisible="vipps_credentials_validated"/>
                         <button name="action_validate_vipps_credentials" 
                                 string="Re-validate Credentials" 
                                 type="object" 
                                 class="btn-secondary"
-                                attrs="{'invisible': [('vipps_credentials_validated', '=', False)]}"/>
+                                invisible="not vipps_credentials_validated"/>
                         <field name="vipps_last_validation_error" 
                                readonly="1" 
                                colspan="2"
-                               attrs="{'invisible': [('vipps_last_validation_error', '=', False)]}"/>
+                               invisible="not vipps_last_validation_error"/>
                     </group>
 
                     <!-- Feature Configuration -->
@@ -68,14 +68,14 @@
                                 string="Configure Profile Collection" 
                                 type="object" 
                                 class="btn-secondary"
-                                attrs="{'invisible': [('vipps_collect_user_info', '=', False)]}"/>
+                                invisible="not vipps_collect_user_info"/>
                     </group>
 
                     <!-- Profile Collection Configuration -->
-                    <group string="Profile Information Collection" col="2" attrs="{'invisible': [('vipps_collect_user_info', '=', False)]}">
+                    <group string="Profile Information Collection" col="2" invisible="not vipps_collect_user_info">
                         <field name="vipps_profile_scope" widget="radio"/>
                         <field name="vipps_custom_scopes" 
-                               attrs="{'invisible': [('vipps_profile_scope', '!=', 'custom')], 'required': [('vipps_profile_scope', '=', 'custom')]}"/>
+                               invisible="vipps_profile_scope != 'custom'" required="vipps_profile_scope == 'custom'"/>
                         <field name="vipps_data_retention_days"/>
                         <field name="vipps_auto_update_partners"/>
                         <field name="vipps_require_consent"/>
@@ -83,10 +83,10 @@
                             <strong>Privacy Notice:</strong> Collecting customer information requires compliance with GDPR and local privacy laws. 
                             Ensure you have proper consent mechanisms and data protection policies in place.
                         </div>
-                        <div colspan="2" class="alert alert-info" attrs="{'invisible': [('vipps_capture_mode', '!=', 'manual')]}">
+                        <div colspan="2" class="alert alert-info" invisible="vipps_capture_mode != 'manual'">
                             <strong>Manual Capture:</strong> Payments will be authorized but not captured until you manually capture them or ship the order. This complies with legal requirements for ecommerce.
                         </div>
-                        <div colspan="2" class="alert alert-warning" attrs="{'invisible': [('vipps_capture_mode', '!=', 'automatic')]}">
+                        <div colspan="2" class="alert alert-warning" invisible="vipps_capture_mode != 'automatic'">
                             <strong>Automatic Capture:</strong> Payments will be immediately captured upon authorization. Only use this for Point of Sale transactions.
                         </div>
                     </group>
@@ -101,7 +101,7 @@
                                 string="Encrypt Credentials" 
                                 type="object" 
                                 class="btn-primary"
-                                attrs="{'invisible': [('vipps_credentials_encrypted', '=', True)]}"
+                                invisible="vipps_credentials_encrypted"
                                 help="Encrypt all sensitive credentials for secure storage"/>
                         <button name="action_setup_credential_rotation" 
                                 string="Setup Credential Rotation" 
@@ -113,10 +113,10 @@
                                 type="object" 
                                 class="btn-info"
                                 help="View credential access and modification audit trail"/>
-                        <div colspan="2" class="alert alert-success" attrs="{'invisible': [('vipps_credentials_encrypted', '=', False)]}">
+                        <div colspan="2" class="alert alert-success" invisible="not vipps_credentials_encrypted">
                             <i class="fa fa-shield"/> <strong>Credentials Encrypted:</strong> All sensitive data is encrypted at rest.
                         </div>
-                        <div colspan="2" class="alert alert-warning" attrs="{'invisible': [('vipps_credentials_encrypted', '=', True)]}">
+                        <div colspan="2" class="alert alert-warning" invisible="vipps_credentials_encrypted">
                             <i class="fa fa-exclamation-triangle"/> <strong>Security Notice:</strong> Credentials are stored in plaintext. Click "Encrypt Credentials" to secure them.
                         </div>
                     </group>
@@ -143,9 +143,9 @@
                         <field name="vipps_webhook_timestamp_tolerance"/>
                         <field name="vipps_webhook_rate_limit_enabled"/>
                         <field name="vipps_webhook_max_requests" 
-                               attrs="{'invisible': [('vipps_webhook_rate_limit_enabled', '=', False)]}"/>
+                               invisible="not vipps_webhook_rate_limit_enabled"/>
                         <field name="vipps_webhook_window_seconds" 
-                               attrs="{'invisible': [('vipps_webhook_rate_limit_enabled', '=', False)]}"/>
+                               invisible="not vipps_webhook_rate_limit_enabled"/>
                         <field name="vipps_webhook_allowed_ips" 
                                placeholder="213.52.3.0/24, 213.52.4.0/24"
                                help="Comma-separated list of allowed IP addresses or CIDR ranges"/>
@@ -180,7 +180,7 @@
 
                     <!-- Token Information (Read-only) -->
                     <group string="Token Information" col="2" groups="base.group_system" 
-                           attrs="{'invisible': [('vipps_access_token', '=', False)]}">
+                           invisible="not vipps_access_token">
                         <field name="vipps_token_expires_at" readonly="1"/>
                         <div colspan="2" class="text-muted">
                             Access tokens are automatically managed and refreshed as needed.
@@ -232,13 +232,13 @@
 
                     <!-- Status Indicators -->
                     <div class="alert alert-success" 
-                         attrs="{'invisible': ['|', ('code', '!=', 'vipps'), ('vipps_credentials_validated', '=', False)]}">
+                         invisible="code != 'vipps'">
                         <i class="fa fa-check-circle"/> 
                         <strong>Ready:</strong> Vipps/MobilePay is configured and ready to process payments.
                     </div>
                     
                     <div class="alert alert-warning" 
-                         attrs="{'invisible': ['|', ('code', '!=', 'vipps'), ('vipps_credentials_validated', '=', True)]}">
+                         invisible="code != 'vipps'">
                         <i class="fa fa-exclamation-triangle"/> 
                         <strong>Configuration Required:</strong> Please configure and validate your API credentials above.
                     </div>
@@ -256,10 +256,10 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='state']" position="after">
                 <field name="vipps_environment" 
-                       attrs="{'invisible': [('code', '!=', 'vipps')]}"
+                       invisible="code != 'vipps'"
                        optional="show"/>
                 <field name="vipps_credentials_validated" 
-                       attrs="{'invisible': [('code', '!=', 'vipps')]}"
+                       invisible="code != 'vipps'"
                        widget="boolean_toggle"
                        optional="show"/>
             </xpath>

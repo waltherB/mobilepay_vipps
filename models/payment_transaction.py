@@ -141,6 +141,58 @@ class PaymentTransaction(models.Model):
         base_url = self.provider_id.get_base_url()
         return f"{base_url}/payment/vipps/return?reference={self.vipps_payment_reference or self.reference}"
 
+    def _process_notification_data(self, notification_data):
+        """Process notification data from Vipps/MobilePay webhook - Odoo 17 method"""
+        self.ensure_one()
+        
+        if self.provider_code != 'vipps':
+            return super()._process_notification_data(notification_data)
+        
+        try:
+            # Extract payment state from notification
+            payment_state = notification_data.get('state') or notification_data.get('transactionInfo', {}).get('status')
+            
+            if not payment_state:
+                _logger.warning("No payment state found in notification data for transaction %s", self.reference)
+                return
+            
+            # Update Vipps-specific fields
+            self.write({
+                'vipps_payment_state': payment_state,
+                'provider_reference': notification_data.get('pspReference') or notification_data.get('transactionInfo', {}).get('transactionId'),
+                'vipps_webhook_received': True,
+            })
+            
+            # Handle state transitions according to Odoo 17 payment flow
+            if payment_state == 'AUTHORIZED':
+                self._set_authorized()
+                _logger.info("Payment authorized for transaction %s", self.reference)
+                
+            elif payment_state == 'CAPTURED':
+                self._set_done()
+                _logger.info("Payment captured for transaction %s", self.reference)
+                
+            elif payment_state == 'CANCELLED':
+                self._set_canceled("Payment was cancelled")
+                _logger.info("Payment cancelled for transaction %s", self.reference)
+                
+            elif payment_state == 'REFUNDED':
+                # Handle refund - Odoo 17 handles refunds separately
+                self._set_done()  # Keep transaction as done, refund is handled elsewhere
+                _logger.info("Payment refunded for transaction %s", self.reference)
+                
+            elif payment_state in ['EXPIRED', 'ABORTED', 'TERMINATED']:
+                error_msg = f"Payment {payment_state.lower()}"
+                self._set_error(error_msg)
+                _logger.info("Payment failed for transaction %s: %s", self.reference, error_msg)
+            
+            else:
+                _logger.warning("Unknown payment state %s for transaction %s", payment_state, self.reference)
+            
+        except Exception as e:
+            _logger.error("Error processing Vipps notification for transaction %s: %s", self.reference, str(e))
+            self._set_error(f"Notification processing failed: {str(e)}")
+
     def _send_payment_request(self):
         """Create payment request for online ecommerce flow"""
         if self.provider_code != 'vipps':

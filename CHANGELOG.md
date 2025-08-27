@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🎉 Initial Release
 
-This is the first stable release of the Vipps/MobilePay Payment Integration for Odoo.
+This is the first stable release of the Vipps/MobilePay Payment Integration for Odoo 17.0+.
 
 ### ✨ Added
 
@@ -108,7 +108,7 @@ This is the first stable release of the Vipps/MobilePay Payment Integration for 
 ### 🔧 Technical Specifications
 
 #### System Requirements
-- Odoo 16.0 or higher
+- Odoo 17.0 or higher
 - Python 3.8+
 - PostgreSQL 12+
 - SSL certificate for webhook endpoints
@@ -129,11 +129,13 @@ This is the first stable release of the Vipps/MobilePay Payment Integration for 
 - Vipps (Norway)
 - MobilePay (Denmark)
 - MobilePay (Finland)
+- MobilePay (Sweden)
 
 #### Supported Currencies
 - NOK (Norwegian Krone)
 - DKK (Danish Krone)
 - EUR (Euro)
+- SEK (Swedish Krona)
 
 ### 🏗️ Architecture
 
@@ -264,7 +266,7 @@ This is an open-source project and contributions are welcome!
 #### Development Setup
 ```bash
 # Clone repository
-git clone https://github.com/your-org/odoo-vipps-mobilepay.git
+git clone https://github.com/waltherB/mobilepay_vipps.git
 
 # Install dependencies
 pip install -r requirements.txt
@@ -370,7 +372,7 @@ This project is licensed under the LGPL-3.0 License - see the [LICENSE](LICENSE)
 
 ---
 
-For the most up-to-date information, please check the [GitHub repository](https://github.com/your-org/odoo-vipps-mobilepay) and [documentation](docs/).
+For the most up-to-date information, please check the [GitHub repository](https://github.com/waltherB/mobilepay_vipps) and [documentation](docs/).
 
 ## Version History
 
@@ -379,4 +381,3 @@ For the most up-to-date information, please check the [GitHub repository](https:
 | 1.0.0   | 2024-01-15  | Stable | Initial release |
 | 1.1.0   | 2024-Q2     | Planned| Enhanced subscriptions |
 | 1.2.0   | 2024-Q3     | Planned| Multi-currency expansion |
-| 2.0.0   | 2024-Q4     | Planned| Odoo 17.0 compatibility |

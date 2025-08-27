@@ -33,7 +33,10 @@
     "metrics_enabled": true,
     "alerting_enabled": true,
     "log_retention_days": 30,
-    "monitoring_tools": ["prometheus", "grafana"]
+    "monitoring_tools": [
+      "prometheus",
+      "grafana"
+    ]
   },
   "security": {
     "firewall_enabled": true,
@@ -41,7 +44,10 @@
     "vulnerability_scanning": true,
     "penetration_testing": false,
     "fail2ban_enabled": true,
-    "ssl_protocols": ["TLSv1.2", "TLSv1.3"]
+    "ssl_protocols": [
+      "TLSv1.2",
+      "TLSv1.3"
+    ]
   },
   "performance": {
     "max_concurrent_users": 100,

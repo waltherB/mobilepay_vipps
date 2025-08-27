@@ -1,24 +1,27 @@
-odoo.define('mobilepay_vipps.payment_form', function (require) {
-    'use strict';
+/** @odoo-module **/
 
-    const publicWidget = require('web.public.widget');
+import { registry } from "@web/core/registry";
+import { Component } from "@odoo/owl";
+
+export class PaymentVipps extends Component {
+    static template = "payment_vipps_mobilepay.PaymentForm";
     
-    publicWidget.registry.PaymentVipps = publicWidget.Widget.extend({
-        selector: '.oe_website_sale',
-        
-        start: function () {
-            if (window.location.pathname === '/shop/payment') {
-                this._handleVippsRedirect();
-            }
-            return this._super.apply(this, arguments);
-        },
+    setup() {
+        super.setup();
+        if (window.location.pathname === '/shop/payment') {
+            this._handleVippsRedirect();
+        }
+    }
 
-        _handleVippsRedirect: function () {
-            const $vippsButton = $('button[name="pay_vipps"]');
-            $vippsButton.click(function (ev) {
+    _handleVippsRedirect() {
+        const vippsButton = document.querySelector('button[name="pay_vipps"]');
+        if (vippsButton) {
+            vippsButton.addEventListener('click', (ev) => {
                 ev.preventDefault();
                 window.location.href = '/payment/vipps/redirect';
             });
         }
-    });
-});
+    }
+}
+
+registry.category("public_components").add("PaymentVipps", PaymentVipps);

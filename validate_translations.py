@@ -7,12 +7,10 @@ This script validates that all translations are complete and up to date
 with the implemented features.
 """
 
-import os
 import re
 import sys
 import logging
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 from collections import defaultdict
 
 # Configure logging
@@ -25,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class TranslationValidator:
     """Validates translation completeness and consistency"""
-    
+
     def __init__(self):
         """Initialize validator"""
         self.module_path = Path('.')
@@ -107,7 +105,6 @@ class TranslationValidator:
                 
                 except Exception as e:
                     logger.warning(f"Could not read {file_path}: {e}")
-        
         # Add known strings from our implementation
         known_strings = [
             "Vipps/MobilePay",
@@ -160,7 +157,7 @@ class TranslationValidator:
             "Data Management",
             "Reports",
         ]
-        
+
         self.source_strings.update(known_strings)
         
         logger.info(f"Extracted {len(self.source_strings)} source strings")

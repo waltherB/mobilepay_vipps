@@ -1500,3 +1500,205 @@ msgstr "⚠️ Konfigurationsadvarsel"
 #: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.payment_provider_form_vipps
 msgid "🔄 Testing Configuration"
 msgstr "🔄 Tester Konfiguration"
+# Additional Essential Translations
+
+msgid "Customer QR Code"
+msgstr "Kunde QR-kode"
+
+msgid "Customer scans QR code with their mobile app"
+msgstr "Kunden scanner QR-kode med deres mobilapp"
+
+msgid "Send push message to customer's phone"
+msgstr "Send push-besked til kundens telefon"
+
+msgid "Customer enters shop number in their app"
+msgstr "Kunden indtaster butiksnummer i deres app"
+
+msgid "Shop QR Code"
+msgstr "Butiks QR-kode"
+
+msgid "Customer scans shop-specific QR code"
+msgstr "Kunden scanner butiksspecifik QR-kode"
+
+msgid "Customer Phone Number"
+msgstr "Kundens telefonnummer"
+
+msgid "Manual Shop Number"
+msgstr "Manuel butiksnummer"
+
+msgid "Manual Shop QR"
+msgstr "Manuel butiks QR"
+
+msgid "Please enter a valid Nordic phone number (8 digits)"
+msgstr "Indtast venligst et gyldigt nordisk telefonnummer (8 cifre)"
+
+msgid "Payment creation failed"
+msgstr "Oprettelse af betaling mislykkedes"
+
+msgid "Failed to start payment"
+msgstr "Kunne ikke starte betaling"
+
+msgid "Payment completed successfully!"
+msgstr "Betaling gennemført med succes!"
+
+msgid "Payment was cancelled or failed"
+msgstr "Betalingen blev annulleret eller mislykkedes"
+
+msgid "Payment timed out"
+msgstr "Betalingen fik timeout"
+
+msgid "Payment cancelled"
+msgstr "Betaling annulleret"
+
+msgid "Failed to cancel payment"
+msgstr "Kunne ikke annullere betaling"
+
+msgid "Payment verified and completed!"
+msgstr "Betaling verificeret og gennemført!"
+
+msgid "Initializing payment..."
+msgstr "Initialiserer betaling..."
+
+msgid "Waiting for customer action..."
+msgstr "Venter på kundehandling..."
+
+msgid "Processing payment..."
+msgstr "Behandler betaling..."
+
+msgid "Verifying payment..."
+msgstr "Verificerer betaling..."
+
+msgid "Finalizing..."
+msgstr "Afslutter..."
+
+msgid "Payment completed"
+msgstr "Betaling gennemført"
+
+msgid "Connected"
+msgstr "Forbundet"
+
+msgid "Checking..."
+msgstr "Kontrollerer..."
+
+msgid "Reconnecting..."
+msgstr "Genopretter forbindelse..."
+
+msgid "Connection Error"
+msgstr "Forbindelsesfejl"
+
+msgid "Disconnected"
+msgstr "Afbrudt"
+
+msgid "Vipps/MobilePay Payment"
+msgstr "Vipps/MobilePay Betaling"
+
+msgid "Choose how the customer will complete their payment"
+msgstr "Vælg hvordan kunden skal gennemføre deres betaling"
+
+msgid "Start Payment"
+msgstr "Start betaling"
+
+msgid "Starting..."
+msgstr "Starter..."
+
+msgid "Cancel"
+msgstr "Annuller"
+
+msgid "Payment in Progress"
+msgstr "Betaling i gang"
+
+msgid "remaining"
+msgstr "tilbage"
+
+msgid "Scan QR Code"
+msgstr "Scan QR-kode"
+
+msgid "Ask the customer to scan this QR code with their Vipps/MobilePay app"
+msgstr "Bed kunden om at scanne denne QR-kode med deres Vipps/MobilePay app"
+
+msgid "Push Message Sent"
+msgstr "Push-besked sendt"
+
+msgid "Ask the customer to check their phone and approve the payment"
+msgstr "Bed kunden om at tjekke deres telefon og godkende betalingen"
+
+msgid "Enter Shop Number"
+msgstr "Indtast butiksnummer"
+
+msgid "Ask the customer to:"
+msgstr "Bed kunden om at:"
+
+msgid "Open their Vipps/MobilePay app"
+msgstr "Åbne deres Vipps/MobilePay app"
+
+msgid "Confirm the payment amount"
+msgstr "Bekræfte betalingsbeløbet"
+
+msgid "Scan Shop QR Code"
+msgstr "Scan butiks QR-kode"
+
+msgid "Retry"
+msgstr "Prøv igen"
+
+msgid "Processing..."
+msgstr "Behandler..."
+
+msgid "Elapsed:"
+msgstr "Forløbet:"
+
+msgid "Remaining:"
+msgstr "Tilbage:"
+
+msgid "Attempt:"
+msgstr "Forsøg:"
+
+msgid "Waiting for customer to complete payment..."
+msgstr "Venter på at kunden gennemfører betalingen..."
+
+msgid "Payment Verification"
+msgstr "Betalingsverifikation"
+
+msgid "Verify with the customer that the payment has been completed"
+msgstr "Verificer med kunden at betalingen er gennemført"
+
+msgid "Customer Confirmed Payment"
+msgstr "Kunde bekræftede betaling"
+
+msgid "Show Payment Proof"
+msgstr "Vis betalingsbevis"
+
+msgid "Back"
+msgstr "Tilbage"
+
+msgid "Payment Completed!"
+msgstr "Betaling gennemført!"
+
+msgid "The payment has been successfully processed."
+msgstr "Betalingen er blevet behandlet med succes."
+
+msgid "Continue"
+msgstr "Fortsæt"
+
+msgid "Try Again"
+msgstr "Prøv igen"
+
+msgid "Amount:"
+msgstr "Beløb:"
+
+msgid "Reference:"
+msgstr "Reference:"
+
+msgid "Created"
+msgstr "Oprettet"
+
+msgid "Authorized"
+msgstr "Autoriseret"
+
+msgid "Aborted"
+msgstr "Afbrudt"
+
+msgid "Terminated"
+msgstr "Afsluttet"
+
+msgid "Push Message"
+msgstr "Push-besked"
