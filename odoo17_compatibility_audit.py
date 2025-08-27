@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Comprehensive Odoo 17 CE Compatibility Audit and Fix Script
+Comprehensive Odoo 17 CE Compatibility Audit Script
 
-This script identifies and fixes all Odoo 17 compatibility issues in the Vipps/MobilePay module.
+This script identifies Odoo 17 compatibility issues in the
+Vipps/MobilePay module.
 """
 
 import os
 import re
-import json
+import ast
 from pathlib import Path
+from typing import List, Set
+
 
 class Odoo17CompatibilityAuditor:
     def __init__(self):
-        self.issues = []
-        self.fixes_applied = []
+        self.issues: List[str] = []
         
     def audit_all(self):
         """Run comprehensive audit"""
@@ -31,6 +33,42 @@ class Odoo17CompatibilityAuditor:
         self.print_results()
         return len(self.issues) == 0
     
+    # ----------------------
+    # Python AST-based checks
+    # ----------------------
+    def _read_text(self, file_path: str) -> str:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    
+    def _parse_ast(self, file_path: str):
+        try:
+            return ast.parse(self._read_text(file_path), filename=file_path)
+        except Exception as e:
+            self.issues.append(f"Could not parse {file_path}: {e}")
+            return None
+    
+    def _find_assign_string(self, tree: ast.AST, target_name: str) -> Set[str]:
+        values: Set[str] = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name) and target.id == target_name:
+                        if isinstance(node.value, ast.Str):
+                            values.add(node.value.s)
+                        elif (
+                            isinstance(node.value, ast.Constant)
+                            and isinstance(node.value.value, str)
+                        ):
+                            values.add(node.value.value)
+        return values
+    
+    def _find_function_names(self, tree: ast.AST) -> Set[str]:
+        names: Set[str] = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                names.add(node.name)
+        return names
+    
     def audit_payment_provider(self):
         """Audit payment provider for Odoo 17 compatibility"""
         print("📋 Auditing Payment Provider...")
@@ -40,27 +78,35 @@ class Odoo17CompatibilityAuditor:
             self.issues.append(f"Missing file: {file_path}")
             return
         
-        with open(file_path, 'r') as f:
-            content = f.read()
+        tree = self._parse_ast(file_path)
+        if not tree:
+            return
         
-        # Check for required Odoo 17 methods
-        required_methods = [
+        required_methods = {
             '_get_supported_currencies',
-            '_get_supported_countries', 
-            '_get_default_payment_method_codes'
-        ]
-        
+            '_get_supported_countries',
+            '_get_default_payment_method_codes',
+        }
+        method_names = self._find_function_names(tree)
         for method in required_methods:
-            if f"def {method}" not in content:
-                self.issues.append(f"Missing required Odoo 17 method: {method} in payment_provider.py")
+            if method not in method_names:
+                self.issues.append(
+                    "Missing required Odoo 17 method: "
+                    f"{method} in payment_provider.py"
+                )
         
-        # Check for proper inheritance
-        if "_inherit = 'payment.provider'" not in content:
-            self.issues.append("payment_provider.py must inherit from 'payment.provider'")
+        inherit_values = self._find_assign_string(tree, '_inherit')
+        if 'payment.provider' not in inherit_values:
+            self.issues.append(
+                "payment_provider.py must inherit from 'payment.provider'"
+            )
         
-        # Check for deprecated imports
+        # Deprecated imports in older versions
+        content = self._read_text(file_path)
         if "from odoo.addons.payment.models.payment_acquirer" in content:
-            self.issues.append("Using deprecated payment_acquirer import in payment_provider.py")
+            self.issues.append(
+                "Using deprecated payment_acquirer import in payment_provider.py"
+            )
     
     def audit_payment_transaction(self):
         """Audit payment transaction for Odoo 17 compatibility"""
@@ -71,22 +117,23 @@ class Odoo17CompatibilityAuditor:
             self.issues.append(f"Missing file: {file_path}")
             return
         
-        with open(file_path, 'r') as f:
-            content = f.read()
+        tree = self._parse_ast(file_path)
+        if not tree:
+            return
         
-        # Check for required Odoo 17 methods
-        if "_process_notification_data" not in content:
-            self.issues.append("Missing _process_notification_data method in payment_transaction.py (required for Odoo 17)")
+        method_names = self._find_function_names(tree)
+        if "_process_notification_data" not in method_names:
+            self.issues.append(
+                "Missing _process_notification_data method in "
+                "payment_transaction.py (required for Odoo 17)"
+            )
         
-        # Check for deprecated methods
-        deprecated_methods = [
-            "_handle_feedback_data",
-            "_get_tx_from_feedback_data"
-        ]
-        
+        deprecated_methods = {"_handle_feedback_data", "_get_tx_from_feedback_data"}
         for method in deprecated_methods:
-            if f"def {method}" in content:
-                self.issues.append(f"Using deprecated method {method} in payment_transaction.py")
+            if method in method_names:
+                self.issues.append(
+                    f"Using deprecated method {method} in payment_transaction.py"
+                )
     
     def audit_pos_integration(self):
         """Audit POS integration for Odoo 17 compatibility"""
@@ -97,12 +144,15 @@ class Odoo17CompatibilityAuditor:
             self.issues.append(f"Missing file: {file_path}")
             return
         
-        with open(file_path, 'r') as f:
-            content = f.read()
+        tree = self._parse_ast(file_path)
+        if not tree:
+            return
         
-        # Check for proper POS API usage
-        if "_get_payment_terminal_selection" not in content:
-            self.issues.append("Missing _get_payment_terminal_selection method for Odoo 17 POS API")
+        method_names = self._find_function_names(tree)
+        if "_get_payment_terminal_selection" not in method_names:
+            self.issues.append(
+                "Missing _get_payment_terminal_selection method for Odoo 17 POS API"
+            )
     
     def audit_webhook_handling(self):
         """Audit webhook handling for Odoo 17 compatibility"""
@@ -113,38 +163,92 @@ class Odoo17CompatibilityAuditor:
             self.issues.append(f"Missing file: {file_path}")
             return
         
-        with open(file_path, 'r') as f:
-            content = f.read()
-        
-        # Check for proper notification handling
-        if "_process_notification_data" not in content:
-            self.issues.append("Webhook controller should use _process_notification_data for Odoo 17")
+        content = self._read_text(file_path)
+        # In Odoo 17, controller should delegate to payment.transaction processing
+        uses_tx_model = (
+            "env['payment.transaction']" in content or
+            "request.env['payment.transaction']" in content
+        )
+        references_process = "_process_notification_data" in content
+        if not (uses_tx_model and references_process):
+            self.issues.append(
+                "Webhook controller should delegate to "
+                "payment.transaction._process_notification_data"
+            )
     
+    # ----------------------
+    # XML checks (recursive)
+    # ----------------------
     def audit_xml_views(self):
         """Audit XML views for deprecated syntax"""
         print("📄 Auditing XML Views...")
         
-        xml_files = list(Path('views').glob('*.xml')) if Path('views').exists() else []
+        xml_files: List[Path] = []
+        views_dir = Path('views')
+        if views_dir.exists():
+            xml_files.extend(list(views_dir.rglob('*.xml')))
+        static_dir = Path('static')
+        if static_dir.exists():
+            xml_files.extend(list(static_dir.rglob('xml/*.xml')))
+        
+        # Targeted deprecated patterns
+        deprecated_patterns = [
+            # Legacy JS loader templates
+            re.compile(
+                r"<script[^>]+src=\"/web/static/lib/\w+/\w+\.js\"",
+                re.IGNORECASE,
+            ),
+            # Old JS QWeb loader usage
+            re.compile(
+                r"t-call=\"web\.assets_\w+\".*?odoo\.define",
+                re.IGNORECASE | re.DOTALL,
+            ),
+        ]
         
         for xml_file in xml_files:
-            with open(xml_file, 'r') as f:
-                content = f.read()
-            
-            if 'attrs=' in content:
-                self.issues.append(f"File {xml_file} uses deprecated 'attrs' syntax (Odoo 17 uses invisible/required/readonly)")
+            try:
+                content = self._read_text(str(xml_file))
+            except Exception as e:
+                self.issues.append(f"Could not read XML file {xml_file}: {e}")
+                continue
+            for pat in deprecated_patterns:
+                if pat.search(content):
+                    self.issues.append(
+                        f"File {xml_file} appears to include legacy JS loading "
+                        "patterns not used in Odoo 17"
+                    )
     
+    # ----------------------
+    # JavaScript/TypeScript
+    # ----------------------
     def audit_javascript(self):
-        """Audit JavaScript for Odoo 17 compatibility"""
+        """Audit JavaScript/TypeScript for Odoo 17 compatibility"""
         print("🟨 Auditing JavaScript...")
         
-        js_files = list(Path('static/src/js').glob('*.js')) if Path('static/src/js').exists() else []
+        js_files: List[Path] = []
+        src_dir = Path('static/src')
+        if src_dir.exists():
+            js_files.extend(list(src_dir.rglob('*.js')))
+            js_files.extend(list(src_dir.rglob('*.ts')))
         
         for js_file in js_files:
-            with open(js_file, 'r') as f:
-                content = f.read()
+            try:
+                content = self._read_text(str(js_file))
+            except Exception as e:
+                self.issues.append(f"Could not read JS/TS file {js_file}: {e}")
+                continue
             
             if 'odoo.define(' in content:
-                self.issues.append(f"File {js_file} uses deprecated odoo.define() (Odoo 17 uses ES6 modules)")
+                self.issues.append(
+                    f"File {js_file} uses deprecated odoo.define() "
+                    "(Odoo 17 uses ES6 modules)"
+                )
+            
+            if '@odoo-module' not in content:
+                self.issues.append(
+                    f"File {js_file} is missing @odoo-module header "
+                    "required for Odoo 17 modules"
+                )
     
     def audit_manifest(self):
         """Audit manifest for Odoo 17 compatibility"""
@@ -154,8 +258,7 @@ class Odoo17CompatibilityAuditor:
             self.issues.append("Missing __manifest__.py file")
             return
         
-        with open('__manifest__.py', 'r') as f:
-            content = f.read()
+        content = self._read_text('__manifest__.py')
         
         # Check dependencies
         if "'payment'" not in content:
@@ -179,16 +282,18 @@ class Odoo17CompatibilityAuditor:
         
         print("="*60)
 
+
 def main():
     auditor = Odoo17CompatibilityAuditor()
     is_compatible = auditor.audit_all()
     
     if not is_compatible:
-        print("\n🔧 CRITICAL ISSUES FOUND - Module needs updates for Odoo 17 CE compatibility!")
+        print("\n🔧 Issues found - review required for Odoo 17 CE compatibility")
         return False
     else:
         print("\n✅ Module is compatible with Odoo 17 CE!")
         return True
+
 
 if __name__ == "__main__":
     main()
