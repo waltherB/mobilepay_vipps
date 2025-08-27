@@ -174,12 +174,6 @@ result = payment_provider.create_payment(payment_data)
 - [Administrator Guide](docs/admin-guide.md)
 - [FAQ](docs/faq.md)
 
-### Video Tutorials
-- [Setup and Configuration](https://example.com/setup-video)
-- [E-commerce Integration](https://example.com/ecommerce-video)
-- [POS Integration](https://example.com/pos-video)
-- [Troubleshooting Common Issues](https://example.com/troubleshooting-video)
-
 ## 🏗️ Architecture
 
 ### Module Structure
