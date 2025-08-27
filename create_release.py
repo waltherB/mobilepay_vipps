@@ -364,7 +364,7 @@ For detailed information, see PRODUCTION_READINESS.md.
             "name": "Vipps/MobilePay Payment Integration",
             "version": self.version,
             "release_date": datetime.now().isoformat(),
-            "odoo_version": "16.0+",
+            "odoo_version": "17.0 CE+",
             "python_version": "3.8+",
             "license": "LGPL-3.0",
             "author": "Vipps/MobilePay Integration Team",
@@ -426,7 +426,7 @@ For detailed information, see PRODUCTION_READINESS.md.
 
 ## System Requirements
 
-- Odoo 16.0 or higher
+- Odoo 17.0 CE or higher
 - Python 3.8 or higher
 - PostgreSQL 12 or higher
 - SSL certificate for webhook endpoints
@@ -569,7 +569,7 @@ This is the initial stable release of the Vipps/MobilePay Payment Integration fo
 
 ### 🔧 Technical Highlights
 
-- **Odoo 16.0+ Compatible**: Built for the latest Odoo versions
+- **Odoo 17.0+ Compatible**: Built for the latest Odoo versions
 - **Comprehensive Testing**: 95%+ test coverage with security and performance validation
 - **Multi-language Support**: Danish localization included
 - **Professional Documentation**: Complete user guides and technical documentation
@@ -592,7 +592,7 @@ This release package includes:
 
 ### 📋 System Requirements
 
-- Odoo 16.0 or higher
+- Odoo 17.0 or higher
 - Python 3.8+
 - PostgreSQL 12+
 - SSL certificate for webhooks

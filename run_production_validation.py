@@ -70,7 +70,7 @@ class ProductionValidationRunner:
         """Create default configuration"""
         default_config = {
             "odoo": {
-                "version": "16.0",
+                "version": "17.0",
                 "database_url": "postgresql://odoo_user:password@localhost:5432/production_db",
                 "admin_password": "secure_admin_password",
                 "workers": 4,

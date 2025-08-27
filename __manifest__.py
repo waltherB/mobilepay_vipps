@@ -138,6 +138,7 @@ Website: https://github.com/waltherB/mobilepay_vipps
     'installable': True,
     'auto_install': False,
     'application': False,
+    'pre_init_hook': 'pre_init_check',
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',
     'external_dependencies': {

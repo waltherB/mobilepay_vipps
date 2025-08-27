@@ -7,22 +7,28 @@ import tempfile
 from datetime import datetime, timedelta
 
 from odoo import api, SUPERUSER_ID
+from odoo import release
 
 _logger = logging.getLogger(__name__)
 
 
+def pre_init_check(cr):
+    """Ensure module installs only on Odoo 17.0+."""
+    version_str = getattr(release, 'version', '') or ''
+    parts = version_str.split('.')
+    major = int(parts[0]) if parts and parts[0].isdigit() else 0
+    if major < 17:
+        raise Exception(
+            ("Requires Odoo 17.0+; " f"detected {version_str or 'unknown'}")
+        )
+
+
 def uninstall_hook(cr, registry):
-    """
-    Comprehensive uninstall hook to securely clean up sensitive data
-    
-    This hook is called when the module is uninstalled and ensures
-    that all sensitive data is properly cleaned up in compliance with
-    GDPR and data protection regulations.
-    """
+    """Comprehensive uninstall cleanup for sensitive data."""
     env = api.Environment(cr, SUPERUSER_ID, {})
     
     try:
-        _logger.info("Starting comprehensive Vipps/MobilePay module uninstallation cleanup...")
+        _logger.info("Starting module uninstallation cleanup...")
         
         # Create cleanup report
         cleanup_report = {
@@ -74,21 +80,23 @@ def uninstall_hook(cr, registry):
         cleanup_report['end_time'] = datetime.now().isoformat()
         cleanup_report['status'] = 'completed'
         
-        _logger.info("Comprehensive Vipps/MobilePay sensitive data cleanup completed successfully")
-        _logger.info("Cleanup summary: %d actions performed, %d warnings, %d errors", 
-                    len(cleanup_report['cleanup_actions']), 
-                    len(cleanup_report['warnings']), 
-                    len(cleanup_report['errors']))
+        _logger.info("Cleanup completed successfully")
+        _logger.info(
+            "Cleanup summary: %d actions, %d warnings, %d errors",
+            len(cleanup_report['cleanup_actions']),
+            len(cleanup_report['warnings']),
+            len(cleanup_report['errors'])
+        )
         
     except Exception as e:
-        _logger.error("Critical error during Vipps/MobilePay uninstallation cleanup: %s", str(e))
+        _logger.error("Error during uninstallation cleanup: %s", str(e))
         # Don't raise exception to avoid blocking uninstallation
         # Log the error for manual cleanup if needed
         try:
             cleanup_report['status'] = 'failed'
             cleanup_report['critical_error'] = str(e)
             cleanup_report['end_time'] = datetime.now().isoformat()
-        except:
+        except Exception:
             pass  # Don't fail on reporting errors
 
 

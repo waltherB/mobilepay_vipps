@@ -15,7 +15,7 @@ This guide provides step-by-step instructions for installing and configuring the
 
 ### System Requirements
 
-- **Odoo Version**: 16.0 or higher
+- **Odoo Version**: 17.0 or higher
 - **Python**: 3.8 or higher
 - **Database**: PostgreSQL 12 or higher
 - **Operating System**: Linux (Ubuntu 20.04+ recommended)

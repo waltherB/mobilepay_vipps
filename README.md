@@ -303,9 +303,9 @@ ODOO 17 CE COMPATIBILITY AUDIT RESULTS
 ============================================================
 ```
 
-### Migration from Odoo 16
+### Migration to Odoo 17
 
-If upgrading from Odoo 16, the module will automatically handle:
+If upgrading to Odoo 17, the module will automatically handle:
 
 - API method updates
 - Database schema migrations  
@@ -345,7 +345,7 @@ sudo apt install postgresql nginx certbot
 
 # 2. Install Odoo
 wget -O - https://nightly.odoo.com/odoo.key | apt-key add -
-echo "deb http://nightly.odoo.com/16.0/nightly/deb/ ./" >> /etc/apt/sources.list.d/odoo.list
+echo "deb http://nightly.odoo.com/17.0/nightly/deb/ ./" >> /etc/apt/sources.list.d/odoo.list
 apt update && apt install odoo
 
 # 3. Configure SSL
@@ -358,7 +358,7 @@ systemctl restart odoo
 
 ### Docker Deployment
 ```dockerfile
-FROM odoo:16.0
+FROM odoo:17.0
 
 # Copy module
 COPY . /mnt/extra-addons/mobilepay_vipps/
@@ -388,7 +388,7 @@ spec:
     spec:
       containers:
       - name: odoo
-        image: odoo:16.0
+        image: odoo:17.0
         ports:
         - containerPort: 8069
         env:

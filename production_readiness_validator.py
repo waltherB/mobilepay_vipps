@@ -76,7 +76,7 @@ class ProductionReadinessValidator:
         """Get default configuration for validation"""
         return {
             'odoo': {
-                'version': '16.0',
+                'version': '17.0',
                 'database_url': 'postgresql://localhost:5432/production_db',
                 'admin_password': 'admin',
                 'workers': 4,
@@ -425,14 +425,14 @@ class ProductionReadinessValidator:
                 "Odoo Version",
                 ValidationStatus.WARNING,
                 f"Odoo {odoo_version} is supported but not latest",
-                recommendations=["Consider upgrading to Odoo 16.0"]
+                recommendations=["Consider upgrading to Odoo 17.0 CE"]
             )
         else:
             self._add_result(
                 "Odoo Version",
                 ValidationStatus.FAIL,
                 f"Odoo {odoo_version} is not supported",
-                recommendations=["Upgrade to Odoo 16.0 or higher"]
+                recommendations=["Upgrade to Odoo 17.0 CE or higher"]
             )
         
         # Check worker configuration

@@ -44,7 +44,7 @@ The Vipps/MobilePay onboarding wizard guides you through the complete setup proc
 - ✅ Received API credentials from MobilePay
 
 #### 2. Technical Requirements
-- ✅ Odoo 16.0 or higher
+- ✅ Odoo 17.0 CE or higher
 - ✅ SSL certificate installed (HTTPS required)
 - ✅ Internet connectivity
 - ✅ Administrator access to Odoo
