@@ -12,11 +12,28 @@ from odoo import release
 _logger = logging.getLogger(__name__)
 
 
-def pre_init_check(env):
+def pre_init_check(*args, **kwargs):
     """Ensure module installs only on Odoo 17.0+.
 
-    Odoo passes an env to pre-init hooks in 17.0; we only need version.
+    Supports both signatures depending on Odoo invocation:
+    - pre_init_check(env)
+    - pre_init_check(cr, registry)
     """
+    # Normalize to env if needed (kept for future extension)
+    env = None
+    if args:
+        # If first arg looks like an env (has .cr), use it
+        first = args[0]
+        if hasattr(first, 'cr'):
+            env = first
+        elif len(args) >= 2:
+            # Assume (cr, registry)
+            cr = args[0]
+            env = api.Environment(cr, SUPERUSER_ID, {})
+    if env is None:
+        env = kwargs.get('env')
+
+    # Version check using odoo.release (env not strictly required)
     version_str = getattr(release, 'version', '') or ''
     parts = version_str.split('.')
     major = int(parts[0]) if parts and parts[0].isdigit() else 0
