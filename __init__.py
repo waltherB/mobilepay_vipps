@@ -4,14 +4,10 @@ from . import models
 from . import controllers
 from . import hooks as _hooks
 from odoo import release
-from odoo import api, SUPERUSER_ID
 
 
-def pre_init_check(env, registry=None):
-    """Ensure module installs only on Odoo 17.0+.
-
-    Accepts (env) or (env, registry); Odoo passes env in 17.0.
-    """
+def pre_init_check(env):
+    """Ensure module installs only on Odoo 17.0+ (expects env)."""
     version_str = getattr(release, 'version', '') or ''
     parts = version_str.split('.')
     major = int(parts[0]) if parts and parts[0].isdigit() else 0
@@ -23,7 +19,6 @@ def pre_init_check(env, registry=None):
 
 def post_init_hook(cr, registry):
     """Post-installation hook. No-op reserved for future setup."""
-    # Keep minimal to avoid side effects
     return None
 
 
