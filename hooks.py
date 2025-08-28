@@ -43,6 +43,15 @@ def pre_init_check(*args, **kwargs):
         )
 
 
+def post_init_hook(cr, registry):
+    """Post-installation hook. Reserved for future setup steps.
+
+    Kept minimal to avoid side effects during installation.
+    """
+    _logger.info("Vipps/MobilePay post_init_hook executed")
+    # No-op for now
+
+
 def uninstall_hook(cr, registry):
     """Comprehensive uninstall cleanup for sensitive data."""
     env = api.Environment(cr, SUPERUSER_ID, {})
