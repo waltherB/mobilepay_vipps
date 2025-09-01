@@ -169,7 +169,7 @@ urllib3>=2.0.0,<3.0.0
 # | Odoo Version | Module Version | Python | PostgreSQL | Status |
 # |--------------|----------------|--------|------------|--------|
 # | 17.0 CE      | 1.0.0+        | 3.8+   | 12+        | ✅ Full |
-
+# | 16.0 CE      | Not supported  | -      | -          | ❌ No   |
 # | 15.0 CE      | Not supported  | -      | -          | ❌ No   |
 #
 # Security Notes

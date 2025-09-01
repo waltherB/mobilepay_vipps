@@ -136,9 +136,13 @@ class VippsController(http.Controller):
                 _logger.warning("Webhook validation warning: %s", warning)
             
             # Extract validated data
-            webhook_data = validation_result['webhook_data']
+            webhook_data = validation_result.get('webhook_data')
+            if not webhook_data:
+                _logger.error("No webhook data in validation result")
+                return request.make_response('Bad Request: Invalid webhook data', status=400)
+                
             reference = webhook_data.get('reference')
-            webhook_id = webhook_data.get('eventId') or validation_result['headers'].get('vipps_idempotency_key')
+            webhook_id = webhook_data.get('eventId') or validation_result.get('headers', {}).get('vipps_idempotency_key')
             
             # Find transaction
             transaction = request.env['payment.transaction'].sudo().search([

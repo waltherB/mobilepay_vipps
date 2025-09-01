@@ -330,9 +330,27 @@ class PaymentProvider(models.Model):
     def _get_supported_currencies(self):
         """Return supported currencies for Vipps/MobilePay"""
         if self.code == 'vipps':
-            supported_currencies = ['NOK', 'DKK', 'EUR', 'SEK']
+            # Vipps/MobilePay supported currencies by country:
+            # Norway (Vipps): NOK
+            # Denmark (MobilePay): DKK  
+            # Finland (MobilePay): EUR
+            # Sweden (MobilePay): SEK
+            supported_currencies = self._get_vipps_supported_currencies()
             return self.env['res.currency'].search([('name', 'in', supported_currencies)])
         return super()._get_supported_currencies()
+    
+    def _get_vipps_supported_currencies(self):
+        """Get supported currencies based on configuration or defaults"""
+        # Check if there's a system parameter for custom currencies
+        custom_currencies = self.env['ir.config_parameter'].sudo().get_param(
+            'payment_vipps_mobilepay.supported_currencies', False
+        )
+        
+        if custom_currencies:
+            return custom_currencies.split(',')
+        
+        # Default supported currencies based on Vipps/MobilePay coverage
+        return ['NOK', 'DKK', 'EUR', 'SEK']
     
     @api.model
     def _get_supported_countries(self):
