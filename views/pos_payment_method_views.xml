@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- POS Payment Method Form View Extension -->
+    <record id="view_pos_payment_method_form_vipps" model="ir.ui.view">
+        <field name="name">pos.payment.method.form.vipps</field>
+        <field name="model">pos.payment.method</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_payment_method_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='payment_terminal']" position="after">
+                <group string="Vipps/MobilePay Configuration" 
+                       invisible="use_payment_terminal != 'vipps'">
+                    <group>
+                        <field name="vipps_enable_qr_flow"/>
+                        <field name="vipps_enable_phone_flow"/>
+                        <field name="vipps_enable_manual_flows"/>
+                    </group>
+                    <group>
+                        <field name="vipps_payment_timeout"/>
+                        <field name="vipps_polling_interval"/>
+                    </group>
+                </group>
+            </xpath>
+            
+            <xpath expr="//sheet" position="inside">
+                <div class="alert alert-info" role="alert" 
+                     invisible="use_payment_terminal != 'vipps'">
+                    <strong>Vipps/MobilePay Payment Flows:</strong>
+                    <ul class="mb-0">
+                        <li><strong>Customer QR Code:</strong> Customer scans QR code displayed on POS terminal</li>
+                        <li><strong>Customer Phone Number:</strong> Push message sent to customer's mobile device</li>
+                        <li><strong>Manual Shop Number:</strong> Customer enters shop number in their Vipps/MobilePay app</li>
+                        <li><strong>Manual Shop QR:</strong> Customer scans shop-specific QR code</li>
+                    </ul>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- POS Payment Method Tree View Extension -->
+    <record id="view_pos_payment_method_tree_vipps" model="ir.ui.view">
+        <field name="name">pos.payment.method.tree.vipps</field>
+        <field name="model">pos.payment.method</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_payment_method_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='use_payment_terminal']" position="after">
+                <field name="vipps_enable_qr_flow" optional="hide"/>
+                <field name="vipps_enable_phone_flow" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- POS Configuration Form View Extension -->
+    <record id="view_pos_config_form_vipps" model="ir.ui.view">
+        <field name="name">pos.config.form.vipps</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_config_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='payment_methods']" position="inside">
+                <div class="alert alert-info mt-3" role="alert">
+                    <strong>Vipps/MobilePay Integration:</strong>
+                    <p class="mb-0">
+                        To use Vipps/MobilePay payments, ensure you have:
+                    </p>
+                    <ul class="mb-0">
+                        <li>Configured a Vipps payment provider with valid API credentials</li>
+                        <li>Added a Vipps payment method to this POS configuration</li>
+                        <li>Enabled the desired payment flows (QR code, phone number, etc.)</li>
+                    </ul>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action to Setup Vipps Payment Method -->
+    <record id="action_setup_vipps_pos_method" model="ir.actions.server">
+        <field name="name">Setup Vipps POS Payment Method</field>
+        <field name="model_id" ref="model_pos_payment_method"/>
+        <field name="state">code</field>
+        <field name="code">
+            method = model._setup_vipps_payment_method(None)
+            action = {
+                'type': 'ir.actions.act_window',
+                'res_model': 'pos.payment.method',
+                'res_id': method.id,
+                'view_mode': 'form',
+                'target': 'current',
+            }
+        </field>
+    </record>
+
+    <!-- Menu Item for Quick Setup -->
+    <menuitem id="menu_setup_vipps_pos_method"
+              name="Setup Vipps POS Method"
+              parent="point_of_sale.menu_point_of_sale_config"
+              action="action_setup_vipps_pos_method"
+              sequence="50"/>
+
+</odoo>

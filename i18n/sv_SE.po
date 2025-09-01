@@ -1,0 +1,628 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Vipps/MobilePay Payment Integration 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2024-01-15 12:00+0000\n"
+"Last-Translator: Vipps/MobilePay Integration Team\n"
+"Language-Team: Swedish\n"
+"Language: sv_SE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: payment_vipps_mobilepay
+#: model:payment.provider,name:payment_vipps_mobilepay.payment_provider_vipps
+msgid "Vipps/MobilePay"
+msgstr "Vipps/MobilePay"
+
+# Basic Configuration
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.payment_provider_form_vipps
+msgid "Environment Configuration"
+msgstr "Miljökonfiguration"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.payment_provider_form_vipps
+msgid "Test Environment"
+msgstr "Testmiljö"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.payment_provider_form_vipps
+msgid "Production Environment"
+msgstr "Produktionsmiljö"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.payment_provider_form_vipps
+msgid "Use this for development and testing. Test payments will not process real money."
+msgstr "Använd detta för utveckling och testning. Testbetalningar behandlar inte riktiga pengar."
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.payment_provider_form_vipps
+msgid "Real payments will be processed. Ensure all testing is complete before enabling."
+msgstr "Riktiga betalningar kommer att behandlas. Se till att all testning är klar innan aktivering."
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.payment_provider_form_vipps
+msgid "API Credentials"
+msgstr "API-uppgifter"
+
+#. module: payment_vipps_mobilepay
+#: model:ir.model.fields,field_description:payment_vipps_mobilepay.field_payment_provider__vipps_merchant_serial_number
+msgid "Merchant Serial Number"
+msgstr "Handlare Serienummer"
+
+#. module: payment_vipps_mobilepay
+#: model:ir.model.fields,field_description:payment_vipps_mobilepay.field_payment_provider__vipps_subscription_key
+msgid "Subscription Key"
+msgstr "Prenumerationsnyckel"
+
+#. module: payment_vipps_mobilepay
+#: model:ir.model.fields,field_description:payment_vipps_mobilepay.field_payment_provider__vipps_client_id
+msgid "Client ID"
+msgstr "Klient-ID"
+
+#. module: payment_vipps_mobilepay
+#: model:ir.model.fields,field_description:payment_vipps_mobilepay.field_payment_provider__vipps_client_secret
+msgid "Client Secret"
+msgstr "Klienthemlighet"
+
+#. module: payment_vipps_mobilepay
+#: model:ir.model.fields,field_description:payment_vipps_mobilepay.field_payment_provider__vipps_environment
+msgid "Environment"
+msgstr "Miljö"
+
+# Onboarding Wizard
+#. module: payment_vipps_mobilepay
+#: model:ir.model,name:payment_vipps_mobilepay.model_vipps_profile_wizard
+msgid "Vipps Profile Configuration Wizard"
+msgstr "Vipps Profilkonfigurationsguide"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_profile_wizard_form
+msgid "Vipps/MobilePay Setup Wizard"
+msgstr "Vipps/MobilePay Installationsguide"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_profile_wizard_form
+msgid "Welcome to Vipps/MobilePay Integration"
+msgstr "Välkommen till Vipps/MobilePay Integration"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_profile_wizard_form
+msgid "This wizard will guide you through the setup process step by step."
+msgstr "Den här guiden kommer att leda dig genom installationsprocessen steg för steg."
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_profile_wizard_form
+msgid "Environment Setup"
+msgstr "Miljöinställning"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_profile_wizard_form
+msgid "Credential Configuration"
+msgstr "Uppgiftskonfiguration"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_profile_wizard_form
+msgid "Feature Configuration"
+msgstr "Funktionskonfiguration"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_profile_wizard_form
+msgid "Testing & Validation"
+msgstr "Testning och Validering"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_profile_wizard_form
+msgid "Go Live Checklist"
+msgstr "Driftsättning Checklista"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_profile_wizard_form
+msgid "Run Onboarding Wizard"
+msgstr "Kör Introduktionsguide"
+
+# POS Integration
+#. module: payment_vipps_mobilepay
+#: model:ir.model,name:payment_vipps_mobilepay.model_pos_payment_method
+msgid "POS Payment Method"
+msgstr "POS Betalningsmetod"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.pos_payment_method_form
+msgid "POS Configuration"
+msgstr "POS Konfiguration"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.pos_payment_method_form
+msgid "Payment Flow Options"
+msgstr "Betalningsflöde Alternativ"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.pos_payment_method_form
+msgid "QR Code Payment"
+msgstr "QR-kod Betalning"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.pos_payment_method_form
+msgid "Phone Number Payment"
+msgstr "Telefonnummer Betalning"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.pos_payment_method_form
+msgid "Manual Verification"
+msgstr "Manuell Verifiering"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.pos_payment_method_form
+msgid "Customer scans QR code displayed on terminal"
+msgstr "Kunden skannar QR-kod som visas på terminalen"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.pos_payment_method_form
+msgid "Payment request sent to customer's phone"
+msgstr "Betalningsförfrågan skickad till kundens telefon"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.pos_payment_method_form
+msgid "Customer enters shop number/QR in their app"
+msgstr "Kunden anger butiksnummer/QR-kod i sin app"
+
+# Security Features
+#. module: payment_vipps_mobilepay
+#: model:ir.model,name:payment_vipps_mobilepay.model_vipps_webhook_security
+msgid "Vipps Webhook Security"
+msgstr "Vipps Webhook Säkerhet"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_security_form
+msgid "Security Configuration"
+msgstr "Säkerhetskonfiguration"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_security_form
+msgid "Webhook Security"
+msgstr "Webhook Säkerhet"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_security_form
+msgid "Credential Encryption"
+msgstr "Uppgiftskryptering"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_security_form
+msgid "Access Control"
+msgstr "Åtkomstkontroll"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_security_form
+msgid "Audit Logging"
+msgstr "Granskningsloggning"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_security_form
+msgid "Security Status"
+msgstr "Säkerhetsstatus"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_security_form
+msgid "Run Security Audit"
+msgstr "Kör Säkerhetsrevision"
+
+# Data Management and GDPR
+#. module: payment_vipps_mobilepay
+#: model:ir.model,name:payment_vipps_mobilepay.model_vipps_data_management
+msgid "Vipps Data Management"
+msgstr "Vipps Datahantering"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_data_management_form
+msgid "Data Protection & Privacy"
+msgstr "Dataskydd och Integritet"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_data_management_form
+msgid "GDPR Compliance"
+msgstr "GDPR Efterlevnad"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_data_management_form
+msgid "Data Retention Policy"
+msgstr "Datalagringspolicy"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_data_management_form
+msgid "Customer Consent Management"
+msgstr "Kundsamtycke Hantering"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.vipps_data_management_form
+msgid "Data Export & Deletion"
+msgstr "Dataexport och Radering"
+
+# Status Messages
+#. module: payment_vipps_mobilepay
+#: selection:payment.transaction,vipps_payment_status:0
+msgid "Initiated"
+msgstr "Initierad"
+
+#. module: payment_vipps_mobilepay
+#: selection:payment.transaction,vipps_payment_status:0
+msgid "Reserved"
+msgstr "Reserverad"
+
+#. module: payment_vipps_mobilepay
+#: selection:payment.transaction,vipps_payment_status:0
+msgid "Captured"
+msgstr "Debiterad"
+
+#. module: payment_vipps_mobilepay
+#: selection:payment.transaction,vipps_payment_status:0
+msgid "Cancelled"
+msgstr "Avbruten"
+
+#. module: payment_vipps_mobilepay
+#: selection:payment.transaction,vipps_payment_status:0
+msgid "Refunded"
+msgstr "Återbetald"
+
+#. module: payment_vipps_mobilepay
+#: selection:payment.transaction,vipps_payment_status:0
+msgid "Failed"
+msgstr "Misslyckades"
+
+#. module: payment_vipps_mobilepay
+#: selection:payment.transaction,vipps_payment_status:0
+msgid "Expired"
+msgstr "Utgången"
+
+# Error Messages
+#. module: payment_vipps_mobilepay
+#: code:addons/payment_vipps_mobilepay/models/payment_provider.py:0
+#, python-format
+msgid "Success"
+msgstr "Framgång"
+
+#. module: payment_vipps_mobilepay
+#: code:addons/payment_vipps_mobilepay/models/payment_provider.py:0
+#, python-format
+msgid "Vipps/MobilePay credentials validated successfully!"
+msgstr "Vipps/MobilePay uppgifter validerade framgångsrikt!"
+
+#. module: payment_vipps_mobilepay
+#: code:addons/payment_vipps_mobilepay/models/payment_provider.py:0
+#, python-format
+msgid "Payment capture successful"
+msgstr "Betalningsdebitering framgångsrik"
+
+#. module: payment_vipps_mobilepay
+#: code:addons/payment_vipps_mobilepay/models/payment_provider.py:0
+#, python-format
+msgid "Payment refund successful"
+msgstr "Betalningsåterbetalning framgångsrik"
+
+# POS Interface Messages
+#. module: payment_vipps_mobilepay
+#: code:addons/payment_vipps_mobilepay/static/src/js/pos_payment.js:0
+#, python-format
+msgid "Waiting for customer payment..."
+msgstr "Väntar på kundbetalning..."
+
+#. module: payment_vipps_mobilepay
+#: code:addons/payment_vipps_mobilepay/static/src/js/pos_payment.js:0
+#, python-format
+msgid "Payment successful!"
+msgstr "Betalning framgångsrik!"
+
+#. module: payment_vipps_mobilepay
+#: code:addons/payment_vipps_mobilepay/static/src/js/pos_payment.js:0
+#, python-format
+msgid "Payment failed. Please try again."
+msgstr "Betalning misslyckades. Försök igen."
+
+#. module: payment_vipps_mobilepay
+#: code:addons/payment_vipps_mobilepay/static/src/js/pos_payment.js:0
+#, python-format
+msgid "Show QR code to customer"
+msgstr "Visa QR-kod för kunden"
+
+#. module: payment_vipps_mobilepay
+#: code:addons/payment_vipps_mobilepay/static/src/js/pos_payment.js:0
+#, python-format
+msgid "Enter customer phone number"
+msgstr "Ange kundens telefonnummer"
+
+# Button Labels
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.payment_provider_form_vipps
+msgid "Test Connection"
+msgstr "Testa Anslutning"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.payment_provider_form_vipps
+msgid "Validate Credentials"
+msgstr "Validera Uppgifter"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.payment_transaction_form_vipps
+msgid "Capture Payment"
+msgstr "Debitera Betalning"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.payment_transaction_form_vipps
+msgid "Refund Payment"
+msgstr "Återbetala Betalning"
+
+#. module: payment_vipps_mobilepay
+#: model_terms:ir.ui.view,arch_db:payment_vipps_mobilepay.payment_transaction_form_vipps
+msgid "Cancel Payment"
+msgstr "Avbryt Betalning"
+
+# Menu Items
+#. module: payment_vipps_mobilepay
+#: model:ir.ui.menu,name:payment_vipps_mobilepay.menu_vipps_main
+msgid "Vipps/MobilePay"
+msgstr "Vipps/MobilePay"
+
+#. module: payment_vipps_mobilepay
+#: model:ir.ui.menu,name:payment_vipps_mobilepay.menu_vipps_configuration
+msgid "Configuration"
+msgstr "Konfiguration"
+
+#. module: payment_vipps_mobilepay
+#: model:ir.ui.menu,name:payment_vipps_mobilepay.menu_vipps_transactions
+msgid "Transactions"
+msgstr "Transaktioner"
+
+#. module: payment_vipps_mobilepay
+#: model:ir.ui.menu,name:payment_vipps_mobilepay.menu_vipps_security
+msgid "Security"
+msgstr "Säkerhet"
+# Additional Essential Translations
+
+msgid "Capture Mode"
+msgstr "Insamlingsläge"
+
+msgid "Collect User Information"
+msgstr "Samla användarinformation"
+
+msgid "Webhook Secret"
+msgstr "Webhook-hemlighet"
+
+msgid "Payment Configuration"
+msgstr "Betalningskonfiguration"
+
+msgid "Manual Capture"
+msgstr "Manuell insamling"
+
+msgid "Automatic Capture"
+msgstr "Automatisk insamling"
+
+msgid "Ready"
+msgstr "Redo"
+
+msgid "Configuration Required"
+msgstr "Konfiguration krävs"
+
+msgid "Customer QR Code"
+msgstr "Kund QR-kod"
+
+msgid "Customer scans QR code with their mobile app"
+msgstr "Kunden skannar QR-kod med sin mobilapp"
+
+msgid "Phone Number"
+msgstr "Telefonnummer"
+
+msgid "Send push message to customer's phone"
+msgstr "Skicka push-meddelande till kundens telefon"
+
+msgid "Shop Number"
+msgstr "Butiksnummer"
+
+msgid "Customer enters shop number in their app"
+msgstr "Kunden anger butiksnummer i sin app"
+
+msgid "Shop QR Code"
+msgstr "Butiks QR-kod"
+
+msgid "Customer scans shop-specific QR code"
+msgstr "Kunden skannar butiksspecifik QR-kod"
+
+msgid "Customer Phone Number"
+msgstr "Kundens telefonnummer"
+
+msgid "Manual Shop Number"
+msgstr "Manuellt butiksnummer"
+
+msgid "Manual Shop QR"
+msgstr "Manuell butiks QR"
+
+msgid "Please enter a valid Nordic phone number (8 digits)"
+msgstr "Ange ett giltigt nordiskt telefonnummer (8 siffror)"
+
+msgid "Payment creation failed"
+msgstr "Skapande av betalning misslyckades"
+
+msgid "Failed to start payment"
+msgstr "Kunde inte starta betalning"
+
+msgid "Payment completed successfully!"
+msgstr "Betalning slutförd framgångsrikt!"
+
+msgid "Payment was cancelled or failed"
+msgstr "Betalningen avbröts eller misslyckades"
+
+msgid "Payment timed out"
+msgstr "Betalningen fick timeout"
+
+msgid "Payment cancelled"
+msgstr "Betalning avbruten"
+
+msgid "Failed to cancel payment"
+msgstr "Kunde inte avbryta betalning"
+
+msgid "Payment verified and completed!"
+msgstr "Betalning verifierad och slutförd!"
+
+msgid "Initializing payment..."
+msgstr "Initierar betalning..."
+
+msgid "Waiting for customer action..."
+msgstr "Väntar på kundåtgärd..."
+
+msgid "Processing payment..."
+msgstr "Behandlar betalning..."
+
+msgid "Verifying payment..."
+msgstr "Verifierar betalning..."
+
+msgid "Finalizing..."
+msgstr "Slutför..."
+
+msgid "Payment completed"
+msgstr "Betalning slutförd"
+
+msgid "Connected"
+msgstr "Ansluten"
+
+msgid "Checking..."
+msgstr "Kontrollerar..."
+
+msgid "Reconnecting..."
+msgstr "Återansluter..."
+
+msgid "Connection Error"
+msgstr "Anslutningsfel"
+
+msgid "Disconnected"
+msgstr "Frånkopplad"
+
+msgid "Vipps/MobilePay Payment"
+msgstr "Vipps/MobilePay Betalning"
+
+msgid "Choose how the customer will complete their payment"
+msgstr "Välj hur kunden ska slutföra sin betalning"
+
+msgid "Start Payment"
+msgstr "Starta betalning"
+
+msgid "Starting..."
+msgstr "Startar..."
+
+msgid "Cancel"
+msgstr "Avbryt"
+
+msgid "Payment in Progress"
+msgstr "Betalning pågår"
+
+msgid "remaining"
+msgstr "kvar"
+
+msgid "Scan QR Code"
+msgstr "Skanna QR-kod"
+
+msgid "Ask the customer to scan this QR code with their Vipps/MobilePay app"
+msgstr "Be kunden att skanna denna QR-kod med sin Vipps/MobilePay-app"
+
+msgid "Push Message Sent"
+msgstr "Push-meddelande skickat"
+
+msgid "Ask the customer to check their phone and approve the payment"
+msgstr "Be kunden att kontrollera sin telefon och godkänna betalningen"
+
+msgid "Enter Shop Number"
+msgstr "Ange butiksnummer"
+
+msgid "Ask the customer to:"
+msgstr "Be kunden att:"
+
+msgid "Open their Vipps/MobilePay app"
+msgstr "Öppna sin Vipps/MobilePay-app"
+
+msgid "Confirm the payment amount"
+msgstr "Bekräfta betalningsbeloppet"
+
+msgid "Scan Shop QR Code"
+msgstr "Skanna butiks QR-kod"
+
+msgid "Retry"
+msgstr "Försök igen"
+
+msgid "Processing..."
+msgstr "Behandlar..."
+
+msgid "Elapsed:"
+msgstr "Förfluten:"
+
+msgid "Remaining:"
+msgstr "Återstår:"
+
+msgid "Attempt:"
+msgstr "Försök:"
+
+msgid "Waiting for customer to complete payment..."
+msgstr "Väntar på att kunden slutför betalningen..."
+
+msgid "Payment Verification"
+msgstr "Betalningsverifiering"
+
+msgid "Verify with the customer that the payment has been completed"
+msgstr "Verifiera med kunden att betalningen har slutförts"
+
+msgid "Customer Confirmed Payment"
+msgstr "Kund bekräftade betalning"
+
+msgid "Show Payment Proof"
+msgstr "Visa betalningsbevis"
+
+msgid "Back"
+msgstr "Tillbaka"
+
+msgid "Payment Completed!"
+msgstr "Betalning slutförd!"
+
+msgid "The payment has been successfully processed."
+msgstr "Betalningen har behandlats framgångsrikt."
+
+msgid "Continue"
+msgstr "Fortsätt"
+
+msgid "Try Again"
+msgstr "Försök igen"
+
+msgid "Amount:"
+msgstr "Belopp:"
+
+msgid "Reference:"
+msgstr "Referens:"
+
+msgid "Created"
+msgstr "Skapad"
+
+msgid "Authorized"
+msgstr "Auktoriserad"
+
+msgid "Aborted"
+msgstr "Avbruten"
+
+msgid "Terminated"
+msgstr "Avslutad"
+
+msgid "Web Redirect"
+msgstr "Webomdirigering"
+
+msgid "QR Code"
+msgstr "QR-kod"
+
+msgid "Push Message"
+msgstr "Push-meddelande"
+
+msgid "Validation Failed"
+msgstr "Validering misslyckades"
+
+msgid "Connection Test Successful"
+msgstr "Anslutningstest lyckades"
+
+msgid "Connection Test Failed"
+msgstr "Anslutningstest misslyckades"

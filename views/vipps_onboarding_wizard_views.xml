@@ -1,0 +1,869 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Onboarding Wizard Form View -->
+    <record id="view_vipps_onboarding_wizard_form" model="ir.ui.view">
+        <field name="name">vipps.onboarding.wizard.form</field>
+        <field name="model">vipps.onboarding.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Vipps/MobilePay Setup Wizard">
+                <header>
+                    <!-- Progress Bar -->
+                    <div class="o_wizard_progress">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success" 
+                                 role="progressbar" 
+                                 t-att-style="'width: ' + str(step_progress) + '%'">
+                                <span t-esc="step_progress"/>%
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step Navigation -->
+                    <div class="o_wizard_steps">
+                        <span class="badge badge-primary" t-if="current_step == 'welcome'">Welcome</span>
+                        <span class="badge badge-secondary" t-else="">Welcome</span>
+                        
+                        <span class="badge badge-primary" t-if="current_step == 'environment'">Environment</span>
+                        <span class="badge badge-secondary" t-else="">Environment</span>
+                        
+                        <span class="badge badge-primary" t-if="current_step == 'credentials'">Credentials</span>
+                        <span class="badge badge-secondary" t-else="">Credentials</span>
+                        
+                        <span class="badge badge-primary" t-if="current_step == 'features'">Features</span>
+                        <span class="badge badge-secondary" t-else="">Features</span>
+                        
+                        <span class="badge badge-primary" t-if="current_step == 'testing'">Testing</span>
+                        <span class="badge badge-secondary" t-else="">Testing</span>
+                        
+                        <span class="badge badge-primary" t-if="current_step == 'go_live'">Go Live</span>
+                        <span class="badge badge-secondary" t-else="">Go Live</span>
+                        
+                        <span class="badge badge-success" t-if="current_step == 'complete'">Complete</span>
+                        <span class="badge badge-secondary" t-else="">Complete</span>
+                    </div>
+                </header>
+
+                <sheet>
+                    <!-- Welcome Step -->
+                    <div t-if="current_step == 'welcome'" class="o_wizard_step">
+                        <div class="text-center">
+                            <h1>
+                                <i class="fa fa-credit-card text-primary"></i>
+                                Welcome to Vipps/MobilePay Setup
+                            </h1>
+                            <p class="lead">
+                                This wizard will guide you through setting up Vipps and MobilePay payments for your Odoo system.
+                            </p>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-4 text-center">
+                                <i class="fa fa-shopping-cart fa-3x text-success"></i>
+                                <h4>eCommerce Payments</h4>
+                                <p>Accept online payments through your website</p>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <i class="fa fa-mobile fa-3x text-info"></i>
+                                <h4>Point of Sale</h4>
+                                <p>Process in-store payments with QR codes and push messages</p>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <i class="fa fa-shield fa-3x text-warning"></i>
+                                <h4>Secure Integration</h4>
+                                <p>Bank-grade security with full compliance</p>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mt-4">
+                            <h5><i class="fa fa-info-circle"></i> Before You Start</h5>
+                            <p>Make sure you have:</p>
+                            <ul>
+                                <li>A Vipps merchant account (for Norway) or MobilePay merchant account (for Denmark)</li>
+                                <li>API credentials from your payment provider</li>
+                                <li>Administrator access to your Odoo system</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Environment Setup Step -->
+                    <div t-if="current_step == 'environment'" class="o_wizard_step">
+                        <h2><i class="fa fa-cog"></i> Environment Setup</h2>
+                        <p>Choose the environment for your payment integration.</p>
+                        
+                        <group>
+                            <field name="environment" widget="radio" required="1"/>
+                        </group>
+                        
+                        <div class="alert alert-warning" t-if="environment == 'test'">
+                            <h5><i class="fa fa-flask"></i> Test Environment</h5>
+                            <p>
+                                Use this for development and testing. No real money will be processed.
+                                You'll need test API credentials from your payment provider.
+                            </p>
+                        </div>
+                        
+                        <div class="alert alert-danger" t-if="environment == 'production'">
+                            <h5><i class="fa fa-exclamation-triangle"></i> Production Environment</h5>
+                            <p>
+                                <strong>Warning:</strong> This will process real payments with real money.
+                                Make sure you have completed all testing before using production credentials.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Credentials Step -->
+                    <div t-if="current_step == 'credentials'" class="o_wizard_step">
+                        <h2><i class="fa fa-key"></i> API Credentials</h2>
+                        <p>Enter your API credentials from your payment provider.</p>
+                        
+                        <group>
+                            <group>
+                                <field name="merchant_serial_number" required="1" 
+                                       placeholder="e.g., 123456"/>
+                                <field name="client_id" required="1" 
+                                       placeholder="e.g., your-client-id"/>
+                            </group>
+                            <group>
+                                <field name="client_secret" required="1" password="True"
+                                       placeholder="Your client secret"/>
+                                <field name="subscription_key" required="1" password="True"
+                                       placeholder="Your subscription key"/>
+                            </group>
+                        </group>
+                        
+                        <group>
+                            <field name="webhook_secret" password="True"
+                                   placeholder="Optional webhook secret for security"/>
+                        </group>
+                        
+                        <div class="alert alert-info">
+                            <h5><i class="fa fa-info-circle"></i> Where to Find Your Credentials</h5>
+                            <ul>
+                                <li><strong>Vipps (Norway):</strong> Log in to your Vipps Developer Portal</li>
+                                <li><strong>MobilePay (Denmark):</strong> Access your MobilePay Developer Portal</li>
+                                <li>Navigate to your application settings to find these credentials</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Credential Test Section -->
+                        <div class="mt-3">
+                            <button name="action_test_credentials" type="object" 
+                                    class="btn btn-primary">
+                                <i class="fa fa-check"></i> Test Credentials
+                            </button>
+                            
+                            <span t-if="credential_test_status == 'testing'" class="ml-2">
+                                <i class="fa fa-spinner fa-spin"></i> Testing...
+                            </span>
+                            <span t-if="credential_test_status == 'success'" class="ml-2 text-success">
+                                <i class="fa fa-check-circle"></i> Success
+                            </span>
+                            <span t-if="credential_test_status == 'failed'" class="ml-2 text-danger">
+                                <i class="fa fa-times-circle"></i> Failed
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Features Step -->
+                    <div t-if="current_step == 'features'" class="o_wizard_step">
+                        <h2><i class="fa fa-puzzle-piece"></i> Feature Configuration</h2>
+                        <p>Configure which payment features to enable.</p>
+                        
+                        <group string="Payment Methods">
+                            <field name="enable_ecommerce"/>
+                            <field name="enable_pos"/>
+                        </group>
+                        
+                        <group string="POS Payment Flows" t-if="enable_pos">
+                            <field name="enable_qr_flow"/>
+                            <field name="enable_phone_flow"/>
+                            <field name="enable_manual_flows"/>
+                        </group>
+                        
+                        <group string="POS Configuration" t-if="enable_pos and enable_manual_flows">
+                            <field name="shop_mobilepay_number" required="1"
+                                   placeholder="e.g., 12345678"/>
+                            <field name="shop_qr_code" widget="text"
+                                   placeholder="Base64 encoded QR code (optional)"/>
+                        </group>
+                        
+                        <group string="Advanced Settings">
+                            <field name="payment_timeout" 
+                                   help="Maximum time to wait for payment completion (seconds)"/>
+                            <field name="polling_interval"
+                                   help="How often to check payment status (seconds)"/>
+                        </group>
+                        
+                        <group string="User Information Collection">
+                            <field name="collect_user_info"/>
+                            <field name="profile_scope_ids" widget="many2many_tags" 
+                                   t-if="collect_user_info"
+                                   domain="[('active', '=', True)]"/>
+                        </group>
+                        
+                        <div class="alert alert-info" t-if="collect_user_info">
+                            <h5><i class="fa fa-user"></i> Privacy Notice</h5>
+                            <p>
+                                When collecting user information, ensure you comply with GDPR and local privacy laws.
+                                Users must consent to data collection, and you must provide options for data deletion.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Testing Step -->
+                    <div t-if="current_step == 'testing'" class="o_wizard_step">
+                        <h2><i class="fa fa-flask"></i> Testing &amp; Validation</h2>
+                        <p>Validate your configuration with comprehensive tests.</p>
+                        
+                        <!-- Credential Test -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5>
+                                    <i class="fa fa-key"></i> API Credentials Test
+                                    <span t-if="credential_test_status == 'success'" class="badge badge-success ml-2">
+                                        <i class="fa fa-check"></i> Passed
+                                    </span>
+                                    <span t-if="credential_test_status == 'failed'" class="badge badge-danger ml-2">
+                                        <i class="fa fa-times"></i> Failed
+                                    </span>
+                                    <span t-if="credential_test_status == 'testing'" class="badge badge-warning ml-2">
+                                        <i class="fa fa-spinner fa-spin"></i> Testing...
+                                    </span>
+                                    <span t-if="credential_test_status == 'not_tested'" class="badge badge-secondary ml-2">
+                                        <i class="fa fa-question"></i> Not Tested
+                                    </span>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p>Comprehensive API connectivity and credential validation including:</p>
+                                <ul class="test-features">
+                                    <li><i class="fa fa-check-circle text-success"></i> Authentication verification</li>
+                                    <li><i class="fa fa-check-circle text-success"></i> API version compatibility</li>
+                                    <li><i class="fa fa-check-circle text-success"></i> Merchant information retrieval</li>
+                                    <li><i class="fa fa-check-circle text-success"></i> Permission validation</li>
+                                    <li><i class="fa fa-check-circle text-success"></i> Rate limit information</li>
+                                </ul>
+                                <button name="action_test_credentials" type="object" 
+                                        class="btn btn-primary"
+                                        t-att-disabled="credential_test_status == 'testing'">
+                                    <i class="fa fa-play" t-if="credential_test_status != 'testing'"></i>
+                                    <i class="fa fa-spinner fa-spin" t-if="credential_test_status == 'testing'"></i>
+                                    <span t-if="credential_test_status != 'testing'">Run Comprehensive Test</span>
+                                    <span t-if="credential_test_status == 'testing'">Testing...</span>
+                                </button>
+                                <button name="action_test_credentials" type="object" 
+                                        class="btn btn-outline-secondary ml-2"
+                                        t-if="credential_test_status == 'success'">
+                                    <i class="fa fa-refresh"></i> Re-test
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Webhook Test -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5>
+                                    <i class="fa fa-globe"></i> Webhook Connectivity Test
+                                    <span t-if="webhook_test_status == 'success'" class="badge badge-success ml-2">
+                                        <i class="fa fa-check"></i> Passed
+                                    </span>
+                                    <span t-if="webhook_test_status == 'failed'" class="badge badge-danger ml-2">
+                                        <i class="fa fa-times"></i> Failed
+                                    </span>
+                                    <span t-if="webhook_test_status == 'testing'" class="badge badge-warning ml-2">
+                                        <i class="fa fa-spinner fa-spin"></i> Testing...
+                                    </span>
+                                    <span t-if="webhook_test_status == 'not_tested'" class="badge badge-secondary ml-2">
+                                        <i class="fa fa-question"></i> Not Tested
+                                    </span>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p>Comprehensive webhook endpoint validation including:</p>
+                                <ul class="test-features">
+                                    <li><i class="fa fa-check-circle text-success"></i> URL accessibility verification</li>
+                                    <li><i class="fa fa-check-circle text-success"></i> SSL/TLS configuration check</li>
+                                    <li><i class="fa fa-check-circle text-success"></i> HTTP methods support</li>
+                                    <li><i class="fa fa-check-circle text-success"></i> Security headers validation</li>
+                                    <li><i class="fa fa-check-circle text-success"></i> Response time measurement</li>
+                                    <li><i class="fa fa-check-circle text-success"></i> Signature validation setup</li>
+                                </ul>
+                                <button name="action_test_webhook" type="object" 
+                                        class="btn btn-primary"
+                                        t-att-disabled="webhook_test_status == 'testing'">
+                                    <i class="fa fa-play" t-if="webhook_test_status != 'testing'"></i>
+                                    <i class="fa fa-spinner fa-spin" t-if="webhook_test_status == 'testing'"></i>
+                                    <span t-if="webhook_test_status != 'testing'">Run Connectivity Test</span>
+                                    <span t-if="webhook_test_status == 'testing'">Testing...</span>
+                                </button>
+                                <button name="action_test_webhook" type="object" 
+                                        class="btn btn-outline-secondary ml-2"
+                                        t-if="webhook_test_status == 'success'">
+                                    <i class="fa fa-refresh"></i> Re-test
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Test Payment -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5>
+                                    <i class="fa fa-credit-card"></i> Payment Integration Test
+                                    <span t-if="test_payment_status == 'success'" class="badge badge-success ml-2">
+                                        <i class="fa fa-check"></i> Passed
+                                    </span>
+                                    <span t-if="test_payment_status == 'failed'" class="badge badge-danger ml-2">
+                                        <i class="fa fa-times"></i> Failed
+                                    </span>
+                                    <span t-if="test_payment_status == 'testing'" class="badge badge-warning ml-2">
+                                        <i class="fa fa-spinner fa-spin"></i> Testing...
+                                    </span>
+                                    <span t-if="test_payment_status == 'not_tested'" class="badge badge-secondary ml-2">
+                                        <i class="fa fa-question"></i> Not Tested
+                                    </span>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p>End-to-end payment flow validation including:</p>
+                                <ul class="test-features">
+                                    <li t-if="enable_ecommerce"><i class="fa fa-check-circle text-success"></i> eCommerce payment flow (WEB_REDIRECT)</li>
+                                    <li t-if="enable_pos and enable_qr_flow"><i class="fa fa-check-circle text-success"></i> POS QR code generation</li>
+                                    <li t-if="enable_pos and enable_phone_flow"><i class="fa fa-check-circle text-success"></i> POS phone push messages</li>
+                                    <li t-if="enable_pos and enable_manual_flows"><i class="fa fa-check-circle text-success"></i> POS manual payment flows</li>
+                                    <li t-if="collect_user_info"><i class="fa fa-check-circle text-success"></i> User information collection</li>
+                                </ul>
+                                <div class="alert alert-info" t-if="environment == 'test'">
+                                    <small><i class="fa fa-info-circle"></i> Test payments use minimal amounts and are for validation only.</small>
+                                </div>
+                                <button name="action_test_payment" type="object" 
+                                        class="btn btn-primary"
+                                        t-att-disabled="test_payment_status == 'testing'">
+                                    <i class="fa fa-play" t-if="test_payment_status != 'testing'"></i>
+                                    <i class="fa fa-spinner fa-spin" t-if="test_payment_status == 'testing'"></i>
+                                    <span t-if="test_payment_status != 'testing'">Run Payment Test</span>
+                                    <span t-if="test_payment_status == 'testing'">Creating Test Payments...</span>
+                                </button>
+                                <button name="action_test_payment" type="object" 
+                                        class="btn btn-outline-secondary ml-2"
+                                        t-if="test_payment_status == 'success'">
+                                    <i class="fa fa-refresh"></i> Re-test
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Validation Messages -->
+                        <div t-if="validation_messages" class="alert alert-info">
+                            <h5><i class="fa fa-info-circle"></i> Test Results</h5>
+                            <p t-esc="validation_messages"/>
+                        </div>
+                    </div>
+
+                    <!-- Go Live Step -->
+                    <div t-if="current_step == 'go_live'" class="o_wizard_step">
+                        <h2><i class="fa fa-rocket"></i> Production Readiness &amp; Go Live</h2>
+                        <p>Complete the comprehensive checklist and security validation before going live.</p>
+                        
+                        <!-- Readiness Score Display -->
+                        <div class="readiness-score-container">
+                            <div class="readiness-score-circle">
+                                <div class="score-value" t-esc="readiness_score + '%'"></div>
+                                <div class="score-label">Readiness Score</div>
+                            </div>
+                            <div class="readiness-level">
+                                <span t-if="readiness_level == 'fully_ready'" class="badge badge-success">
+                                    <i class="fa fa-check-circle"></i> Fully Ready
+                                </span>
+                                <span t-if="readiness_level == 'ready'" class="badge badge-primary">
+                                    <i class="fa fa-thumbs-up"></i> Ready for Production
+                                </span>
+                                <span t-if="readiness_level == 'partially_ready'" class="badge badge-warning">
+                                    <i class="fa fa-exclamation-triangle"></i> Partially Ready
+                                </span>
+                                <span t-if="readiness_level == 'not_ready'" class="badge badge-danger">
+                                    <i class="fa fa-times-circle"></i> Not Ready
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Security Scan Section -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5>
+                                    <i class="fa fa-shield"></i> Security Validation
+                                    <span t-if="security_scan_status == 'completed'" class="badge badge-success ml-2">
+                                        <i class="fa fa-check"></i> Completed
+                                    </span>
+                                    <span t-if="security_scan_status == 'failed'" class="badge badge-danger ml-2">
+                                        <i class="fa fa-times"></i> Failed
+                                    </span>
+                                    <span t-if="security_scan_status == 'in_progress'" class="badge badge-warning ml-2">
+                                        <i class="fa fa-spinner fa-spin"></i> In Progress
+                                    </span>
+                                    <span t-if="security_scan_status == 'not_started'" class="badge badge-secondary ml-2">
+                                        <i class="fa fa-question"></i> Not Started
+                                    </span>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p>Run comprehensive security scan to validate production readiness.</p>
+                                <button name="action_run_security_scan" type="object" 
+                                        class="btn btn-primary"
+                                        t-att-disabled="security_scan_status == 'in_progress'">
+                                    <i class="fa fa-shield" t-if="security_scan_status != 'in_progress'"></i>
+                                    <i class="fa fa-spinner fa-spin" t-if="security_scan_status == 'in_progress'"></i>
+                                    <span t-if="security_scan_status != 'in_progress'">Run Security Scan</span>
+                                    <span t-if="security_scan_status == 'in_progress'">Scanning...</span>
+                                </button>
+                                <button name="action_auto_complete_checklist" type="object" 
+                                        class="btn btn-outline-secondary ml-2">
+                                    <i class="fa fa-magic"></i> Auto-Complete from Tests
+                                </button>
+                            </div>
+                            <div t-if="security_scan_results" class="card-footer">
+                                <div class="security-results">
+                                    <pre t-esc="security_scan_results"></pre>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Technical Requirements Checklist -->
+                        <div class="checklist-section">
+                            <h4><i class="fa fa-cogs"></i> Technical Requirements</h4>
+                            <div class="checklist technical-checklist">
+                                <div class="form-check">
+                                    <field name="checklist_credentials" widget="boolean"/>
+                                    <label for="checklist_credentials" class="form-check-label">
+                                        <strong>API Credentials Validated</strong>
+                                        <small>All API credentials have been tested and verified</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <field name="checklist_webhook" widget="boolean"/>
+                                    <label for="checklist_webhook" class="form-check-label">
+                                        <strong>Webhook Connectivity Tested</strong>
+                                        <small>Webhook endpoints are accessible and properly configured</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <field name="checklist_test_payment" widget="boolean"/>
+                                    <label for="checklist_test_payment" class="form-check-label">
+                                        <strong>Test Payments Completed</strong>
+                                        <small>All payment flows have been tested successfully</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <field name="checklist_ssl_certificate" widget="boolean"/>
+                                    <label for="checklist_ssl_certificate" class="form-check-label">
+                                        <strong>SSL Certificate Valid</strong>
+                                        <small>HTTPS is configured with a valid SSL certificate</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <field name="checklist_security_headers" widget="boolean"/>
+                                    <label for="checklist_security_headers" class="form-check-label">
+                                        <strong>Security Headers Configured</strong>
+                                        <small>Proper security headers are in place</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Business Requirements Checklist -->
+                        <div class="checklist-section">
+                            <h4><i class="fa fa-briefcase"></i> Business Requirements</h4>
+                            <div class="checklist business-checklist">
+                                <div class="form-check">
+                                    <field name="checklist_documentation" widget="boolean"/>
+                                    <label for="checklist_documentation" class="form-check-label">
+                                        <strong>Documentation Reviewed</strong>
+                                        <small>Integration documentation has been reviewed and understood</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <field name="checklist_support" widget="boolean"/>
+                                    <label for="checklist_support" class="form-check-label">
+                                        <strong>Support Contacts Configured</strong>
+                                        <small>Support and escalation contacts are properly set up</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <field name="checklist_compliance" widget="boolean"/>
+                                    <label for="checklist_compliance" class="form-check-label">
+                                        <strong>Compliance Requirements Met</strong>
+                                        <small>PCI DSS, GDPR, and other compliance requirements are satisfied</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <field name="checklist_backup_procedures" widget="boolean"/>
+                                    <label for="checklist_backup_procedures" class="form-check-label">
+                                        <strong>Backup Procedures Established</strong>
+                                        <small>Data backup and recovery procedures are in place</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <field name="checklist_monitoring" widget="boolean"/>
+                                    <label for="checklist_monitoring" class="form-check-label">
+                                        <strong>Monitoring and Alerting Setup</strong>
+                                        <small>Transaction monitoring and alerting systems are configured</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Production-Specific Requirements (only for production environment) -->
+                        <div t-if="environment == 'production'" class="checklist-section">
+                            <h4><i class="fa fa-exclamation-triangle text-warning"></i> Production Requirements</h4>
+                            <div class="checklist production-checklist">
+                                <div class="form-check">
+                                    <field name="checklist_production_credentials" widget="boolean"/>
+                                    <label for="checklist_production_credentials" class="form-check-label">
+                                        <strong>Production Credentials Obtained</strong>
+                                        <small>Valid production API credentials have been obtained from Vipps/MobilePay</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <field name="checklist_merchant_agreement" widget="boolean"/>
+                                    <label for="checklist_merchant_agreement" class="form-check-label">
+                                        <strong>Merchant Agreement Signed</strong>
+                                        <small>Legal merchant agreement with Vipps/MobilePay is in place</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <field name="checklist_risk_assessment" widget="boolean"/>
+                                    <label for="checklist_risk_assessment" class="form-check-label">
+                                        <strong>Risk Assessment Completed</strong>
+                                        <small>Security and operational risk assessment has been performed</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <field name="checklist_staff_training" widget="boolean"/>
+                                    <label for="checklist_staff_training" class="form-check-label">
+                                        <strong>Staff Training Completed</strong>
+                                        <small>Relevant staff have been trained on the payment system</small>
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <field name="checklist_rollback_plan" widget="boolean"/>
+                                    <label for="checklist_rollback_plan" class="form-check-label">
+                                        <strong>Rollback Plan Prepared</strong>
+                                        <small>Rollback procedures are documented and tested</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Support Configuration -->
+                        <div class="support-config-section">
+                            <h4><i class="fa fa-life-ring"></i> Support Configuration</h4>
+                            <group>
+                                <group>
+                                    <field name="support_contact_name" placeholder="Primary Support Contact"/>
+                                    <field name="support_contact_email" placeholder="support@company.com"/>
+                                    <field name="support_contact_phone" placeholder="+45 12 34 56 78"/>
+                                </group>
+                                <group>
+                                    <field name="escalation_contact_name" placeholder="Escalation Contact"/>
+                                    <field name="escalation_contact_email" placeholder="escalation@company.com"/>
+                                </group>
+                            </group>
+                        </div>
+                        
+                        <!-- Monitoring Configuration -->
+                        <div class="monitoring-config-section">
+                            <h4><i class="fa fa-bar-chart"></i> Monitoring &amp; Notifications</h4>
+                            <group>
+                                <field name="enable_monitoring"/>
+                                <field name="enable_notifications"/>
+                                <field name="notification_emails" t-if="enable_notifications" 
+                                       placeholder="admin@company.com, finance@company.com"/>
+                                <field name="enable_audit_logging"/>
+                            </group>
+                        </div>
+                        
+                        <!-- Production Environment Warning -->
+                        <div class="alert alert-danger mt-4" t-if="environment == 'production'">
+                            <h5><i class="fa fa-exclamation-triangle"></i> Production Environment Warning</h5>
+                            <p>
+                                <strong>You are configuring a PRODUCTION environment.</strong><br/>
+                                Real payments will be processed and real money will be transferred.
+                                Ensure all testing has been completed in the test environment first.
+                            </p>
+                            <ul>
+                                <li>All test payments should be completed successfully</li>
+                                <li>Security scan should show no critical vulnerabilities</li>
+                                <li>Support contacts must be configured</li>
+                                <li>Monitoring and alerting should be enabled</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Validation Messages -->
+                        <div t-if="validation_messages" class="validation-messages-container mt-3">
+                            <div class="alert alert-warning" t-if="readiness_level in ['ready', 'partially_ready']">
+                                <h5><i class="fa fa-info-circle"></i> Recommendations</h5>
+                                <div class="validation-messages" t-esc="validation_messages"></div>
+                            </div>
+                            <div class="alert alert-danger" t-if="readiness_level == 'not_ready'">
+                                <h5><i class="fa fa-exclamation-circle"></i> Requirements Not Met</h5>
+                                <div class="validation-messages" t-esc="validation_messages"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Actions -->
+                        <div class="additional-actions mt-4">
+                            <button name="action_generate_deployment_report" type="object" 
+                                    class="btn btn-info">
+                                <i class="fa fa-file-text"></i> Generate Deployment Report
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Complete Step -->
+                    <div t-if="current_step == 'complete'" class="o_wizard_step">
+                        <!-- Success Header -->
+                        <div class="completion-header text-center mb-4">
+                            <div class="success-animation">
+                                <i class="fa fa-check-circle fa-5x text-success pulse"></i>
+                            </div>
+                            <h1 class="mt-3">🎉 Setup Complete!</h1>
+                            <p class="lead">
+                                Vipps/MobilePay has been successfully configured and activated for your Odoo system.
+                            </p>
+                            <div class="completion-stats">
+                                <span class="badge badge-success badge-lg">
+                                    <i class="fa fa-trophy"></i> Readiness Score: <span t-esc="readiness_score"/>%
+                                </span>
+                                <span class="badge badge-info badge-lg ml-2">
+                                    <i class="fa fa-calendar"></i> Completed: <span t-esc="setup_completed_date and setup_completed_date.strftime('%Y-%m-%d %H:%M') or 'Just now'"/>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Configuration Summary -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card summary-card">
+                                    <div class="card-body text-center">
+                                        <i class="fa fa-cog fa-2x text-primary mb-2"></i>
+                                        <h5>Payment Provider</h5>
+                                        <p class="text-muted">Environment: <strong t-esc="environment.title()"/></p>
+                                        <p class="text-muted" t-if="provider_id">Provider ID: <strong t-esc="provider_id.id"/></p>
+                                        <button name="action_open_provider" type="object" 
+                                                class="btn btn-primary btn-sm">
+                                            <i class="fa fa-external-link"></i> Open Configuration
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card summary-card">
+                                    <div class="card-body text-center">
+                                        <i class="fa fa-credit-card fa-2x text-success mb-2"></i>
+                                        <h5>Payment Methods</h5>
+                                        <div class="feature-list">
+                                            <span t-if="enable_ecommerce" class="badge badge-success">eCommerce</span>
+                                            <span t-if="enable_pos" class="badge badge-success">POS</span>
+                                            <span t-if="collect_user_info" class="badge badge-info">User Info</span>
+                                        </div>
+                                        <a href="/web#action=payment.action_payment_provider" 
+                                           class="btn btn-secondary btn-sm mt-2">
+                                            <i class="fa fa-list"></i> View All Providers
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card summary-card">
+                                    <div class="card-body text-center">
+                                        <i class="fa fa-shield fa-2x text-warning mb-2"></i>
+                                        <h5>Security Status</h5>
+                                        <p class="text-muted">
+                                            Scan Status: 
+                                            <span t-if="security_scan_status == 'completed'" class="text-success">
+                                                <i class="fa fa-check"></i> Completed
+                                            </span>
+                                            <span t-if="security_scan_status != 'completed'" class="text-warning">
+                                                <i class="fa fa-exclamation-triangle"></i> <span t-esc="security_scan_status.title()"/>
+                                            </span>
+                                        </p>
+                                        <button name="action_run_security_scan" type="object" 
+                                                class="btn btn-outline-warning btn-sm"
+                                                t-if="security_scan_status != 'completed'">
+                                            <i class="fa fa-shield"></i> Run Security Scan
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Next Steps and Resources -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card resources-card">
+                                    <div class="card-header">
+                                        <h5><i class="fa fa-list-ol"></i> Next Steps</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ol class="next-steps-list">
+                                            <li t-if="environment == 'test'">
+                                                <strong>Complete Testing</strong>
+                                                <p>Thoroughly test all payment flows before switching to production</p>
+                                            </li>
+                                            <li t-if="readiness_score &lt; 90">
+                                                <strong>Improve Readiness Score</strong>
+                                                <p>Complete remaining checklist items to reach 90%+ readiness</p>
+                                            </li>
+                                            <li>
+                                                <strong>Monitor Transactions</strong>
+                                                <p>Keep an eye on payment transactions for the first few days</p>
+                                            </li>
+                                            <li>
+                                                <strong>Test Small Amounts</strong>
+                                                <p>Start with small payment amounts to verify everything works correctly</p>
+                                            </li>
+                                            <li>
+                                                <strong>Review Logs Regularly</strong>
+                                                <p>Check transaction logs and error reports periodically</p>
+                                            </li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card resources-card">
+                                    <div class="card-header">
+                                        <h5><i class="fa fa-life-ring"></i> Support &amp; Resources</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="support-contacts" t-if="support_contact_email">
+                                            <h6><i class="fa fa-user"></i> Support Contacts</h6>
+                                            <p class="mb-1">
+                                                <strong t-esc="support_contact_name or 'Primary Support'"/>
+                                            </p>
+                                            <p class="text-muted mb-2">
+                                                <i class="fa fa-envelope"></i> <span t-esc="support_contact_email"/>
+                                                <span t-if="support_contact_phone">
+                                                    <br/><i class="fa fa-phone"></i> <span t-esc="support_contact_phone"/>
+                                                </span>
+                                            </p>
+                                        </div>
+                                        
+                                        <div class="documentation-links">
+                                            <h6><i class="fa fa-book"></i> Documentation</h6>
+                                            <ul class="list-unstyled">
+                                                <li><a href="#" class="text-primary"><i class="fa fa-external-link"></i> Vipps Developer Portal</a></li>
+                                                <li><a href="#" class="text-primary"><i class="fa fa-external-link"></i> MobilePay Developer Portal</a></li>
+                                                <li><a href="#" class="text-primary"><i class="fa fa-external-link"></i> Integration Guide</a></li>
+                                                <li><a href="#" class="text-primary"><i class="fa fa-external-link"></i> Troubleshooting Guide</a></li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <div class="additional-actions mt-3">
+                                            <button name="action_generate_deployment_report" type="object" 
+                                                    class="btn btn-outline-info btn-sm">
+                                                <i class="fa fa-file-text"></i> Download Report
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Maintenance Recommendations -->
+                        <div class="alert alert-info">
+                            <h5><i class="fa fa-wrench"></i> Maintenance Recommendations</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="maintenance-list">
+                                        <li><i class="fa fa-certificate"></i> Monitor SSL certificate expiration dates</li>
+                                        <li><i class="fa fa-shield"></i> Review webhook security settings regularly</li>
+                                        <li><i class="fa fa-refresh"></i> Rotate API credentials periodically</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="maintenance-list">
+                                        <li><i class="fa fa-search"></i> Perform periodic security scans</li>
+                                        <li><i class="fa fa-bar-chart"></i> Review transaction patterns for anomalies</li>
+                                        <li><i class="fa fa-backup"></i> Maintain backup and recovery procedures</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Success Message -->
+                        <div class="alert alert-success text-center">
+                            <h5><i class="fa fa-thumbs-up"></i> Congratulations!</h5>
+                            <p class="mb-0">
+                                Your Vipps/MobilePay integration is now ready to process payments. 
+                                <strong>Welcome to seamless Nordic payments!</strong>
+                            </p>
+                        </div>
+                    </div>
+                </sheet>
+
+                <footer>
+                    <!-- Navigation Buttons -->
+                    <div class="o_wizard_footer">
+                        <button name="action_previous_step" type="object" 
+                                class="btn btn-secondary"
+                                t-if="current_step not in ['welcome', 'complete']">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </button>
+                        
+                        <button name="action_skip_step" type="object" 
+                                class="btn btn-outline-secondary"
+                                t-if="current_step in ['features', 'testing']">
+                            <i class="fa fa-forward"></i> Skip
+                        </button>
+                        
+                        <button name="action_next_step" type="object" 
+                                class="btn btn-primary"
+                                t-if="current_step not in ['go_live', 'complete']">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </button>
+                        
+                        <button name="action_complete_setup" type="object" 
+                                class="btn btn-success"
+                                t-if="current_step == 'go_live'">
+                            <i class="fa fa-rocket"></i> Complete Setup
+                        </button>
+                        
+                        <button special="cancel" class="btn btn-secondary"
+                                t-if="current_step == 'complete'">
+                            <i class="fa fa-times"></i> Close
+                        </button>
+                    </div>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action -->
+    <record id="action_vipps_onboarding_wizard" model="ir.actions.act_window">
+        <field name="name">Vipps/MobilePay Setup Wizard</field>
+        <field name="res_model">vipps.onboarding.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_vipps_onboarding_wizard_form"/>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_vipps_onboarding_wizard"
+              name="Setup Wizard"
+              parent="payment.menu_payment_config"
+              action="action_vipps_onboarding_wizard"
+              sequence="10"/>
+
+</odoo>

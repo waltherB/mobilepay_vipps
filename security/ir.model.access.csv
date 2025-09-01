@@ -1,2 +1,16 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_payment_vipps,payment_vipps.access_payment_vipps,model_payment_provider,base.group_user,1,1,1,0
+access_payment_provider_vipps_user,payment.provider.vipps.user,payment.model_payment_provider,base.group_user,1,0,0,0
+access_payment_provider_vipps_manager,payment.provider.vipps.manager,payment.model_payment_provider,account.group_account_manager,1,1,1,0
+access_payment_provider_vipps_admin,payment.provider.vipps.admin,payment.model_payment_provider,base.group_system,1,1,1,1
+access_payment_transaction_vipps_user,payment.transaction.vipps.user,payment.model_payment_transaction,base.group_user,1,0,0,0
+access_payment_transaction_vipps_manager,payment.transaction.vipps.manager,payment.model_payment_transaction,account.group_account_manager,1,1,1,0
+access_payment_transaction_vipps_admin,payment.transaction.vipps.admin,payment.model_payment_transaction,base.group_system,1,1,1,1
+access_pos_payment_method_vipps_user,pos.payment.method.vipps.user,point_of_sale.model_pos_payment_method,base.group_user,1,0,0,0
+access_pos_payment_method_vipps_manager,pos.payment.method.vipps.manager,point_of_sale.model_pos_payment_method,point_of_sale.group_pos_manager,1,1,1,1
+access_vipps_profile_wizard_user,vipps.profile.wizard.user,model_vipps_profile_wizard,base.group_user,1,1,1,1
+access_vipps_data_management_user,vipps.data.management.user,model_vipps_data_management,base.group_user,1,0,0,0
+access_vipps_data_management_manager,vipps.data.management.manager,model_vipps_data_management,account.group_account_manager,1,1,1,0
+access_vipps_data_management_admin,vipps.data.management.admin,model_vipps_data_management,base.group_system,1,1,1,1
+access_vipps_webhook_security_user,vipps.webhook.security.user,model_vipps_webhook_security,base.group_user,1,0,0,0
+access_vipps_webhook_security_manager,vipps.webhook.security.manager,model_vipps_webhook_security,account.group_account_manager,1,1,0,0
+access_vipps_webhook_security_admin,vipps.webhook.security.admin,model_vipps_webhook_security,base.group_system,1,1,1,1

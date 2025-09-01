@@ -1,8 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="payment_provider_vipps" model="payment.provider">
-        <field name="name">MobilePay by Vipps</field>
-        <field name="code">vipps</field>
-        <field name="state">enabled</field>
-        <field name="image">data:image/png;base64,...</field>
-    </record>
+    <data noupdate="1">
+        <!-- Vipps/MobilePay Payment Provider -->
+        <record id="payment_provider_vipps" model="payment.provider">
+            <field name="name">Vipps/MobilePay</field>
+            <field name="code">vipps</field>
+            <field name="state">disabled</field>
+            <field name="is_published">False</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="supported_currency_ids" eval="[(6, 0, [
+                ref('base.NOK'),
+                ref('base.DKK'), 
+                ref('base.EUR')
+            ])]"/>
+            <field name="supported_country_ids" eval="[(6, 0, [
+                ref('base.no'),
+                ref('base.dk'),
+                ref('base.fi')
+            ])]"/>
+            <field name="maximum_amount">999999.99</field>
+            <field name="support_manual_capture">True</field>
+            <field name="support_refund">partial</field>
+            <field name="support_tokenization">False</field>
+            <field name="capture_manually">True</field>
+            <field name="allow_tokenization">False</field>
+            <field name="display_as">Vipps/MobilePay</field>
+            <field name="pre_msg"><![CDATA[
+                <p>Pay securely with Vipps or MobilePay - the leading Nordic mobile payment solution.</p>
+                <ul>
+                    <li>Quick and secure payments</li>
+                    <li>No card details required</li>
+                    <li>Available in Norway, Denmark, and Finland</li>
+                </ul>
+            ]]></field>
+        </record>
+
+        <!-- Cron job for refreshing Vipps access tokens -->
+        <record id="ir_cron_vipps_token_refresh" model="ir.cron">
+            <field name="name">Vipps/MobilePay: Refresh Access Tokens</field>
+            <field name="model_id" ref="payment.model_payment_provider"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_refresh_vipps_tokens()</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="active">True</field>
+            <field name="doall">False</field>
+        </record>
+
+    </data>
 </odoo>

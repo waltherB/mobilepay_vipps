@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Security Groups -->
+        <record id="group_vipps_user" model="res.groups">
+            <field name="name">Vipps/MobilePay User</field>
+            <field name="category_id" ref="base.module_category_accounting_payment"/>
+            <field name="comment">Basic access to Vipps/MobilePay payment features</field>
+        </record>
+        
+        <record id="group_vipps_manager" model="res.groups">
+            <field name="name">Vipps/MobilePay Manager</field>
+            <field name="category_id" ref="base.module_category_accounting_payment"/>
+            <field name="implied_ids" eval="[(4, ref('group_vipps_user'))]"/>
+            <field name="comment">Manage Vipps/MobilePay payment configuration and transactions</field>
+        </record>
+        
+        <record id="group_vipps_admin" model="res.groups">
+            <field name="name">Vipps/MobilePay Administrator</field>
+            <field name="category_id" ref="base.module_category_administration"/>
+            <field name="implied_ids" eval="[(4, ref('group_vipps_manager'))]"/>
+            <field name="comment">Full administrative access to Vipps/MobilePay features including security settings</field>
+        </record>
+        
+        <!-- Record Rules -->
+        <record id="rule_payment_provider_vipps_user" model="ir.rule">
+            <field name="name">Vipps Payment Provider: User Access</field>
+            <field name="model_id" ref="payment.model_payment_provider"/>
+            <field name="domain_force">[('code', '!=', 'vipps_mobilepay')]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        
+        <record id="rule_payment_provider_vipps_manager" model="ir.rule">
+            <field name="name">Vipps Payment Provider: Manager Access</field>
+            <field name="model_id" ref="payment.model_payment_provider"/>
+            <field name="domain_force">[]</field>
+            <field name="groups" eval="[(4, ref('group_vipps_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        
+        <record id="rule_vipps_data_management_user" model="ir.rule">
+            <field name="name">Vipps Data Management: User Access</field>
+            <field name="model_id" ref="model_vipps_data_management"/>
+            <field name="domain_force">[]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        
+        <record id="rule_vipps_webhook_security_manager" model="ir.rule">
+            <field name="name">Vipps Webhook Security: Manager Access</field>
+            <field name="model_id" ref="model_vipps_webhook_security"/>
+            <field name="domain_force">[]</field>
+            <field name="groups" eval="[(4, ref('group_vipps_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        
+        <!-- Sensitive Field Access Rules -->
+        <record id="rule_sensitive_fields_admin_only" model="ir.rule">
+            <field name="name">Vipps Sensitive Fields: Admin Only</field>
+            <field name="model_id" ref="payment.model_payment_provider"/>
+            <field name="domain_force">[('code', '=', 'vipps_mobilepay')]</field>
+            <field name="groups" eval="[(4, ref('group_vipps_admin'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+        
+    </data>
+</odoo>
