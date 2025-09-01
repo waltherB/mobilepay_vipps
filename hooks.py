@@ -89,4 +89,5 @@ def uninstall_hook(cr, registry):
             _logger.info(f"Removed ir.config_parameter: {key}")
 
     # Add other uninstall clean-ups here as needed (avoid touching core tables)
+
     _logger.info("Vipps/MobilePay uninstall_hook completed successfully.")
