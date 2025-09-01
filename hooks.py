@@ -11,35 +11,23 @@ from odoo import release
 
 _logger = logging.getLogger(__name__)
 
-def pre_init_check(*args, **kwargs):
+def pre_init_check(cr, registry):
     """Ensure module installs only on Odoo 17.0+.
-
-    Supports both signatures depending on Odoo invocation:
-    - pre_init_check(env)
-    - pre_init_check(cr, registry)
+    
+    Args:
+        cr: Database cursor
+        registry: Odoo registry
     """
-    # Normalize to env if needed (kept for future extension)
-    env = None
-    if args:
-        # If first arg looks like an env (has .cr), use it
-        first = args[0]
-        if hasattr(first, 'cr'):
-            env = first
-        elif len(args) >= 2:
-            # Assume (cr, registry)
-            cr = args[0]
-            env = api.Environment(cr, SUPERUSER_ID, {})
-    if env is None:
-        env = kwargs.get('env')
-
-    # Version check using odoo.release (env not strictly required)
+    # Version check using odoo.release
     version_str = getattr(release, 'version', '') or ''
     parts = version_str.split('.')
     major = int(parts[0]) if parts and parts[0].isdigit() else 0
     if major < 17:
         raise Exception(
-            ("Requires Odoo 17.0+; " f"detected {version_str or 'unknown'}")
+            f"Vipps/MobilePay module requires Odoo 17.0+; detected {version_str or 'unknown'}"
         )
+    
+    _logger.info("Pre-init check passed: Odoo %s detected", version_str)
 
 def post_init_hook(cr, registry):
     """Post-installation hook. Reserved for future setup steps.
