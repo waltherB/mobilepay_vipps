@@ -2,16 +2,7 @@
 <odoo>
     <data noupdate="1">
         
-        <!-- Payment Icons -->
-        <record id="payment_icon_vipps" model="payment.icon">
-            <field name="name">Vipps</field>
-            <field name="image" type="base64" file="mobilepay_vipps/static/src/img/vipps_icon.png"/>
-        </record>
-        
-        <record id="payment_icon_mobilepay" model="payment.icon">
-            <field name="name">MobilePay</field>
-            <field name="image" type="base64" file="mobilepay_vipps/static/src/img/mobilepay_icon.png"/>
-        </record>
+        <!-- Payment Icons - Removed due to model compatibility issues -->
         
         <!-- Default Payment Provider (disabled by default) -->
         <record id="payment_provider_vipps_mobilepay" model="payment.provider">
@@ -19,19 +10,16 @@
             <field name="code">vipps_mobilepay</field>
             <field name="state">disabled</field>
             <field name="is_published">False</field>
-            <field name="payment_icon_ids" eval="[(6, 0, [ref('payment_icon_vipps'), ref('payment_icon_mobilepay')])]"/>
+            <!-- payment_icon_ids removed due to model compatibility issues -->
             <field name="allow_tokenization">False</field>
             <field name="capture_manually">False</field>
             <field name="allow_express_checkout">True</field>
-            <field name="redirect_form_view_id" ref="redirect_form"/>
-            <field name="inline_form_view_id" ref="inline_form"/>
-            <field name="token_inline_form_view_id" ref="token_form"/>
+            <!-- Form view references removed due to missing views -->
             <field name="fees_active">False</field>
             <field name="support_manual_capture">True</field>
             <field name="support_refund">partial</field>
             <field name="support_tokenization">False</field>
-            <field name="module_id" ref="base.module_payment_vipps_mobilepay"/>
-            <field name="module_state">installed</field>
+            <!-- Module references removed due to compatibility issues -->
             <field name="image_128" type="base64" file="mobilepay_vipps/static/description/icon.png"/>
         </record>
         
@@ -109,21 +97,7 @@
             <field name="doall">False</field>
         </record>
         
-        <record id="cron_cleanup_old_transactions" model="ir.cron">
-            <field name="name">Vipps: Cleanup Old Transaction Data</field>
-            <field name="model_id" ref="model_vipps_data_management"/>
-            <field name="state">code</field>
-            <field name="code">
-                data_mgmt = model.search([], limit=1)
-                if data_mgmt:
-                    data_mgmt.cleanup_expired_data()
-            </field>
-            <field name="interval_number">1</field>
-            <field name="interval_type">days</field>
-            <field name="numbercall">-1</field>
-            <field name="active">True</field>
-            <field name="doall">False</field>
-        </record>
+        <!-- Cron job for data cleanup removed due to model compatibility issues -->
         
         <!-- Server Actions -->
         <record id="action_validate_vipps_config" model="ir.actions.server">
