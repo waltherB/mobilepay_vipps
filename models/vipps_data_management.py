@@ -250,7 +250,7 @@ class VippsDataDeletionWizard(models.TransientModel):
                 deleted_count += 1
         
         # Update partner flags
-        self.partner_id._compute_vipps_data_stats()
+        self.partner_id.update_vipps_data_stats()
         
         _logger.info(
             "Deleted Vipps user data for partner %s (%d transactions) - Reason: %s",
