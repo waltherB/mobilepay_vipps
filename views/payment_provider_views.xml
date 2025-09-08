@@ -249,22 +249,6 @@
         </field>
     </record>
 
-    <!-- Add Vipps-specific fields to the payment provider tree view -->
-    <record id="payment_provider_tree_vipps" model="ir.ui.view">
-        <field name="name">payment.provider.tree.vipps</field>
-        <field name="model">payment.provider</field>
-        <field name="inherit_id" ref="payment.payment_provider_tree"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='state']" position="after">
-                <field name="vipps_environment" 
-                       invisible="code != 'vipps'"
-                       optional="show"/>
-                <field name="vipps_credentials_validated" 
-                       invisible="code != 'vipps'"
-                       widget="boolean_toggle"
-                       optional="show"/>
-            </xpath>
-        </field>
-    </record>
+
 
 </odoo>
