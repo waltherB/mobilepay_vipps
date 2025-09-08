@@ -181,6 +181,7 @@
                     <!-- Token Information (Read-only) -->
                     <group string="Token Information" col="2" groups="base.group_system" 
                            invisible="not vipps_access_token">
+                        <field name="vipps_access_token" invisible="1"/>
                         <field name="vipps_token_expires_at" readonly="1"/>
                         <div colspan="2" class="text-muted">
                             Access tokens are automatically managed and refreshed as needed.
