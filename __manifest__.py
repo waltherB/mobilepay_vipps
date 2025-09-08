@@ -138,7 +138,7 @@ Website: https://github.com/waltherB/mobilepay_vipps
     'installable': True,
     'auto_install': False,
     'application': False,
-    'pre_init_hook': 'pre_init_check',
+    # 'pre_init_hook': 'pre_init_check',  # Temporarily disabled due to Odoo 17 caching issues
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',
     'external_dependencies': {
