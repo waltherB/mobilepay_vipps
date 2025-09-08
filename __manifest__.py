@@ -81,11 +81,6 @@ Website: https://github.com/waltherB/mobilepay_vipps
     'depends': [
         'base',
         'payment',
-        'website_sale',
-        'point_of_sale',
-        'account',
-        'sale',
-        'website',
     ],
     'data': [
         # Security files removed to resolve installation issues
@@ -96,11 +91,6 @@ Website: https://github.com/waltherB/mobilepay_vipps
         
         # Views
         'views/payment_provider_views.xml',
-        'views/pos_payment_method_views.xml',
-        'views/vipps_profile_wizard_views.xml',
-        'views/vipps_data_management_views.xml',
-        'views/vipps_security_views.xml',
-        'views/res_partner_views.xml',
     ],
     'assets': {
         'web.assets_frontend': [
