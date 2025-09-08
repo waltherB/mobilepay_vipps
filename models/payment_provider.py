@@ -1564,6 +1564,11 @@ class PaymentProvider(models.Model):
 
     def _setup_pos_payment_method(self):
         """Set up POS payment method for Vipps provider"""
+        # Check if POS module is available
+        if 'pos.payment.method' not in self.env:
+            _logger.info("POS module not installed - skipping POS payment method setup")
+            return
+            
         try:
             pos_method = self.env['pos.payment.method']._setup_vipps_payment_method(self.id)
             

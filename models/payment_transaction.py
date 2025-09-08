@@ -12,6 +12,20 @@ _logger = logging.getLogger(__name__)
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
+    def _register_hook(self):
+        """Replace POS session field with proper Many2one if POS module is available"""
+        super()._register_hook()
+        
+        # Check if POS module is installed and replace field
+        if 'pos.session' in self.env.registry:
+            # Replace the Char field with Many2one field
+            self._fields['pos_session_id'] = fields.Many2one(
+                'pos.session', 
+                string="POS Session", 
+                copy=False,
+                help="POS session for this payment"
+            )
+
     # Core Vipps fields
     vipps_payment_reference = fields.Char(
         string="Vipps Payment Reference", 
@@ -55,12 +69,11 @@ class PaymentTransaction(models.Model):
         ('manual_shop_qr', 'Manual Shop QR Scan')
     ], string="POS Payment Flow", copy=False)
     
-    # POS session reference
-    pos_session_id = fields.Many2one(
-        'pos.session', 
-        string="POS Session", 
+    # POS session reference - will be set conditionally in _register_hook
+    pos_session_id = fields.Char(
+        string="POS Session ID", 
         copy=False,
-        help="POS session for this payment"
+        help="POS session identifier (string fallback when POS not installed)"
     )
 
     vipps_qr_code = fields.Text(
@@ -136,6 +149,7 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
         
         # Check if this transaction has a POS session
+        # Handle both Many2one (when POS installed) and Char (fallback) field types
         if self.pos_session_id:
             return 'pos'
         
