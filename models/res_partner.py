@@ -46,13 +46,16 @@ class ResPartner(models.Model):
         help="When customer opted out of data collection"
     )
 
-    @api.depends('payment_transaction_ids')
+    @api.depends()  # Remove dependency since we'll search for transactions
     def _compute_vipps_data_stats(self):
         """Compute statistics about Vipps data collection"""
         for partner in self:
-            vipps_transactions = partner.payment_transaction_ids.filtered(
-                lambda t: t.provider_code == 'vipps' and t.vipps_user_details
-            )
+            # Search for Vipps transactions for this partner
+            vipps_transactions = self.env['payment.transaction'].search([
+                ('partner_id', '=', partner.id),
+                ('provider_code', '=', 'vipps'),
+                ('vipps_user_details', '!=', False)
+            ])
             
             partner.vipps_data_collection_count = len(vipps_transactions)
             
@@ -78,9 +81,11 @@ class ResPartner(models.Model):
         """View all Vipps data collections for this partner"""
         self.ensure_one()
         
-        vipps_transactions = self.payment_transaction_ids.filtered(
-            lambda t: t.provider_code == 'vipps' and t.vipps_user_details
-        )
+        vipps_transactions = self.env['payment.transaction'].search([
+            ('partner_id', '=', self.id),
+            ('provider_code', '=', 'vipps'),
+            ('vipps_user_details', '!=', False)
+        ])
         
         if not vipps_transactions:
             return {
@@ -108,9 +113,11 @@ class ResPartner(models.Model):
         """Export all collected Vipps data for GDPR compliance"""
         self.ensure_one()
         
-        vipps_transactions = self.payment_transaction_ids.filtered(
-            lambda t: t.provider_code == 'vipps' and t.vipps_user_details
-        )
+        vipps_transactions = self.env['payment.transaction'].search([
+            ('partner_id', '=', self.id),
+            ('provider_code', '=', 'vipps'),
+            ('vipps_user_details', '!=', False)
+        ])
         
         if not vipps_transactions:
             raise ValidationError(_("No Vipps data found for this customer"))
@@ -170,9 +177,11 @@ class ResPartner(models.Model):
         """Delete all collected Vipps data for this customer"""
         self.ensure_one()
         
-        vipps_transactions = self.payment_transaction_ids.filtered(
-            lambda t: t.provider_code == 'vipps' and t.vipps_user_details
-        )
+        vipps_transactions = self.env['payment.transaction'].search([
+            ('partner_id', '=', self.id),
+            ('provider_code', '=', 'vipps'),
+            ('vipps_user_details', '!=', False)
+        ])
         
         if not vipps_transactions:
             return {
@@ -260,9 +269,11 @@ class ResPartner(models.Model):
         ])
         
         for partner in partners_with_flags:
-            vipps_transactions = partner.payment_transaction_ids.filtered(
-                lambda t: t.provider_code == 'vipps' and t.vipps_user_details
-            )
+            vipps_transactions = self.env['payment.transaction'].search([
+                ('partner_id', '=', partner.id),
+                ('provider_code', '=', 'vipps'),
+                ('vipps_user_details', '!=', False)
+            ])
             
             if not vipps_transactions:
                 partner.write({
