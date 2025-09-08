@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'Vipps/MobilePay Payment Integration Clean',
+    'name': 'Vipps/MobilePay Payment Integration Minimal',
     'version': '1.0.0',
     'category': 'Accounting/Payment Providers',
     'sequence': 350,
@@ -96,12 +96,6 @@ Website: https://github.com/waltherB/mobilepay_vipps
         'web.assets_frontend': [
             'mobilepay_vipps/static/src/js/payment_form.js',
         ],
-        'point_of_sale.assets': [
-            'mobilepay_vipps/static/src/css/pos_payment.css',
-            'mobilepay_vipps/static/src/js/pos_payment.js',
-            'mobilepay_vipps/static/src/js/pos_payment_screen.js',
-            'mobilepay_vipps/static/src/xml/pos_payment_screen.xml',
-        ],
         'web.assets_backend': [],
     },
     'demo': [],
@@ -127,5 +121,5 @@ Website: https://github.com/waltherB/mobilepay_vipps
         'QA Team',
     ],
     'development_status': 'Production/Stable',
-    'technical_name': 'mobilepay_vipps_clean',
+    'technical_name': 'mobilepay_vipps_minimal',
 }
