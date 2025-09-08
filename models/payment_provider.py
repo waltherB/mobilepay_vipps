@@ -1557,23 +1557,35 @@ class PaymentProvider(models.Model):
                 if default_scopes:
                     provider.vipps_custom_scopes = [(6, 0, default_scopes.ids)]
             
-            # Set up POS payment method
-            provider._setup_pos_payment_method()
+            # Set up POS payment method (only if POS module is available)
+            try:
+                provider._setup_pos_payment_method()
+            except Exception as e:
+                _logger.info("POS setup skipped: %s", str(e))
         
         return provider
 
     def _setup_pos_payment_method(self):
         """Set up POS payment method for Vipps provider"""
-        # Check if POS module is available
-        if 'pos.payment.method' not in self.env:
+        # Check if POS models are available in the registry
+        if ('pos.payment.method' not in self.env.registry or 
+            'pos.config' not in self.env.registry):
             _logger.info("POS module not installed - skipping POS payment method setup")
             return
             
         try:
-            pos_method = self.env['pos.payment.method']._setup_vipps_payment_method(self.id)
+            # Only proceed if the POS models are actually available
+            pos_method_model = self.env.get('pos.payment.method')
+            pos_config_model = self.env.get('pos.config')
+            
+            if not pos_method_model or not pos_config_model:
+                _logger.info("POS models not available - skipping POS setup")
+                return
+                
+            pos_method = pos_method_model._setup_vipps_payment_method(self.id)
             
             # Add to all active POS configurations
-            pos_configs = self.env['pos.config'].search([('state', '!=', 'disabled')])
+            pos_configs = pos_config_model.search([('state', '!=', 'disabled')])
             for config in pos_configs:
                 if pos_method not in config.payment_method_ids:
                     config.write({
