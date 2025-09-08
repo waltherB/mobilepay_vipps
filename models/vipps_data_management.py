@@ -217,9 +217,11 @@ class VippsDataDeletionWizard(models.TransientModel):
         if not self.confirm_deletion:
             raise ValidationError(_("Please confirm the deletion by checking the confirmation box"))
         
-        vipps_transactions = self.partner_id.payment_transaction_ids.filtered(
-            lambda t: t.provider_code == 'vipps' and t.vipps_user_details
-        )
+        vipps_transactions = self.env['payment.transaction'].search([
+            ('partner_id', '=', self.partner_id.id),
+            ('provider_code', '=', 'vipps'),
+            ('vipps_user_details', '!=', False)
+        ])
         
         if not vipps_transactions:
             raise ValidationError(_("No Vipps data found for this customer"))
