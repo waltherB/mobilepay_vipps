@@ -13,14 +13,12 @@
             <!-- payment_icon_ids removed due to model compatibility issues -->
             <field name="allow_tokenization">False</field>
             <field name="capture_manually">False</field>
-            <field name="allow_express_checkout">True</field>
+            <!-- allow_express_checkout field removed due to potential compatibility issues -->
             <!-- Form view references removed due to missing views -->
-            <field name="fees_active">False</field>
-            <field name="support_manual_capture">True</field>
-            <field name="support_refund">partial</field>
-            <field name="support_tokenization">False</field>
+            <!-- fees_active field removed due to compatibility issues -->
+            <!-- support_* fields removed due to potential compatibility issues -->
             <!-- Module references removed due to compatibility issues -->
-            <field name="image_128" type="base64" file="mobilepay_vipps/static/description/icon.png"/>
+            <field name="image_128" type="base64" file="mobilepay_vipps_clean/static/description/icon.png"/>
         </record>
         
         <!-- Default Configuration Values -->
