@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'Vipps/MobilePay Payment Integration',
+    'name': 'Vipps/MobilePay Payment Integration v2',
     'version': '1.0.0',
     'category': 'Accounting/Payment Providers',
     'sequence': 350,
@@ -104,14 +104,9 @@ Website: https://github.com/waltherB/mobilepay_vipps
         'views/vipps_data_management_views.xml',
         'views/vipps_security_views.xml',
         'views/res_partner_views.xml',
-        
-        # Templates
-        'views/payment_form_templates.xml',
-        'views/checkout_templates.xml',
     ],
     'assets': {
         'web.assets_frontend': [
-            'mobilepay_vipps/static/src/css/payment_form.css',
             'mobilepay_vipps/static/src/js/payment_form.js',
         ],
         'point_of_sale.assets': [
@@ -120,20 +115,11 @@ Website: https://github.com/waltherB/mobilepay_vipps
             'mobilepay_vipps/static/src/js/pos_payment_screen.js',
             'mobilepay_vipps/static/src/xml/pos_payment_screen.xml',
         ],
-        'web.assets_backend': [
-            'mobilepay_vipps/static/src/css/backend.css',
-            'mobilepay_vipps/static/src/js/backend.js',
-        ],
+        'web.assets_backend': [],
     },
-    'demo': [
-        'demo/payment_demo.xml',
-    ],
+    'demo': [],
     'images': [
         'static/description/icon.png',
-        'static/description/banner.png',
-        'static/description/screenshot_1.png',
-        'static/description/screenshot_2.png',
-        'static/description/screenshot_3.png',
     ],
     'installable': True,
     'auto_install': False,
@@ -154,5 +140,5 @@ Website: https://github.com/waltherB/mobilepay_vipps
         'QA Team',
     ],
     'development_status': 'Production/Stable',
-    'technical_name': 'payment_vipps_mobilepay',
+    'technical_name': 'mobilepay_vipps_v2',
 }
