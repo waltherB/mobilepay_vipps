@@ -11,14 +11,18 @@ from odoo import release
 
 _logger = logging.getLogger(__name__)
 
-def pre_init_check(cr, registry):
+def pre_init_check(env_or_cr, registry=None):
     """Ensure module installs only on Odoo 17.0+.
     
+    Handles both calling conventions:
+    - pre_init_check(env) - when called with environment
+    - pre_init_check(cr, registry) - when called with cursor and registry
+    
     Args:
-        cr: Database cursor
-        registry: Odoo registry
+        env_or_cr: Either an Environment object or database cursor
+        registry: Odoo registry (optional, when first arg is cursor)
     """
-    # Version check using odoo.release
+    # Version check using odoo.release (doesn't need database access)
     version_str = getattr(release, 'version', '') or ''
     parts = version_str.split('.')
     major = int(parts[0]) if parts and parts[0].isdigit() else 0
