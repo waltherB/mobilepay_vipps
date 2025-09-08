@@ -147,9 +147,10 @@ class PaymentProvider(models.Model):
     # Feature Configuration
     vipps_capture_mode = fields.Selection([
         ('manual', 'Manual Capture (Recommended for eCommerce)'),
-        ('automatic', 'Automatic Capture (POS Only)')
-    ], string="Capture Mode", default='manual', required_if_provider='vipps',
-       help="Manual capture complies with legal requirements for ecommerce")
+        ('automatic', 'Automatic Capture (POS Only)'),
+        ('context_aware', 'Context Aware (Manual for eCommerce, Automatic for POS)')
+    ], string="Capture Mode", default='context_aware', required_if_provider='vipps',
+       help="Context aware mode uses manual capture for eCommerce and automatic for POS")
     
     vipps_collect_user_info = fields.Boolean(
         string="Collect User Information",
@@ -757,6 +758,55 @@ class PaymentProvider(models.Model):
         # Generate 64-character secret with mixed case, numbers, and symbols
         alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
         return ''.join(secrets.choice(alphabet) for _ in range(64))
+
+    def _get_effective_capture_mode(self, context=None):
+        """
+        Get the effective capture mode based on context
+        
+        Args:
+            context (str): Payment context - 'ecommerce', 'pos', or None
+            
+        Returns:
+            str: 'manual' or 'automatic'
+        """
+        self.ensure_one()
+        
+        if self.vipps_capture_mode == 'context_aware':
+            # Determine context if not provided
+            if context is None:
+                # Try to determine from current context or transaction
+                context = self._detect_payment_context()
+            
+            # Apply context-aware rules
+            if context == 'pos':
+                return 'automatic'
+            else:  # ecommerce or unknown defaults to manual for compliance
+                return 'manual'
+        else:
+            # Use configured mode directly
+            return self.vipps_capture_mode
+    
+    def _detect_payment_context(self):
+        """
+        Detect payment context from current environment
+        
+        Returns:
+            str: 'ecommerce', 'pos', or 'ecommerce' (default)
+        """
+        # Check if we're in a POS session context
+        if self.env.context.get('pos_session_id') or self.env.context.get('is_pos_payment'):
+            return 'pos'
+        
+        # Check if there's an active POS session in the environment
+        if hasattr(self.env, 'pos_session') and self.env.pos_session:
+            return 'pos'
+        
+        # Check for POS-specific models in the context
+        if any(key.startswith('pos_') for key in self.env.context.keys()):
+            return 'pos'
+        
+        # Default to ecommerce for compliance
+        return 'ecommerce'
 
     def _ensure_webhook_secret(self):
         """Ensure webhook secret exists and is secure"""
