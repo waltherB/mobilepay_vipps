@@ -120,5 +120,4 @@ Website: https://github.com/waltherB/mobilepay_vipps
         'QA Team',
     ],
     'development_status': 'Production/Stable',
-    'technical_name': 'mobilepay_vipps_minimal',
 }
