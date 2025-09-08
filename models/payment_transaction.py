@@ -12,19 +12,7 @@ _logger = logging.getLogger(__name__)
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
-    def _register_hook(self):
-        """Replace POS session field with proper Many2one if POS module is available"""
-        super()._register_hook()
-        
-        # Check if POS module is installed and replace field
-        if 'pos.session' in self.env.registry:
-            # Replace the Char field with Many2one field
-            self._fields['pos_session_id'] = fields.Many2one(
-                'pos.session', 
-                string="POS Session", 
-                copy=False,
-                help="POS session for this payment"
-            )
+
 
     # Core Vipps fields
     vipps_payment_reference = fields.Char(
