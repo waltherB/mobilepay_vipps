@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'Vipps/MobilePay Payment Integration v2',
+    'name': 'Vipps/MobilePay Payment Integration Clean',
     'version': '1.0.0',
     'category': 'Accounting/Payment Providers',
     'sequence': 350,
@@ -88,9 +88,7 @@ Website: https://github.com/waltherB/mobilepay_vipps
         'website',
     ],
     'data': [
-        # Security (temporarily disabled for installation)
-        # 'security/ir.model.access.csv',
-        # 'security/security.xml',
+        # Security files removed to resolve installation issues
         
         # Data
         'data/payment_method_data.xml',
@@ -140,5 +138,5 @@ Website: https://github.com/waltherB/mobilepay_vipps
         'QA Team',
     ],
     'development_status': 'Production/Stable',
-    'technical_name': 'mobilepay_vipps_v2',
+    'technical_name': 'mobilepay_vipps_clean',
 }
