@@ -5,7 +5,7 @@
         <field name="name">vipps.credential.audit.log.tree</field>
         <field name="model">vipps.credential.audit.log</field>
         <field name="arch" type="xml">
-            <tree string="Credential Audit Log" default_order="create_date desc" decoration-danger="success=False" decoration-warning="risk_level='high'" decoration-info="risk_level='critical'">
+            <tree string="Credential Audit Log" default_order="create_date desc" decoration-danger="success == False" decoration-warning="risk_level == 'high'" decoration-info="risk_level == 'critical'">
                 <field name="create_date"/>
                 <field name="action_type"/>
                 <field name="field_name"/>
@@ -25,7 +25,7 @@
             <form string="Credential Audit Log Entry" create="false" edit="false">
                 <header>
                     <field name="success" widget="boolean_button" options="{'terminology': {'string_true': 'Success', 'string_false': 'Failed'}}"/>
-                    <field name="risk_level" widget="badge" decoration-success="risk_level=='low'" decoration-info="risk_level=='medium'" decoration-warning="risk_level=='high'" decoration-danger="risk_level=='critical'"/>
+                    <field name="risk_level" widget="badge" decoration-success="risk_level == 'low'" decoration-info="risk_level == 'medium'" decoration-warning="risk_level == 'high'" decoration-danger="risk_level == 'critical'"/>
                 </header>
                 <sheet>
                     <group>
@@ -90,7 +90,7 @@
         <field name="name">vipps.credential.rotation.tree</field>
         <field name="model">vipps.credential.rotation</field>
         <field name="arch" type="xml">
-            <tree string="Credential Rotation Schedule" decoration-danger="status='overdue'" decoration-warning="status='pending'">
+            <tree string="Credential Rotation Schedule" decoration-danger="status == 'overdue'" decoration-warning="status == 'pending'">
                 <field name="provider_id"/>
                 <field name="credential_type"/>
                 <field name="rotation_frequency"/>
@@ -110,7 +110,7 @@
             <form string="Credential Rotation Configuration">
                 <header>
                     <button name="action_rotate_credentials" string="Rotate Credentials" type="object" class="btn-primary" invisible="status not in ['pending', 'overdue']"/>
-                    <field name="status" widget="badge" decoration-success="status=='active'" decoration-info="status=='disabled'" decoration-warning="status=='pending'" decoration-danger="status=='overdue'"/>
+                    <field name="status" widget="badge" decoration-success="status == 'active'" decoration-info="status == 'disabled'" decoration-warning="status == 'pending'" decoration-danger="status == 'overdue'"/>
                 </header>
                 <sheet>
                     <group>
@@ -191,10 +191,10 @@
         <field name="model">vipps.webhook.security.log</field>
         <field name="arch" type="xml">
             <tree string="Webhook Security Log" default_order="create_date desc" 
-                  decoration-danger="severity='critical'" 
-                  decoration-warning="severity='high'" 
-                  decoration-info="severity='medium'"
-                  decoration-muted="severity='info'">
+                  decoration-danger="severity == 'critical'" 
+                  decoration-warning="severity == 'high'" 
+                  decoration-info="severity == 'medium'"
+                  decoration-muted="severity == 'info'">
                 <field name="create_date"/>
                 <field name="event_type"/>
                 <field name="severity"/>
@@ -213,10 +213,10 @@
             <form string="Webhook Security Log Entry" create="false" edit="false">
                 <header>
                     <field name="severity" widget="badge" 
-                           decoration-success="severity=='info'" 
-                           decoration-info="severity=='medium'" 
-                           decoration-warning="severity=='high'" 
-                           decoration-danger="severity=='critical'"/>
+                           decoration-success="severity == 'info'" 
+                           decoration-info="severity == 'medium'" 
+                           decoration-warning="severity == 'high'" 
+                           decoration-danger="severity == 'critical'"/>
                     <field name="is_blocked" widget="boolean_button" 
                            options="{'terminology': {'string_true': 'Blocked', 'string_false': 'Allowed'}}"/>
                 </header>
@@ -287,9 +287,9 @@
         <field name="model">vipps.data.retention.log</field>
         <field name="arch" type="xml">
             <tree string="Data Retention Log" default_order="create_date desc" 
-                  decoration-success="status=='completed'" 
-                  decoration-warning="status=='completed_with_warnings'" 
-                  decoration-danger="status=='failed'">
+                  decoration-success="status == 'completed'" 
+                  decoration-warning="status == 'completed_with_warnings'" 
+                  decoration-danger="status == 'failed'">
                 <field name="enforcement_date"/>
                 <field name="status"/>
                 <field name="actions_performed"/>
@@ -308,9 +308,9 @@
             <form string="Data Retention Log Entry" create="false" edit="false">
                 <header>
                     <field name="status" widget="badge" 
-                           decoration-success="status=='completed'" 
-                           decoration-warning="status=='completed_with_warnings'" 
-                           decoration-danger="status=='failed'"/>
+                           decoration-success="status == 'completed'" 
+                           decoration-warning="status == 'completed_with_warnings'" 
+                           decoration-danger="status == 'failed'"/>
                 </header>
                 <sheet>
                     <group>
