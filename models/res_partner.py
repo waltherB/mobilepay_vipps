@@ -20,13 +20,12 @@ class ResPartner(models.Model):
     
     vipps_data_collection_count = fields.Integer(
         string="Data Collection Count",
-        compute='_compute_vipps_data_stats',
+        default=0,
         help="Number of times data was collected from Vipps/MobilePay"
     )
     
     vipps_last_data_collection = fields.Datetime(
         string="Last Data Collection",
-        compute='_compute_vipps_data_stats',
         help="When data was last collected from Vipps/MobilePay"
     )
     
@@ -46,9 +45,8 @@ class ResPartner(models.Model):
         help="When customer opted out of data collection"
     )
 
-    @api.depends()  # Remove dependency since we'll search for transactions
-    def _compute_vipps_data_stats(self):
-        """Compute statistics about Vipps data collection"""
+    def update_vipps_data_stats(self):
+        """Update statistics about Vipps data collection (called manually)"""
         for partner in self:
             # Search for Vipps transactions for this partner
             vipps_transactions = self.env['payment.transaction'].search([
