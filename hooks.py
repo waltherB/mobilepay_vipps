@@ -14,21 +14,23 @@ _logger = logging.getLogger(__name__)
 # pre_init_check function temporarily removed due to Odoo 17 caching issues
 # The version check is not critical since we're already on Odoo 17
 
-def post_init_hook(env):
+def _post_init_hook_disabled(env):
     """Post-installation hook. Reserved for future setup steps.
 
     Kept minimal to avoid side effects during installation.
+    Temporarily renamed to avoid caching issues.
     """
     _logger.info("Vipps/MobilePay post_init_hook executed")
     # No-op for now
 
-def uninstall_hook(env):
+def _uninstall_hook_disabled(env):
     """
     Clean up after module uninstall.
 
     - Delete cron jobs created by this module (if any).
     - Remove ir.config_parameter keys.
     - Don't touch core tables or Odoo-managed xml_id records.
+    Temporarily renamed to avoid caching issues.
     """
     _logger.info("Vipps/MobilePay uninstall_hook executed")
 
