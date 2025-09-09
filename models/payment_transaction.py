@@ -57,11 +57,11 @@ class PaymentTransaction(models.Model):
         ('manual_shop_qr', 'Manual Shop QR Scan')
     ], string="POS Payment Flow", copy=False)
     
-    # POS session reference - will be set conditionally in _register_hook
-    pos_session_id = fields.Char(
+    # POS session reference - flexible field that works with or without POS module
+    pos_session_id = fields.Integer(
         string="POS Session ID", 
         copy=False,
-        help="POS session identifier (string fallback when POS not installed)"
+        help="POS session identifier (integer ID when POS module is installed)"
     )
 
     vipps_qr_code = fields.Text(
@@ -137,7 +137,6 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
         
         # Check if this transaction has a POS session
-        # Handle both Many2one (when POS installed) and Char (fallback) field types
         if self.pos_session_id:
             return 'pos'
         
