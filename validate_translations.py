@@ -256,22 +256,36 @@ class TranslationValidator:
                     string_translations[source].add((lang_code, target))
         
         # Look for potential issues
+        import re as _re
+
+        def _looks_camel_or_allcaps(s: str) -> bool:
+            return bool(_re.search(r"[a-z][A-Z]", s)) or s.isupper() or s.islower()
+
+        def _alpha_norm(s: str) -> str:
+            return _re.sub(r"[^A-Za-z]", "", s).lower()
+
         for source_string, lang_translations in string_translations.items():
             if len(lang_translations) > 1:
-                # Check if the same source string has different translations
-                # This might be expected for different languages, but worth noting
-                translations_by_lang = {lang: trans for lang, trans in lang_translations}
-                
-                # Check for suspiciously similar source strings with different translations
-                for other_source, other_translations in string_translations.items():
-                    if (source_string != other_source and 
-                        abs(len(source_string) - len(other_source)) <= 2 and
-                        source_string.lower().replace(' ', '') == other_source.lower().replace(' ', '')):
-                        
-                        self.issues.append(
-                            f"Potentially inconsistent translations for similar strings: "
-                            f"'{source_string}' vs '{other_source}'"
-                        )
+                # For now we don't flag cross-language differences
+                pass
+            # Compare with other source strings that normalize the same
+            for other_source, other_translations in string_translations.items():
+                if source_string == other_source:
+                    continue
+                if abs(len(source_string) - len(other_source)) > 2:
+                    continue
+                if _alpha_norm(source_string) != _alpha_norm(other_source):
+                    continue
+                # Ignore case-only or style-only variants (camelCase/ALLCAPS/lowercase)
+                if _looks_camel_or_allcaps(source_string) or _looks_camel_or_allcaps(other_source):
+                    continue
+                # If both are alphabetic phrases with only casing differences, flag once
+                issue = (
+                    "Potentially inconsistent translations for similar strings: "
+                    f"'{source_string}' vs '{other_source}'"
+                )
+                if issue not in self.issues:
+                    self.issues.append(issue)
     
     def _validate_format(self):
         """Validate translation file format"""
@@ -403,6 +417,9 @@ class TranslationValidator:
     def update_translation_template(self):
         """Update POT template file"""
         logger.info("Updating translation template...")
+        # Ensure source strings are available
+        if not self.source_strings:
+            self._extract_source_strings()
         
         pot_content = []
         pot_content.append('msgid ""')
