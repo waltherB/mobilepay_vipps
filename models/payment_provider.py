@@ -1544,6 +1544,23 @@ class PaymentProvider(models.Model):
         }
 
     @api.model
+    def default_get(self, fields_list):
+        """Override default_get to handle context-aware defaults properly"""
+        defaults = super().default_get(fields_list)
+        
+        if 'vipps_capture_mode' in fields_list and 'vipps_capture_mode' not in defaults:
+            # Check if we're in a POS context
+            if (self.env.context.get('pos_session_id') or 
+                self.env.context.get('is_pos_payment') or
+                self.env.context.get('default_use_payment_terminal') == 'vipps'):
+                defaults['vipps_capture_mode'] = 'automatic'
+            else:
+                # Default to context_aware for safety and compliance
+                defaults['vipps_capture_mode'] = 'context_aware'
+        
+        return defaults
+
+    @api.model
     def create(self, vals):
         """Override create to set up default configuration"""
         provider = super().create(vals)

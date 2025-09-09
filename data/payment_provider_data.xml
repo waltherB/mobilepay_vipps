@@ -22,6 +22,7 @@
             <field name="support_manual_capture">True</field>
             <field name="support_refund">partial</field>
             <field name="support_tokenization">False</field>
+            <!-- capture_manually=True for Odoo core compatibility, actual behavior controlled by vipps_capture_mode -->
             <field name="capture_manually">True</field>
             <field name="allow_tokenization">False</field>
             <field name="display_as">Vipps/MobilePay</field>
