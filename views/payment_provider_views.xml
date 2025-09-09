@@ -61,6 +61,7 @@
                     <group string="Payment Configuration" col="2">
                         <field name="vipps_capture_mode" 
                                widget="radio" 
+                               options="{'no_create': True, 'no_open': True}"
                                help="Manual capture is required for ecommerce compliance"/>
                         <field name="vipps_collect_user_info" 
                                help="Collect customer information during payment for improved profiles"/>
