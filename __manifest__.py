@@ -106,6 +106,7 @@ Website: https://github.com/waltherB/mobilepay_vipps
     'demo': [],
     'images': [
         'static/description/icon.png',
+        'static/description/MP_logo_badge.svg',
     ],
     'installable': True,
     'auto_install': False,

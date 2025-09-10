@@ -7,6 +7,7 @@
             <field name="name">Vipps/MobilePay</field>
             <field name="code">vipps</field>
             <field name="state">disabled</field>
+            <!-- Logo shown in app listing is provided by static/description/icon.png and MP_logo_badge.svg -->
         </record>
         
     </data>
