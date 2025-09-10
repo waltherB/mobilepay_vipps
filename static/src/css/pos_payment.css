@@ -1121,3 +1121,6 @@
 .fa-spin {
     animation: spin 1s linear infinite;
 }
+
+.brand-header img { display: inline-block; }
+.brand-header h2 { display: inline-block; vertical-align: middle; }

@@ -8,7 +8,10 @@
             <!-- Flow Selection Step -->
             <div t-if="state.currentStep === 'flow_selection'" class="payment-step flow-selection-step">
                 <div class="step-header">
-                    <h2><i class="fa fa-credit-card"></i> Vipps/MobilePay Payment</h2>
+                    <div class="brand-header">
+                        <img src="/mobilepay_vipps/static/description/MP_logo_badge.svg" alt="Vipps/MobilePay" style="height:32px; width:auto; margin-right:8px; vertical-align:middle;"/>
+                        <h2 style="display:inline-block; vertical-align:middle; margin:0 0 0 4px;">Vipps/MobilePay Payment</h2>
+                    </div>
                     <p>Choose how the customer will complete their payment</p>
                 </div>
                 
