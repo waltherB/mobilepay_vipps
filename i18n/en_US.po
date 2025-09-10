@@ -2,13 +2,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MobilePay Vipps Payment\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2025-09-10 12:24+0200\n"
 "Last-Translator: \n"
 "Language-Team: en_US\n"
 "Language: en_US\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.7\n"
+
 #. module: mobilepay_vipps
 #: model:payment.provider,name:mobilepay_vipps.payment_provider_vipps
 msgid "Vipps/MobilePay"
@@ -30,9 +33,7 @@ msgid "Production Environment"
 msgstr "Production Environment"
 
 #. module: mobilepay_vipps
-#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 #. module: mobilepay_vipps
-#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 #. module: mobilepay_vipps
 #: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 msgid "API Credentials"
@@ -59,61 +60,50 @@ msgid "Client Secret"
 msgstr "Client Secret"
 
 #. module: mobilepay_vipps
+#. module: mobilepay_vipps
+#. module: mobilepay_vipps
+#. module: mobilepay_vipps
+#. module: mobilepay_vipps
 #: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_environment
-#. module: mobilepay_vipps
 #: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_capture_mode
-#. module: mobilepay_vipps
 #: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_collect_user_info
-#. module: mobilepay_vipps
-#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
-#. module: mobilepay_vipps
 #: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 msgid "Validate Credentials"
 msgstr "Validate Credentials"
 
 #. module: mobilepay_vipps
-#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 #. module: mobilepay_vipps
-#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 #. module: mobilepay_vipps
-#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 #. module: mobilepay_vipps
-#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 #. module: mobilepay_vipps
 #: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 msgid "Manual Capture"
 msgstr "Manual Capture"
 
 #. module: mobilepay_vipps
-#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 #. module: mobilepay_vipps
 #: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 msgid "Automatic Capture"
 msgstr "Automatic Capture"
 
 #. module: mobilepay_vipps
-#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 #. module: mobilepay_vipps
 #: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 msgid "Security Configuration"
 msgstr "Security Configuration"
 
 #. module: mobilepay_vipps
-#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 #. module: mobilepay_vipps
 #: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
 msgid "Getting Started"
 msgstr "Getting Started"
 
 #. module: mobilepay_vipps
-#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
+#. module: mobilepay_vipps
+#. module: mobilepay_vipps
+#. module: mobilepay_vipps
 #. module: mobilepay_vipps
 #: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
-#. module: mobilepay_vipps
-#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
-#. module: mobilepay_vipps
-#: model_terms:ir.ui.view,arch_db:mobilepay_vipps.payment_provider_form_vipps
-#. module: mobilepay_vipps
 #: code:addons/mobilepay_vipps/models/payment_provider.py:0
 #, python-format
 msgid "Merchant Serial Number must be a numeric value with at least 6 digits"
@@ -155,10 +145,10 @@ msgid "Webhook Secret"
 msgstr "Webhook Secret"
 
 #. module: mobilepay_vipps
+#. module: mobilepay_vipps
+#. module: mobilepay_vipps
 #: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_credentials_validated
-#. module: mobilepay_vipps
 #: model:ir.model.fields,field_description:mobilepay_vipps.field_payment_provider__vipps_last_validation_error
-#. module: mobilepay_vipps
 #: model:ir.cron,name:mobilepay_vipps.ir_cron_vipps_token_refresh
 msgid "Vipps/MobilePay: Refresh Access Tokens"
 msgstr "Vipps/MobilePay: Refresh Access Tokens"
@@ -232,8 +222,12 @@ msgstr "Webhook secret must be at least 32 characters long for security"
 #. module: mobilepay_vipps
 #: code:addons/mobilepay_vipps/models/payment_provider.py:0
 #, python-format
-msgid "Webhook secret should contain mixed case letters, numbers, and special characters"
-msgstr "Webhook secret should contain mixed case letters, numbers, and special characters"
+msgid ""
+"Webhook secret should contain mixed case letters, numbers, and special "
+"characters"
+msgstr ""
+"Webhook secret should contain mixed case letters, numbers, and special "
+"characters"
 
 #. module: mobilepay_vipps
 #: code:addons/mobilepay_vipps/models/payment_provider.py:0
@@ -276,8 +270,8 @@ msgstr "Vipps API Health Status"
 #, python-format
 msgid "Health Status Error"
 msgstr "Health Status Error"
-# Additional Essential Translations
 
+# Additional Essential Translations
 msgid "Customer QR Code"
 msgstr "Customer QR Code"
 
@@ -425,17 +419,6 @@ msgstr "QR Code"
 msgid "Push Message"
 msgstr "Push Message"
 
-msgid "Success"
-msgstr "Success"
-
-msgid "Validation Failed"
-msgstr "Validation Failed"
-
-msgid "Connection Test Successful"
-msgstr "Connection Test Successful"
-
-msgid "Connection Test Failed"
-msgstr "Connection Test Failed"
 msgid "&test;"
 msgstr "&test;"
 
@@ -559,8 +542,12 @@ msgstr "At least one payment method (eCommerce or POS) must be enabled"
 msgid "Attempting automatic payment cancellation"
 msgstr "Attempting automatic payment cancellation"
 
-msgid "Audit logs are automatically created when customer data is collected, accessed, exported, or deleted."
-msgstr "Audit logs are automatically created when customer data is collected, accessed, exported, or deleted."
+msgid ""
+"Audit logs are automatically created when customer data is collected, "
+"accessed, exported, or deleted."
+msgstr ""
+"Audit logs are automatically created when customer data is collected, "
+"accessed, exported, or deleted."
 
 msgid "Automatic Capture (POS Only)"
 msgstr "Automatic Capture (POS Only)"
@@ -616,8 +603,12 @@ msgstr "Cancellation Failed"
 msgid "Cancellation failed: %s"
 msgstr "Cancellation failed: %s"
 
-msgid "Cannot cancel authorized payment. Use refund instead after capture, or contact Vipps support."
-msgstr "Cannot cancel authorized payment. Use refund instead after capture, or contact Vipps support."
+msgid ""
+"Cannot cancel authorized payment. Use refund instead after capture, or "
+"contact Vipps support."
+msgstr ""
+"Cannot cancel authorized payment. Use refund instead after capture, or "
+"contact Vipps support."
 
 msgid "Cannot cancel captured payment. Use refund instead."
 msgstr "Cannot cancel captured payment. Use refund instead."
@@ -679,8 +670,12 @@ msgstr "Compliance Requirements"
 msgid "Compliance Test Customer"
 msgstr "Compliance Test Customer"
 
-msgid "Comprehensive validation report generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-msgstr "Comprehensive validation report generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+msgid ""
+"Comprehensive validation report generated on {datetime.now().strftime('%Y-%m-"
+"%d %H:%M:%S')}"
+msgstr ""
+"Comprehensive validation report generated on {datetime.now().strftime('%Y-%m-"
+"%d %H:%M:%S')}"
 
 msgid "Configuration"
 msgstr "Configuration"
@@ -778,8 +773,12 @@ msgstr "Credential rotation failed: %s"
 msgid "Credential test error: %s"
 msgstr "Credential test error: %s"
 
-msgid "Credential validation failed:\n%s"
-msgstr "Credential validation failed:\n%s"
+msgid ""
+"Credential validation failed:\n"
+"%s"
+msgstr ""
+"Credential validation failed:\n"
+"%s"
 
 msgid "Credential validation must be successful before proceeding"
 msgstr "Credential validation must be successful before proceeding"
@@ -829,8 +828,12 @@ msgstr "Customer Request (GDPR)"
 msgid "Customer consent for Vipps data collection has been recorded"
 msgstr "Customer consent for Vipps data collection has been recorded"
 
-msgid "Customer data is collected with explicit consent during Vipps/MobilePay payments"
-msgstr "Customer data is collected with explicit consent during Vipps/MobilePay payments"
+msgid ""
+"Customer data is collected with explicit consent during Vipps/MobilePay "
+"payments"
+msgstr ""
+"Customer data is collected with explicit consent during Vipps/MobilePay "
+"payments"
 
 msgid "Customer entered shop MobilePay number"
 msgstr "Customer entered shop MobilePay number"
@@ -925,8 +928,12 @@ msgstr "Data retention period cannot be negative"
 msgid "Database UUID not found. Cannot generate master key."
 msgstr "Database UUID not found. Cannot generate master key."
 
-msgid "Define what customer information can be collected during Vipps/MobilePay payments."
-msgstr "Define what customer information can be collected during Vipps/MobilePay payments."
+msgid ""
+"Define what customer information can be collected during Vipps/MobilePay "
+"payments."
+msgstr ""
+"Define what customer information can be collected during Vipps/MobilePay "
+"payments."
 
 msgid "Delete Customer Data"
 msgstr "Delete Customer Data"
@@ -1078,11 +1085,15 @@ msgstr "Failed to load payment configuration"
 msgid "Failed to send push message: %s"
 msgstr "Failed to send push message: %s"
 
-msgid "Failed: {sum(1 for r in self.results if r.status == RecoveryTestStatus.FAIL)}"
-msgstr "Failed: {sum(1 for r in self.results if r.status == RecoveryTestStatus.FAIL)}"
+msgid ""
+"Failed: {sum(1 for r in self.results if r.status == RecoveryTestStatus.FAIL)}"
+msgstr ""
+"Failed: {sum(1 for r in self.results if r.status == RecoveryTestStatus.FAIL)}"
 
-msgid "Failed: {sum(1 for r in self.results if r.status == ValidationStatus.FAIL)}"
-msgstr "Failed: {sum(1 for r in self.results if r.status == ValidationStatus.FAIL)}"
+msgid ""
+"Failed: {sum(1 for r in self.results if r.status == ValidationStatus.FAIL)}"
+msgstr ""
+"Failed: {sum(1 for r in self.results if r.status == ValidationStatus.FAIL)}"
 
 msgid "Failure Count:"
 msgstr "Failure Count:"
@@ -1195,8 +1206,12 @@ msgstr "Invalid manual payment type"
 msgid "Invalid or closed POS session"
 msgstr "Invalid or closed POS session"
 
-msgid "Invalid phone number format. Please provide a valid Danish, Norwegian, Swedish, or Finnish phone number."
-msgstr "Invalid phone number format. Please provide a valid Danish, Norwegian, Swedish, or Finnish phone number."
+msgid ""
+"Invalid phone number format. Please provide a valid Danish, Norwegian, "
+"Swedish, or Finnish phone number."
+msgstr ""
+"Invalid phone number format. Please provide a valid Danish, Norwegian, "
+"Swedish, or Finnish phone number."
 
 msgid "Inventory Test Order"
 msgstr "Inventory Test Order"
@@ -1378,8 +1393,10 @@ msgstr "Not Tested"
 msgid "Not a manual payment"
 msgstr "Not a manual payment"
 
-msgid "Notification email addresses are required when notifications are enabled"
-msgstr "Notification email addresses are required when notifications are enabled"
+msgid ""
+"Notification email addresses are required when notifications are enabled"
+msgstr ""
+"Notification email addresses are required when notifications are enabled"
 
 msgid "Old User"
 msgstr "Old User"
@@ -1468,14 +1485,22 @@ msgstr "Partial User"
 msgid "Partially Ready"
 msgstr "Partially Ready"
 
-msgid "Passed: {sum(1 for r in self.results if r.status == RecoveryTestStatus.PASS)}"
-msgstr "Passed: {sum(1 for r in self.results if r.status == RecoveryTestStatus.PASS)}"
+msgid ""
+"Passed: {sum(1 for r in self.results if r.status == RecoveryTestStatus.PASS)}"
+msgstr ""
+"Passed: {sum(1 for r in self.results if r.status == RecoveryTestStatus.PASS)}"
 
-msgid "Passed: {sum(1 for r in self.results if r.status == ValidationStatus.PASS)}"
-msgstr "Passed: {sum(1 for r in self.results if r.status == ValidationStatus.PASS)}"
+msgid ""
+"Passed: {sum(1 for r in self.results if r.status == ValidationStatus.PASS)}"
+msgstr ""
+"Passed: {sum(1 for r in self.results if r.status == ValidationStatus.PASS)}"
 
-msgid "Pay securely with Vipps or MobilePay - the leading Nordic mobile payment solution."
-msgstr "Pay securely with Vipps or MobilePay - the leading Nordic mobile payment solution."
+msgid ""
+"Pay securely with Vipps or MobilePay - the leading Nordic mobile payment "
+"solution."
+msgstr ""
+"Pay securely with Vipps or MobilePay - the leading Nordic mobile payment "
+"solution."
 
 msgid "Payment Cancelled"
 msgstr "Payment Cancelled"
@@ -1613,7 +1638,8 @@ msgid "Please select an environment"
 msgstr "Please select an environment"
 
 msgid "Please select at least one custom scope when using custom configuration"
-msgstr "Please select at least one custom scope when using custom configuration"
+msgstr ""
+"Please select at least one custom scope when using custom configuration"
 
 msgid "Please select custom scopes to test"
 msgstr "Please select custom scopes to test"
@@ -1654,8 +1680,12 @@ msgstr "Production Test Customer"
 msgid "Production User"
 msgstr "Production User"
 
-msgid "Production readiness score too low: %d%%. Minimum 75%% required for production deployment."
-msgstr "Production readiness score too low: %d%%. Minimum 75%% required for production deployment."
+msgid ""
+"Production readiness score too low: %d%%. Minimum 75%% required for "
+"production deployment."
+msgstr ""
+"Production readiness score too low: %d%%. Minimum 75%% required for "
+"production deployment."
 
 msgid "Profile Information Collection"
 msgstr "Profile Information Collection"
@@ -1717,8 +1747,16 @@ msgstr "Receipt Test Order"
 msgid "Recommendations:"
 msgstr "Recommendations:"
 
-msgid "Recommended items not completed: %s\n\nYou can proceed, but completing these items is strongly recommended for production use."
-msgstr "Recommended items not completed: %s\n\nYou can proceed, but completing these items is strongly recommended for production use."
+msgid ""
+"Recommended items not completed: %s\n"
+"\n"
+"You can proceed, but completing these items is strongly recommended for "
+"production use."
+msgstr ""
+"Recommended items not completed: %s\n"
+"\n"
+"You can proceed, but completing these items is strongly recommended for "
+"production use."
 
 msgid "Red"
 msgstr "Red"
@@ -1729,8 +1767,12 @@ msgstr "Refund Order"
 msgid "Refund Payment"
 msgstr "Refund Payment"
 
-msgid "Refund amount (%s %s) exceeds available amount (%s %s). Already refunded: %s %s"
-msgstr "Refund amount (%s %s) exceeds available amount (%s %s). Already refunded: %s %s"
+msgid ""
+"Refund amount (%s %s) exceeds available amount (%s %s). Already refunded: %s "
+"%s"
+msgstr ""
+"Refund amount (%s %s) exceeds available amount (%s %s). Already refunded: %s "
+"%s"
 
 msgid "Refund amount must be greater than zero"
 msgstr "Refund amount must be greater than zero"
@@ -1831,8 +1873,8 @@ msgstr "Security scan failed: %s"
 msgid "Security scan must be completed before production deployment"
 msgstr "Security scan must be completed before production deployment"
 
-msgid "Select "Pay in Store"
-msgstr "Select "Pay in Store"
+msgid "Select \"Pay in Store"
+msgstr "Select \"Pay in Store"
 
 msgid "Semi-Annual"
 msgstr "Semi-Annual"
@@ -1864,11 +1906,17 @@ msgstr "Show this QR code to the customer to scan with their MobilePay app"
 msgid "Size"
 msgstr "Size"
 
-msgid "Skipped: {sum(1 for r in self.results if r.status == RecoveryTestStatus.SKIP)}"
-msgstr "Skipped: {sum(1 for r in self.results if r.status == RecoveryTestStatus.SKIP)}"
+msgid ""
+"Skipped: {sum(1 for r in self.results if r.status == "
+"RecoveryTestStatus.SKIP)}"
+msgstr ""
+"Skipped: {sum(1 for r in self.results if r.status == "
+"RecoveryTestStatus.SKIP)}"
 
-msgid "Skipped: {sum(1 for r in self.results if r.status == ValidationStatus.SKIP)}"
-msgstr "Skipped: {sum(1 for r in self.results if r.status == ValidationStatus.SKIP)}"
+msgid ""
+"Skipped: {sum(1 for r in self.results if r.status == ValidationStatus.SKIP)}"
+msgstr ""
+"Skipped: {sum(1 for r in self.results if r.status == ValidationStatus.SKIP)}"
 
 msgid "Split Payment Order"
 msgstr "Split Payment Order"
@@ -1987,8 +2035,12 @@ msgstr "Test eCommerce Site"
 msgid "Test payment error: %s"
 msgstr "Test payment error: %s"
 
-msgid "Test payment failed:\n%s"
-msgstr "Test payment failed:\n%s"
+msgid ""
+"Test payment failed:\n"
+"%s"
+msgstr ""
+"Test payment failed:\n"
+"%s"
 
 msgid "Test-Agent"
 msgstr "Test-Agent"
@@ -2005,8 +2057,12 @@ msgstr "Testing webhook connectivity..."
 msgid "Testing..."
 msgstr "Testing..."
 
-msgid "This integration implements all requirements from the Vipps/MobilePay integration checklists:"
-msgstr "This integration implements all requirements from the Vipps/MobilePay integration checklists:"
+msgid ""
+"This integration implements all requirements from the Vipps/MobilePay "
+"integration checklists:"
+msgstr ""
+"This integration implements all requirements from the Vipps/MobilePay "
+"integration checklists:"
 
 msgid "This method is only available for Vipps transactions"
 msgstr "This method is only available for Vipps transactions"
@@ -2257,8 +2313,12 @@ msgstr "Vipps/MobilePay Payment Integration Minimal"
 msgid "Vipps/MobilePay Setup Wizard"
 msgstr "Vipps/MobilePay Setup Wizard"
 
-msgid "Vipps/MobilePay has been successfully configured and activated. Readiness Score: %d%%"
-msgstr "Vipps/MobilePay has been successfully configured and activated. Readiness Score: %d%%"
+msgid ""
+"Vipps/MobilePay has been successfully configured and activated. Readiness "
+"Score: %d%%"
+msgstr ""
+"Vipps/MobilePay has been successfully configured and activated. Readiness "
+"Score: %d%%"
 
 msgid "Vipps/MobilePay: Check Credential Rotation Schedule"
 msgstr "Vipps/MobilePay: Check Credential Rotation Schedule"
@@ -2287,11 +2347,19 @@ msgstr "Waiting for customer payment..."
 msgid "Warning:"
 msgstr "Warning:"
 
-msgid "Warnings: {sum(1 for r in self.results if r.status == RecoveryTestStatus.WARNING)}"
-msgstr "Warnings: {sum(1 for r in self.results if r.status == RecoveryTestStatus.WARNING)}"
+msgid ""
+"Warnings: {sum(1 for r in self.results if r.status == "
+"RecoveryTestStatus.WARNING)}"
+msgstr ""
+"Warnings: {sum(1 for r in self.results if r.status == "
+"RecoveryTestStatus.WARNING)}"
 
-msgid "Warnings: {sum(1 for r in self.results if r.status == ValidationStatus.WARNING)}"
-msgstr "Warnings: {sum(1 for r in self.results if r.status == ValidationStatus.WARNING)}"
+msgid ""
+"Warnings: {sum(1 for r in self.results if r.status == "
+"ValidationStatus.WARNING)}"
+msgstr ""
+"Warnings: {sum(1 for r in self.results if r.status == "
+"ValidationStatus.WARNING)}"
 
 msgid "Webhook Processed"
 msgstr "Webhook Processed"
@@ -2323,8 +2391,12 @@ msgstr "Webhook URL"
 msgid "Webhook test error: %s"
 msgstr "Webhook test error: %s"
 
-msgid "Webhook test failed:\n%s"
-msgstr "Webhook test failed:\n%s"
+msgid ""
+"Webhook test failed:\n"
+"%s"
+msgstr ""
+"Webhook test failed:\n"
+"%s"
 
 msgid "Welcome"
 msgstr "Welcome"
@@ -2338,11 +2410,19 @@ msgstr "Zero Amount Order"
 msgid "\n"
 msgstr "\n"
 
-msgid "\n💡 Note: Test transactions are created for validation only"
-msgstr "\n💡 Note: Test transactions are created for validation only"
+msgid ""
+"\n"
+"💡 Note: Test transactions are created for validation only"
+msgstr ""
+"\n"
+"💡 Note: Test transactions are created for validation only"
 
-msgid "\n📊 Tests: %d/%d passed"
-msgstr "\n📊 Tests: %d/%d passed"
+msgid ""
+"\n"
+"📊 Tests: %d/%d passed"
+msgstr ""
+"\n"
+"📊 Tests: %d/%d passed"
 
 msgid "]]>"
 msgstr "]]>"
@@ -2380,8 +2460,8 @@ msgstr "admin/*"
 msgid "admin\\"
 msgstr "admin\\"
 
-msgid "alert("xss")"
-msgstr "alert("xss")"
+msgid "alert(\"xss\")"
+msgstr "alert(\"xss\")"
 
 msgid "alert(1)"
 msgstr "alert(1)"
@@ -3109,8 +3189,10 @@ msgstr "{error}"
 msgid "{json.dumps(result.details, indent=2)}"
 msgstr "{json.dumps(result.details, indent=2)}"
 
-msgid "{overall_config[overall_status]['icon']} {overall_status.replace('_', ' ')}"
-msgstr "{overall_config[overall_status]['icon']} {overall_status.replace('_', ' ')}"
+msgid ""
+"{overall_config[overall_status]['icon']} {overall_status.replace('_', ' ')}"
+msgstr ""
+"{overall_config[overall_status]['icon']} {overall_status.replace('_', ' ')}"
 
 msgid "{rec}"
 msgstr "{rec}"
@@ -3127,8 +3209,10 @@ msgstr "{result['duration']:.1f}s"
 msgid "{result['error'][:1000]}{'...' if len(result['error']) > 1000 else ''}"
 msgstr "{result['error'][:1000]}{'...' if len(result['error']) > 1000 else ''}"
 
-msgid "{result['output'][:2000]}{'...' if len(result['output']) > 2000 else ''}"
-msgstr "{result['output'][:2000]}{'...' if len(result['output']) > 2000 else ''}"
+msgid ""
+"{result['output'][:2000]}{'...' if len(result['output']) > 2000 else ''}"
+msgstr ""
+"{result['output'][:2000]}{'...' if len(result['output']) > 2000 else ''}"
 
 msgid "{status_counts['failed']}"
 msgstr "{status_counts['failed']}"
@@ -3205,697 +3289,26 @@ msgstr "🔒 SSL: %s"
 msgid "🛡️ Security Headers: %d configured"
 msgstr "🛡️ Security Headers: %d configured"
 
+msgid "\"\""
+msgstr "\"\""
 
-msgid """"
-            
-            html_content += f""""
-msgstr """"
-            
-            html_content += f""""
+msgid "Select \"Pay in Store\""
+msgstr "Select \"Pay in Store\""
 
-msgid """"
-                
-                html_content += """"
-msgstr """"
-                
-                html_content += """"
+msgid "body {"
+msgstr "body {"
 
-msgid "Select "Pay in Store""
-msgstr "Select "Pay in Store""
+msgid "body {{ font-family: Arial, sans-serif; margin: 20px; }"
+msgstr "body {{ font-family: Arial, sans-serif; margin: 20px; }"
 
-msgid "\n"
-        
-        html += """"
-msgstr "\n"
-        
-        html += """"
+msgid "enforcement_report = model.enforce_data_retention_policies("
+msgstr "enforcement_report = model.enforce_data_retention_policies("
 
-msgid "\n"
-            
-            html_content += """"
-msgstr "\n"
-            
-            html_content += """"
-
-msgid "body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-            line-height: 1.6;
-        }}
-        .container {{
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }}
-        .header {{
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }}
-        .header h1 {{
-            margin: 0;
-            font-size: 2.5em;
-            font-weight: 300;
-        }}
-        .header p {{
-            margin: 10px 0 0 0;
-            opacity: 0.9;
-        }}
-        .overall-status {{
-            padding: 30px;
-            text-align: center;
-            border-bottom: 1px solid #dee2e6;
-        }}
-        .status-badge {{
-            display: inline-block;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: white;
-        }}
-        .summary {{
-            padding: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            border-bottom: 1px solid #dee2e6;
-        }}
-        .summary-card {{
-            text-align: center;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-        }}
-        .summary-card h3 {{
-            margin: 0 0 10px 0;
-            color: #495057;
-        }}
-        .summary-card .number {{
-            font-size: 2em;
-            font-weight: bold;
-            color: #007bff;
-        }}
-        .results {{
-            padding: 30px;
-        }}
-        .suite-result {{
-            margin: 20px 0;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            overflow: hidden;
-        }}
-        .suite-header {{
-            padding: 15px 20px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }}
-        .suite-details {{
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #dee2e6;
-        }}
-        .suite-output {{
-            background-color: #f1f3f4;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            max-height: 300px;
-            overflow-y: auto;
-        }}
-        .duration {{
-            color: #6c757d;
-            font-size: 0.9em;
-        }}
-        .footer {{
-            padding: 20px 30px;
-            background-color: #f8f9fa;
-            text-align: center;
-            color: #6c757d;
-            border-top: 1px solid #dee2e6;
-        }}
-        .collapsible {{
-            cursor: pointer;
-        }}
-        .collapsible:hover {{
-            background-color: rgba(0,0,0,0.05);
-        }}
-        .content {{
-            display: none;
-        }}
-        .content.active {{
-            display: block;
-        }}"
-msgstr "body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-            line-height: 1.6;
-        }}
-        .container {{
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }}
-        .header {{
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }}
-        .header h1 {{
-            margin: 0;
-            font-size: 2.5em;
-            font-weight: 300;
-        }}
-        .header p {{
-            margin: 10px 0 0 0;
-            opacity: 0.9;
-        }}
-        .overall-status {{
-            padding: 30px;
-            text-align: center;
-            border-bottom: 1px solid #dee2e6;
-        }}
-        .status-badge {{
-            display: inline-block;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: white;
-        }}
-        .summary {{
-            padding: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            border-bottom: 1px solid #dee2e6;
-        }}
-        .summary-card {{
-            text-align: center;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-        }}
-        .summary-card h3 {{
-            margin: 0 0 10px 0;
-            color: #495057;
-        }}
-        .summary-card .number {{
-            font-size: 2em;
-            font-weight: bold;
-            color: #007bff;
-        }}
-        .results {{
-            padding: 30px;
-        }}
-        .suite-result {{
-            margin: 20px 0;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            overflow: hidden;
-        }}
-        .suite-header {{
-            padding: 15px 20px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }}
-        .suite-details {{
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #dee2e6;
-        }}
-        .suite-output {{
-            background-color: #f1f3f4;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            max-height: 300px;
-            overflow-y: auto;
-        }}
-        .duration {{
-            color: #6c757d;
-            font-size: 0.9em;
-        }}
-        .footer {{
-            padding: 20px 30px;
-            background-color: #f8f9fa;
-            text-align: center;
-            color: #6c757d;
-            border-top: 1px solid #dee2e6;
-        }}
-        .collapsible {{
-            cursor: pointer;
-        }}
-        .collapsible:hover {{
-            background-color: rgba(0,0,0,0.05);
-        }}
-        .content {{
-            display: none;
-        }}
-        .content.active {{
-            display: block;
-        }}"
-
-msgid "body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
-        .summary {{ margin: 20px 0; }}
-        .result {{ margin: 10px 0; padding: 10px; border-radius: 5px; }}
-        .pass {{ background-color: #d4edda; border-left: 5px solid #28a745; }}
-        .fail {{ background-color: #f8d7da; border-left: 5px solid #dc3545; }}
-        .warning {{ background-color: #fff3cd; border-left: 5px solid #ffc107; }}
-        .skip {{ background-color: #e2e3e5; border-left: 5px solid #6c757d; }}
-        .recommendations {{ margin-top: 10px; }}
-        .recommendations ul {{ margin: 5px 0; }}"
-msgstr "body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
-        .summary {{ margin: 20px 0; }}
-        .result {{ margin: 10px 0; padding: 10px; border-radius: 5px; }}
-        .pass {{ background-color: #d4edda; border-left: 5px solid #28a745; }}
-        .fail {{ background-color: #f8d7da; border-left: 5px solid #dc3545; }}
-        .warning {{ background-color: #fff3cd; border-left: 5px solid #ffc107; }}
-        .skip {{ background-color: #e2e3e5; border-left: 5px solid #6c757d; }}
-        .recommendations {{ margin-top: 10px; }}
-        .recommendations ul {{ margin: 5px 0; }}"
-
-msgid "body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
-        .summary {{ margin: 20px 0; }}
-        .result {{ margin: 10px 0; padding: 10px; border-radius: 5px; }}
-        .pass {{ background-color: #d4edda; border-left: 5px solid #28a745; }}
-        .fail {{ background-color: #f8d7da; border-left: 5px solid #dc3545; }}
-        .warning {{ background-color: #fff3cd; border-left: 5px solid #ffc107; }}
-        .skip {{ background-color: #e2e3e5; border-left: 5px solid #6c757d; }}
-        .recommendations {{ margin-top: 10px; }}
-        .recommendations ul {{ margin: 5px 0; }}
-        .details {{ background-color: #f8f9fa; padding: 10px; margin-top: 10px; border-radius: 3px; }}"
-msgstr "body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
-        .summary {{ margin: 20px 0; }}
-        .result {{ margin: 10px 0; padding: 10px; border-radius: 5px; }}
-        .pass {{ background-color: #d4edda; border-left: 5px solid #28a745; }}
-        .fail {{ background-color: #f8d7da; border-left: 5px solid #dc3545; }}
-        .warning {{ background-color: #fff3cd; border-left: 5px solid #ffc107; }}
-        .skip {{ background-color: #e2e3e5; border-left: 5px solid #6c757d; }}
-        .recommendations {{ margin-top: 10px; }}
-        .recommendations ul {{ margin: 5px 0; }}
-        .details {{ background-color: #f8f9fa; padding: 10px; margin-top: 10px; border-radius: 3px; }}"
-
-msgid "body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
-        .test-result {{ margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }}
-        .metrics {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }}
-        .metric {{ background-color: #f8f9fa; padding: 10px; border-radius: 3px; }}
-        .errors {{ background-color: #f8d7da; padding: 10px; border-radius: 3px; margin-top: 10px; }}"
-msgstr "body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
-        .test-result {{ margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }}
-        .metrics {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }}
-        .metric {{ background-color: #f8f9fa; padding: 10px; border-radius: 3px; }}
-        .errors {{ background-color: #f8d7da; padding: 10px; border-radius: 3px; margin-top: 10px; }}"
-
-msgid "enforcement_report = model.enforce_data_retention_policies()
-                if enforcement_report:
-                    model.env['vipps.data.retention.log'].create_enforcement_log(enforcement_report)"
-msgstr "enforcement_report = model.enforce_data_retention_policies()
-                if enforcement_report:
-                    model.env['vipps.data.retention.log'].create_enforcement_log(enforcement_report)"
-
-msgid "function toggleContent(element) {{
-            const content = element.nextElementSibling;
-            content.classList.toggle('active');
-        }}"
-msgstr "function toggleContent(element) {{
-            const content = element.nextElementSibling;
-            content.classList.toggle('active');
-        }}"
-
-
-msgid """"
-            
-            html_content += f""""
-msgstr """"
-            
-            html_content += f""""
-
-msgid """"
-                
-                html_content += """"
-msgstr """"
-                
-                html_content += """"
-
-msgid "Select "Pay in Store""
-msgstr "Select "Pay in Store""
-
-msgid "\n"
-        
-        html += """"
-msgstr "\n"
-        
-        html += """"
-
-msgid "\n"
-            
-            html_content += """"
-msgstr "\n"
-            
-            html_content += """"
-
-msgid "body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-            line-height: 1.6;
-        }}
-        .container {{
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }}
-        .header {{
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }}
-        .header h1 {{
-            margin: 0;
-            font-size: 2.5em;
-            font-weight: 300;
-        }}
-        .header p {{
-            margin: 10px 0 0 0;
-            opacity: 0.9;
-        }}
-        .overall-status {{
-            padding: 30px;
-            text-align: center;
-            border-bottom: 1px solid #dee2e6;
-        }}
-        .status-badge {{
-            display: inline-block;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: white;
-        }}
-        .summary {{
-            padding: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            border-bottom: 1px solid #dee2e6;
-        }}
-        .summary-card {{
-            text-align: center;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-        }}
-        .summary-card h3 {{
-            margin: 0 0 10px 0;
-            color: #495057;
-        }}
-        .summary-card .number {{
-            font-size: 2em;
-            font-weight: bold;
-            color: #007bff;
-        }}
-        .results {{
-            padding: 30px;
-        }}
-        .suite-result {{
-            margin: 20px 0;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            overflow: hidden;
-        }}
-        .suite-header {{
-            padding: 15px 20px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }}
-        .suite-details {{
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #dee2e6;
-        }}
-        .suite-output {{
-            background-color: #f1f3f4;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            max-height: 300px;
-            overflow-y: auto;
-        }}
-        .duration {{
-            color: #6c757d;
-            font-size: 0.9em;
-        }}
-        .footer {{
-            padding: 20px 30px;
-            background-color: #f8f9fa;
-            text-align: center;
-            color: #6c757d;
-            border-top: 1px solid #dee2e6;
-        }}
-        .collapsible {{
-            cursor: pointer;
-        }}
-        .collapsible:hover {{
-            background-color: rgba(0,0,0,0.05);
-        }}
-        .content {{
-            display: none;
-        }}
-        .content.active {{
-            display: block;
-        }}"
-msgstr "body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-            line-height: 1.6;
-        }}
-        .container {{
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }}
-        .header {{
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }}
-        .header h1 {{
-            margin: 0;
-            font-size: 2.5em;
-            font-weight: 300;
-        }}
-        .header p {{
-            margin: 10px 0 0 0;
-            opacity: 0.9;
-        }}
-        .overall-status {{
-            padding: 30px;
-            text-align: center;
-            border-bottom: 1px solid #dee2e6;
-        }}
-        .status-badge {{
-            display: inline-block;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: white;
-        }}
-        .summary {{
-            padding: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            border-bottom: 1px solid #dee2e6;
-        }}
-        .summary-card {{
-            text-align: center;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #f8f9fa;
-        }}
-        .summary-card h3 {{
-            margin: 0 0 10px 0;
-            color: #495057;
-        }}
-        .summary-card .number {{
-            font-size: 2em;
-            font-weight: bold;
-            color: #007bff;
-        }}
-        .results {{
-            padding: 30px;
-        }}
-        .suite-result {{
-            margin: 20px 0;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            overflow: hidden;
-        }}
-        .suite-header {{
-            padding: 15px 20px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }}
-        .suite-details {{
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #dee2e6;
-        }}
-        .suite-output {{
-            background-color: #f1f3f4;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            max-height: 300px;
-            overflow-y: auto;
-        }}
-        .duration {{
-            color: #6c757d;
-            font-size: 0.9em;
-        }}
-        .footer {{
-            padding: 20px 30px;
-            background-color: #f8f9fa;
-            text-align: center;
-            color: #6c757d;
-            border-top: 1px solid #dee2e6;
-        }}
-        .collapsible {{
-            cursor: pointer;
-        }}
-        .collapsible:hover {{
-            background-color: rgba(0,0,0,0.05);
-        }}
-        .content {{
-            display: none;
-        }}
-        .content.active {{
-            display: block;
-        }}"
-
-msgid "body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
-        .summary {{ margin: 20px 0; }}
-        .result {{ margin: 10px 0; padding: 10px; border-radius: 5px; }}
-        .pass {{ background-color: #d4edda; border-left: 5px solid #28a745; }}
-        .fail {{ background-color: #f8d7da; border-left: 5px solid #dc3545; }}
-        .warning {{ background-color: #fff3cd; border-left: 5px solid #ffc107; }}
-        .skip {{ background-color: #e2e3e5; border-left: 5px solid #6c757d; }}
-        .recommendations {{ margin-top: 10px; }}
-        .recommendations ul {{ margin: 5px 0; }}"
-msgstr "body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
-        .summary {{ margin: 20px 0; }}
-        .result {{ margin: 10px 0; padding: 10px; border-radius: 5px; }}
-        .pass {{ background-color: #d4edda; border-left: 5px solid #28a745; }}
-        .fail {{ background-color: #f8d7da; border-left: 5px solid #dc3545; }}
-        .warning {{ background-color: #fff3cd; border-left: 5px solid #ffc107; }}
-        .skip {{ background-color: #e2e3e5; border-left: 5px solid #6c757d; }}
-        .recommendations {{ margin-top: 10px; }}
-        .recommendations ul {{ margin: 5px 0; }}"
-
-msgid "body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
-        .summary {{ margin: 20px 0; }}
-        .result {{ margin: 10px 0; padding: 10px; border-radius: 5px; }}
-        .pass {{ background-color: #d4edda; border-left: 5px solid #28a745; }}
-        .fail {{ background-color: #f8d7da; border-left: 5px solid #dc3545; }}
-        .warning {{ background-color: #fff3cd; border-left: 5px solid #ffc107; }}
-        .skip {{ background-color: #e2e3e5; border-left: 5px solid #6c757d; }}
-        .recommendations {{ margin-top: 10px; }}
-        .recommendations ul {{ margin: 5px 0; }}
-        .details {{ background-color: #f8f9fa; padding: 10px; margin-top: 10px; border-radius: 3px; }}"
-msgstr "body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
-        .summary {{ margin: 20px 0; }}
-        .result {{ margin: 10px 0; padding: 10px; border-radius: 5px; }}
-        .pass {{ background-color: #d4edda; border-left: 5px solid #28a745; }}
-        .fail {{ background-color: #f8d7da; border-left: 5px solid #dc3545; }}
-        .warning {{ background-color: #fff3cd; border-left: 5px solid #ffc107; }}
-        .skip {{ background-color: #e2e3e5; border-left: 5px solid #6c757d; }}
-        .recommendations {{ margin-top: 10px; }}
-        .recommendations ul {{ margin: 5px 0; }}
-        .details {{ background-color: #f8f9fa; padding: 10px; margin-top: 10px; border-radius: 3px; }}"
-
-msgid "body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
-        .test-result {{ margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }}
-        .metrics {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }}
-        .metric {{ background-color: #f8f9fa; padding: 10px; border-radius: 3px; }}
-        .errors {{ background-color: #f8d7da; padding: 10px; border-radius: 3px; margin-top: 10px; }}"
-msgstr "body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
-        .test-result {{ margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }}
-        .metrics {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }}
-        .metric {{ background-color: #f8f9fa; padding: 10px; border-radius: 3px; }}
-        .errors {{ background-color: #f8d7da; padding: 10px; border-radius: 3px; margin-top: 10px; }}"
+msgid "function toggleContent(element) {"
+msgstr "function toggleContent(element) {"
 
 msgid "en_GB"
 msgstr "en_GB"
 
 msgid "en_US"
 msgstr "en_US"
-
-msgid "enforcement_report = model.enforce_data_retention_policies()
-                if enforcement_report:
-                    model.env['vipps.data.retention.log'].create_enforcement_log(enforcement_report)"
-msgstr "enforcement_report = model.enforce_data_retention_policies()
-                if enforcement_report:
-                    model.env['vipps.data.retention.log'].create_enforcement_log(enforcement_report)"
-
-msgid "function toggleContent(element) {{
-            const content = element.nextElementSibling;
-            content.classList.toggle('active');
-        }}"
-msgstr "function toggleContent(element) {{
-            const content = element.nextElementSibling;
-            content.classList.toggle('active');
-        }}"
-
