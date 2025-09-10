@@ -9,18 +9,28 @@ export class PaymentVipps extends Component {
     setup() {
         super.setup();
         if (window.location.pathname === '/shop/payment') {
-            this._handleVippsRedirect();
+            this._convertVippsButtonToLink();
         }
     }
 
-    _handleVippsRedirect() {
+    _convertVippsButtonToLink() {
         const vippsButton = document.querySelector('button[name="pay_vipps"]');
-        if (vippsButton) {
-            vippsButton.addEventListener('click', (ev) => {
-                ev.preventDefault();
-                window.location.href = '/payment/vipps/redirect';
-            });
+        if (!vippsButton) return;
+
+        const link = document.createElement('a');
+        link.href = '/payment/vipps/redirect';
+        link.textContent = vippsButton.textContent || 'Pay with Vipps/MobilePay';
+        link.className = vippsButton.className;
+        link.setAttribute('role', 'button');
+        link.setAttribute('rel', 'external');
+
+        // Preserve any surrounding layout/attributes
+        if (vippsButton.id) link.id = vippsButton.id;
+        for (const attr of vippsButton.attributes) {
+            if (attr.name.startsWith('data-')) link.setAttribute(attr.name, attr.value);
         }
+
+        vippsButton.replaceWith(link);
     }
 }
 
