@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_vipps_profile_scope,vipps.profile.scope,model_vipps_profile_scope,base.group_user,1,1,1,1
 access_vipps_webhook_security,vipps.webhook.security,model_vipps_webhook_security,base.group_system,1,1,1,1
+access_vipps_credential_audit_log,vipps.credential.audit.log,model_vipps_credential_audit_log,base.group_user,1,1,1,1
