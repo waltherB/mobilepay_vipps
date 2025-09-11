@@ -83,7 +83,7 @@ class VippsController(http.Controller):
         except Exception as e:
             _logger.error("Failed to log security event: %s", str(e))
 
-    @http.route('/payment/vipps/webhook', type='http', auth='public', methods=['POST'], csrf=False)
+    @http.route(['/payment/vipps/webhook', '/payment/mobilepay/webhook'], type='http', auth='public', methods=['POST'], csrf=False)
     def vipps_webhook(self, **kwargs):
         """Handle incoming webhooks from Vipps/MobilePay with enhanced security"""
         webhook_id = None
@@ -96,7 +96,7 @@ class VippsController(http.Controller):
             
             # Find the payment provider first
             provider = request.env['payment.provider'].sudo().search([
-                ('code', '=', 'vipps'),
+                ('code', 'in', ['vipps','mobilepay']),
                 ('state', '!=', 'disabled')
             ], limit=1)
             
@@ -230,7 +230,7 @@ class VippsController(http.Controller):
             
             return request.make_response('Internal Server Error', status=500)
 
-    @http.route('/payment/vipps/return', type='http', auth='public', methods=['GET'], csrf=False)
+    @http.route(['/payment/vipps/return', '/payment/mobilepay/return'], type='http', auth='public', methods=['GET'], csrf=False)
     def vipps_return(self, **kwargs):
         """Handle customer return from Vipps/MobilePay payment flow"""
         reference = kwargs.get('reference')
@@ -308,7 +308,7 @@ class VippsController(http.Controller):
                         reference, str(e))
             return request.redirect('/shop/payment?message=payment_error')
 
-    @http.route('/payment/vipps/status/<string:reference>', type='json', auth='public')
+    @http.route(['/payment/vipps/status/<string:reference>', '/payment/mobilepay/status/<string:reference>'], type='json', auth='public')
     def vipps_payment_status(self, reference, **kwargs):
         """AJAX endpoint for checking payment status (for POS polling)"""
         try:

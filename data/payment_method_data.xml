@@ -5,7 +5,7 @@
         <!-- Default Payment Provider (disabled by default) -->
         <record id="payment_provider_vipps_mobilepay" model="payment.provider">
             <field name="name">Vipps/MobilePay</field>
-            <field name="code">vipps</field>
+            <field name="code">mobilepay</field>
             <field name="state">disabled</field>
             <!-- Set official Vipps/MobilePay approved logo on the provider record -->
 	    <field name="image_128" type="base64" file="mobilepay_vipps/static/description/vipps_mobilepay_logo.svg"/>

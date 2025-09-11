@@ -41,8 +41,8 @@ class PaymentProvider(models.Model):
     _inherit = 'payment.provider'
 
     code = fields.Selection(
-        selection_add=[('vipps', 'Vipps/MobilePay')],
-        ondelete={'vipps': 'set default'}
+        selection_add=[('vipps', 'Vipps/MobilePay'), ('mobilepay', 'MobilePay')],
+        ondelete={'vipps': 'set default', 'mobilepay': 'set default'}
     )
     
     # Core Configuration Fields
@@ -328,7 +328,7 @@ class PaymentProvider(models.Model):
     @api.model
     def _get_supported_currencies(self):
         """Return supported currencies for Vipps/MobilePay"""
-        if self.code == 'vipps':
+        if self.code in ('vipps', 'mobilepay'):
             # Vipps/MobilePay supported currencies by country:
             # Norway (Vipps): NOK
             # Denmark (MobilePay): DKK  
@@ -354,7 +354,7 @@ class PaymentProvider(models.Model):
     @api.model
     def _get_supported_countries(self):
         """Return supported countries for Vipps/MobilePay"""
-        if self.code == 'vipps':
+        if self.code in ('vipps', 'mobilepay'):
             supported_countries = ['NO', 'DK', 'FI', 'SE']
             return self.env['res.country'].search([('code', 'in', supported_countries)])
         return super()._get_supported_countries()
@@ -363,7 +363,7 @@ class PaymentProvider(models.Model):
     def _get_default_payment_method_codes(self):
         """Return default payment method codes"""
         codes = super()._get_default_payment_method_codes()
-        if self.code == 'vipps':
+        if self.code in ('vipps', 'mobilepay'):
             codes.extend(['vipps', 'mobilepay'])
         return codes
 
@@ -391,7 +391,7 @@ class PaymentProvider(models.Model):
             VippsAPIClient: Configured API client for this provider
         """
         self.ensure_one()
-        if self.code != 'vipps':
+        if self.code not in ('vipps', 'mobilepay'):
             raise ValidationError(_("This method can only be called on Vipps payment providers"))
         
         # Import here to avoid circular imports
