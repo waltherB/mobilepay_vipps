@@ -53,7 +53,6 @@ class PaymentProvider(models.Model):
     )
     vipps_subscription_key = fields.Char(
         string="Subscription Key",
-        required_if_provider='vipps',
         groups='base.group_system',
         help="Ocp-Apim-Subscription-Key for API access"
     )
@@ -65,7 +64,6 @@ class PaymentProvider(models.Model):
     )
     vipps_client_secret = fields.Char(
         string="Client Secret",
-        required_if_provider='vipps',
         groups='base.group_system',
         help="Client Secret for access token generation"
     )
