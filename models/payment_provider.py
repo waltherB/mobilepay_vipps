@@ -887,7 +887,7 @@ class PaymentProvider(models.Model):
             
             # Generate credential hash for integrity verification
             if any(f in vals for f in ['vipps_client_secret', 'vipps_subscription_key']):
-                self._update_credential_hash(vals)
+                self._update_credential_hash()
         
         result = super().write(vals)
         
