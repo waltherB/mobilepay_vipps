@@ -405,6 +405,7 @@ class PaymentProvider(models.Model):
     def _get_access_token(self):
         """Get or refresh access token for API calls"""
         self.ensure_one()
+        from datetime import timedelta
         
         # Check if current token is still valid (with 5 minute buffer)
         if (self.vipps_access_token and self.vipps_token_expires_at and 
@@ -441,7 +442,7 @@ class PaymentProvider(models.Model):
                 raise ValidationError(_("No access token received from Vipps API"))
             
             # Store token with expiration time
-            expires_at = fields.Datetime.now().replace(second=fields.Datetime.now().second + expires_in)
+            expires_at = fields.Datetime.now() + timedelta(seconds=expires_in)
             self.sudo().write({
                 'vipps_access_token': access_token,
                 'vipps_token_expires_at': expires_at,
@@ -689,17 +690,20 @@ class PaymentProvider(models.Model):
 
     def _make_api_request(self, method, endpoint, payload=None, idempotency_key=None):
         """Make API request with proper error handling and retry logic"""
+        import time
+        import random
         self.ensure_one()
         
         url = self._get_vipps_api_url() + endpoint.lstrip('/')
         headers = self._get_api_headers(include_auth=True, idempotency_key=idempotency_key)
         
-        # Implement retry logic for transient errors
         max_retries = 3
-        retry_delay = 1  # Start with 1 second
+        base_delay = 1.0  # Start with 1 second
+        last_exception = None
         
         for attempt in range(max_retries):
             try:
+                _logger.debug("Attempt %d/%d: Making %s request to %s", attempt + 1, max_retries, method, url)
                 if method.upper() == 'GET':
                     response = requests.get(url, headers=headers, timeout=30)
                 elif method.upper() == 'POST':
@@ -707,40 +711,35 @@ class PaymentProvider(models.Model):
                 elif method.upper() == 'PUT':
                     response = requests.put(url, headers=headers, json=payload, timeout=30)
                 else:
-                    raise ValueError(f"Unsupported HTTP method: {method}")
+                    _logger.error("Unsupported HTTP method: %s", method)
+                    raise ValueError(_("Unsupported HTTP method: %s") % method)
                 
                 # Handle successful responses
                 if response.status_code in [200, 201, 202]:
                     return response.json() if response.content else {}
                 
-                # Handle errors
-                if response.status_code in [500, 502, 503, 504] and attempt < max_retries - 1:
-                    # Retry on server errors with exponential backoff
-                    import time
-                    time.sleep(retry_delay)
-                    retry_delay *= 2
-                    continue
+                # Retry on 5xx server errors
+                if 500 <= response.status_code < 600:
+                    last_exception = requests.exceptions.HTTPError(f"Server error: {response.status_code}")
+                    _logger.warning(
+                        "Vipps API returned a server error (%s). Retrying...", response.status_code
+                    )
+                else:
+                    # Handle non-retryable client errors
+                    return self._handle_api_error(response, f"{method} {endpoint}")
                 
-                # Handle non-retryable errors
-                self._handle_api_error(response, f"{method} {endpoint}")
-                
-            except requests.exceptions.Timeout:
-                if attempt < max_retries - 1:
-                    import time
-                    time.sleep(retry_delay)
-                    retry_delay *= 2
-                    continue
-                raise ValidationError(_("Request timeout. Please try again."))
-            
-            except requests.exceptions.ConnectionError:
-                if attempt < max_retries - 1:
-                    import time
-                    time.sleep(retry_delay)
-                    retry_delay *= 2
-                    continue
-                raise ValidationError(_("Connection error. Please check your internet connection."))
+            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+                last_exception = e
+                _logger.warning("Vipps API request failed with %s. Retrying...", type(e).__name__)
+
+            # Exponential backoff with jitter if this is not the last attempt
+            if attempt < max_retries - 1:
+                delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+                _logger.info("Waiting %.2f seconds before next retry.", delay)
+                time.sleep(delay)
         
-        raise ValidationError(_("Maximum retry attempts exceeded."))
+        _logger.error("Vipps API request failed after %d attempts. Last error: %s", max_retries, last_exception)
+        raise ValidationError(_("Maximum retry attempts exceeded. Last error: %s") % last_exception)
 
     @api.constrains('vipps_webhook_secret')
     def _check_webhook_secret_strength(self):
