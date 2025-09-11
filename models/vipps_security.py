@@ -265,7 +265,8 @@ class VippsCredentialAuditLog(models.Model):
                 'user_agent': request_data.get('user_agent'),
             }
             
-            audit_log = self.create(audit_vals)
+            # Use sudo to avoid interrupting main flow due to ACLs
+            audit_log = self.sudo().create(audit_vals)
             
             # Log high-risk actions
             if audit_log.risk_level in ['high', 'critical']:
