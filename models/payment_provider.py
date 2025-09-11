@@ -436,8 +436,8 @@ class PaymentProvider(models.Model):
             
             token_data = response.json()
             access_token = token_data.get('access_token')
-            expires_in = token_data.get('expires_in', 3600)  # Default 1 hour
-            
+#            expires_in = token_data.get('expires_in', 3600)  # Default 1 hour
+            expires_in = int(token_data.get('expires_in', 3600))  # Default 1 hour, ensure integer            
             if not access_token:
                 raise ValidationError(_("No access token received from Vipps API"))
             
