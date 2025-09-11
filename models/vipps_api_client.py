@@ -171,7 +171,11 @@ class VippsAPIClient:
             if response.status_code == 200:
                 token_data = response.json()
                 access_token = token_data.get('access_token')
-                expires_in = token_data.get('expires_in', 3600)
+                # Ensure expires_in is an integer number of seconds
+                try:
+                    expires_in = int(token_data.get('expires_in', 3600))
+                except (TypeError, ValueError):
+                    expires_in = 3600
                 
                 if not access_token:
                     raise VippsAPIException("No access token in response")
