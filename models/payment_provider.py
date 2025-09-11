@@ -69,8 +69,8 @@ class PaymentProvider(models.Model):
         string="Client Secret",
         required_if_provider='vipps',
         groups='base.group_system',
-        help="Client Secret for access token generation"
-        copy=False,
+        help="Client Secret for access token generation",
+        copy=False
     )
     
     # Encrypted credential storage
