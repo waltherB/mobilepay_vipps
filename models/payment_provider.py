@@ -1067,26 +1067,26 @@ class PaymentProvider(models.Model):
         
         return False
     
-    def _update_credential_hash(self, vals):
-        """Update credential hash for integrity verification"""
-        try:
-            security_manager = self._get_security_manager()
-            
-            # Combine all sensitive credentials for hashing
-            credential_data = ""
-            if 'vipps_client_secret' in vals:
-                credential_data += vals.get('vipps_client_secret', '')
-            if 'vipps_subscription_key' in vals:
-                credential_data += vals.get('vipps_subscription_key', '')
-            
-            if credential_data:
-                hash_result = security_manager.hash_sensitive_data(credential_data)
-                vals.update({
-                    'vipps_credential_hash': hash_result['hash'],
-                    'vipps_credential_salt': hash_result['salt']
-                })
-        except Exception as e:
-            _logger.error("Failed to update credential hash: %s", str(e))
+#    def _update_credential_hash(self, vals):
+#        """Update credential hash for integrity verification"""
+#        try:
+#            security_manager = self._get_security_manager()
+#            
+#            # Combine all sensitive credentials for hashing
+#            credential_data = ""
+#            if 'vipps_client_secret' in vals:
+#                credential_data += vals.get('vipps_client_secret', '')
+#            if 'vipps_subscription_key' in vals:
+#                credential_data += vals.get('vipps_subscription_key', '')
+#            
+#            if credential_data:
+#                hash_result = security_manager.hash_sensitive_data(credential_data)
+#                vals.update({
+#                    'vipps_credential_hash': hash_result['hash'],
+#                    'vipps_credential_salt': hash_result['salt']
+#                })
+#        except Exception as e:
+#            _logger.error("Failed to update credential hash: %s", str(e))
     
     def _verify_credential_integrity(self):
         """Verify credential integrity using stored hash"""
@@ -1675,52 +1675,52 @@ class PaymentProvider(models.Model):
             _logger.error("Failed to encrypt credentials for provider %s: %s", self.name, str(e))
             raise
 
-    def _decrypt_credential(self, credential_type):
-        """Decrypt specific credential"""
-        self.ensure_one()
-        
-        if self.code != 'vipps':
-            return None
-        
-        security_manager = self._get_security_manager()
-        
-        try:
-            # Log credential access
-            self.env['vipps.credential.audit.log'].log_credential_access(
-                self.id, 'decrypt', credential_type
-            )
-            
-            encrypted_field_map = {
-                'client_secret': 'vipps_client_secret_encrypted',
-                'subscription_key': 'vipps_subscription_key_encrypted',
-                'webhook_secret': 'vipps_webhook_secret_encrypted'
-            }
-            
-            encrypted_field = encrypted_field_map.get(credential_type)
-            if not encrypted_field:
-                raise ValidationError(_("Invalid credential type: %s") % credential_type)
-            
-            encrypted_value = getattr(self, encrypted_field)
-            if not encrypted_value:
-                return None
-            
-            decrypted_value = security_manager.decrypt_sensitive_data(encrypted_value)
-            
-            # Log successful decryption
-            self.env['vipps.credential.audit.log'].log_credential_access(
-                self.id, 'decrypt', credential_type, success=True
-            )
-            
-            return decrypted_value
-            
-        except Exception as e:
-            # Log decryption failure
-            self.env['vipps.credential.audit.log'].log_credential_access(
-                self.id, 'decrypt', credential_type, success=False, error_message=str(e)
-            )
-            
-            _logger.error("Failed to decrypt %s for provider %s: %s", credential_type, self.name, str(e))
-            raise
+#    def _decrypt_credential(self, credential_type):
+#        """Decrypt specific credential"""
+#        self.ensure_one()
+#        
+#        if self.code != 'vipps':
+#            return None
+#        
+#        security_manager = self._get_security_manager()
+#        
+#        try:
+#            # Log credential access
+#            self.env['vipps.credential.audit.log'].log_credential_access(
+#                self.id, 'decrypt', credential_type
+#            )
+#            
+#            encrypted_field_map = {
+#                'client_secret': 'vipps_client_secret_encrypted',
+#                'subscription_key': 'vipps_subscription_key_encrypted',
+#                'webhook_secret': 'vipps_webhook_secret_encrypted'
+#            }
+#            
+#            encrypted_field = encrypted_field_map.get(credential_type)
+#            if not encrypted_field:
+#                raise ValidationError(_("Invalid credential type: %s") % credential_type)
+#            
+#            encrypted_value = getattr(self, encrypted_field)
+#            if not encrypted_value:
+#                return None
+#            
+#            decrypted_value = security_manager.decrypt_sensitive_data(encrypted_value)
+#            
+#            # Log successful decryption
+#            self.env['vipps.credential.audit.log'].log_credential_access(
+#                self.id, 'decrypt', credential_type, success=True
+#            )
+#            
+#            return decrypted_value
+#            
+#        except Exception as e:
+#            # Log decryption failure
+#            self.env['vipps.credential.audit.log'].log_credential_access(
+#                self.id, 'decrypt', credential_type, success=False, error_message=str(e)
+#            )
+#            
+#            _logger.error("Failed to decrypt %s for provider %s: %s", credential_type, self.name, str(e))
+#            raise
 
     def _get_secure_client_secret(self):
         """Get client secret (decrypted if encrypted)"""
@@ -1740,7 +1740,7 @@ class PaymentProvider(models.Model):
             return self._decrypt_credential('webhook_secret')
         return self.vipps_webhook_secret
 
-    def _update_credential_hash_v2(self):
+    def _update_credential_hash(self):
         """Update credential integrity hash"""
         self.ensure_one()
         
