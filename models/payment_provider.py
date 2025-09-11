@@ -1745,7 +1745,7 @@ class PaymentProvider(models.Model):
             return self._decrypt_credential('webhook_secret')
         return self.vipps_webhook_secret
 
-    def _update_credential_hash(self):
+    def _update_credential_hash(self, vals=None):
         """Update credential integrity hash"""
         self.ensure_one()
         
@@ -1755,17 +1755,23 @@ class PaymentProvider(models.Model):
         security_manager = self._get_security_manager()
         
         # Create hash of all encrypted credentials
-        credential_data = {
-            'client_secret': self.vipps_client_secret_encrypted or '',
-            'subscription_key': self.vipps_subscription_key_encrypted or '',
-            'webhook_secret': self.vipps_webhook_secret_encrypted or '',
-            'merchant_serial': self.vipps_merchant_serial_number or '',
-            'client_id': self.vipps_client_id or '',
-        }
+        vals = vals or {}
         
-        credential_string = json.dumps(credential_data, sort_keys=True)
-        hash_result = security_manager.hash_sensitive_data(credential_string)
-        self.vipps_credential_hash = hash_result['hash']
+        # Combine all sensitive credentials for hashing
+        # This part seems to be duplicated from another version of the file.
+        # The logic from the other `_update_credential_hash` is more appropriate here.
+        credential_data = ""
+        if 'vipps_client_secret' in vals:
+            credential_data += vals.get('vipps_client_secret', '') or ''
+        if 'vipps_subscription_key' in vals:
+            credential_data += vals.get('vipps_subscription_key', '') or ''
+
+        if credential_data:
+            hash_result = security_manager.hash_sensitive_data(credential_data)
+            self.sudo().write({
+                'vipps_credential_hash': hash_result['hash'],
+                'vipps_credential_salt': hash_result['salt']
+            })
 
     def _verify_credential_integrity(self):
         """Verify credential integrity using stored hash"""
