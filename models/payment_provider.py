@@ -427,9 +427,9 @@ class PaymentProvider(models.Model):
             
             response = requests.post(token_url, headers=headers, timeout=30)
             if response.status_code != 200:
-                error_msg = f"Vipps API fejl i {token_url}. Status: {response.status_code}, Besked: {response.text}"
-               _logger.error(error_msg)
-               raise ValidationError(_(error_msg))
+		    	error_msg = f"Vipps API fejl i {token_url}. Status: {response.status_code}, Besked: {response.text}"
+			    _logger.error(error_msg)
+			    raise ValidationError(_(error_msg))
             
             response.raise_for_status()
             
