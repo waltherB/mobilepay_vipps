@@ -61,17 +61,16 @@ class VippsAPIClient:
         if not self.provider or self.provider.code != 'vipps':
             raise VippsAPIException("Invalid provider: must be a Vipps payment provider")
         
-        required_fields = [
-            'vipps_merchant_serial_number',
-            'vipps_subscription_key',
-            'vipps_client_id',
-            'vipps_client_secret'
-        ]
-        
+        # Accept either plaintext or encrypted (decrypted) values
         missing_fields = []
-        for field in required_fields:
-            if not getattr(self.provider, field):
-                missing_fields.append(field)
+        if not self.provider.vipps_merchant_serial_number:
+            missing_fields.append('vipps_merchant_serial_number')
+        if not (getattr(self.provider, 'vipps_subscription_key_decrypted', None) or self.provider.vipps_subscription_key):
+            missing_fields.append('vipps_subscription_key')
+        if not self.provider.vipps_client_id:
+            missing_fields.append('vipps_client_id')
+        if not (getattr(self.provider, 'vipps_client_secret_decrypted', None) or self.provider.vipps_client_secret):
+            missing_fields.append('vipps_client_secret')
         
         if missing_fields:
             raise VippsAPIException(
@@ -110,8 +109,8 @@ class VippsAPIClient:
         """Get authentication headers for access token requests"""
         return {
             'client_id': self.provider.vipps_client_id,
-            'client_secret': self.provider.vipps_client_secret,
-            'Ocp-Apim-Subscription-Key': self.provider.vipps_subscription_key,
+            'client_secret': getattr(self.provider, 'vipps_client_secret_decrypted', None) or self.provider.vipps_client_secret,
+            'Ocp-Apim-Subscription-Key': getattr(self.provider, 'vipps_subscription_key_decrypted', None) or self.provider.vipps_subscription_key,
             'Merchant-Serial-Number': self.provider.vipps_merchant_serial_number,
         }
 
@@ -128,7 +127,7 @@ class VippsAPIClient:
         """
         headers = self._get_system_headers()
         headers.update({
-            'Ocp-Apim-Subscription-Key': self.provider.vipps_subscription_key,
+            'Ocp-Apim-Subscription-Key': getattr(self.provider, 'vipps_subscription_key_decrypted', None) or self.provider.vipps_subscription_key,
             'Merchant-Serial-Number': self.provider.vipps_merchant_serial_number,
         })
         
@@ -516,7 +515,7 @@ class VippsAPIClient:
         Returns:
             bool: True if signature is valid
         """
-        if not self.provider.vipps_webhook_secret:
+        if not (getattr(self.provider, 'vipps_webhook_secret_decrypted', None) or self.provider.vipps_webhook_secret):
             _logger.warning("Webhook secret not configured for provider %s", self.provider.name)
             return False
         
@@ -525,7 +524,7 @@ class VippsAPIClient:
             message = f"{timestamp}.{payload}"
             
             expected_signature = hmac.new(
-                self.provider.vipps_webhook_secret.encode('utf-8'),
+                (getattr(self.provider, 'vipps_webhook_secret_decrypted', None) or self.provider.vipps_webhook_secret).encode('utf-8'),
                 message.encode('utf-8'),
                 hashlib.sha256
             ).hexdigest()

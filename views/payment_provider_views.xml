@@ -233,13 +233,13 @@
                     </group>
 
                     <!-- Status Indicators -->
-                    <div class="alert alert-success" role="status"
+                    <div class="alert alert-success" role="status" groups="base.group_system"
                          invisible="code != 'vipps' or not vipps_credentials_validated or state == 'disabled'">
                         <i class="fa fa-check-circle" title="Success" role="img" aria-label="Success icon"/> 
                         <strong>Ready:</strong> Vipps/MobilePay is configured and ready to process payments.
                     </div>
                     
-                    <div class="alert alert-warning" role="alert"
+                    <div class="alert alert-warning" role="alert" groups="base.group_system"
                          invisible="code != 'vipps' or vipps_credentials_validated">
                         <i class="fa fa-exclamation-triangle" title="Warning" role="img" aria-label="Warning icon"/> 
                         <strong>Configuration Required:</strong> Please configure and validate your API credentials above.
