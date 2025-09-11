@@ -480,9 +480,9 @@ class PaymentProvider(models.Model):
         # Check required fields (including encrypted versions)
         required_credentials = {
             'vipps_merchant_serial_number': self.vipps_merchant_serial_number,
-            'vipps_subscription_key': self.vipps_subscription_key_decrypted,
+            'vipps_subscription_key': self.vipps_subscription_key_decrypted or self.vipps_subscription_key,
             'vipps_client_id': self.vipps_client_id,
-            'vipps_client_secret': self.vipps_client_secret_decrypted
+            'vipps_client_secret': self.vipps_client_secret_decrypted or self.vipps_client_secret
         }
         
         missing_fields = []
