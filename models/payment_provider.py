@@ -853,6 +853,8 @@ class PaymentProvider(models.Model):
             'vipps_environment'
         ]
         
+        res = super().write(vals)
+        
         # Check if any credential fields are being changed
         credential_changed = any(field in vals for field in credential_fields)
         
@@ -866,34 +868,37 @@ class PaymentProvider(models.Model):
                         additional_info="Credential update initiated"
                     )
             
-            # Encrypt sensitive credentials before storing
-            if 'vipps_client_secret' in vals and vals['vipps_client_secret']:
-                vals['vipps_client_secret_encrypted'] = self._encrypt_credential(vals['vipps_client_secret'])
-                vals['vipps_client_secret'] = False  # Clear plaintext
-            
-            if 'vipps_subscription_key' in vals and vals['vipps_subscription_key']:
-                vals['vipps_subscription_key_encrypted'] = self._encrypt_credential(vals['vipps_subscription_key'])
-                vals['vipps_subscription_key'] = False  # Clear plaintext
-            
-            if 'vipps_webhook_secret' in vals and vals['vipps_webhook_secret']:
-                vals['vipps_webhook_secret_encrypted'] = self._encrypt_credential(vals['vipps_webhook_secret'])
-                vals['vipps_webhook_secret'] = False  # Clear plaintext
-            
-            # Update security metadata
-            vals.update({
-                'vipps_credentials_validated': False,
-                'vipps_access_token': False,
-                'vipps_token_expires_at': False,
-                'vipps_last_validation_error': False,
-                'vipps_credentials_encrypted': True,
-                'vipps_last_credential_update': fields.Datetime.now(),
-            })
-            
-            # Generate credential hash for integrity verification
-            if any(f in vals for f in ['vipps_client_secret', 'vipps_subscription_key']):
-                self._update_credential_hash(vals)
-        
-        result = super().write(vals)
+            # Use a separate dictionary for the update to avoid modifying `vals`
+            update_data = {}
+            for record in self:
+                if record.code == 'vipps':
+                    # Encrypt sensitive credentials after storing
+                    if 'vipps_client_secret' in vals and vals.get('vipps_client_secret'):
+                        update_data['vipps_client_secret_encrypted'] = record._encrypt_credential(vals['vipps_client_secret'])
+                        update_data['vipps_client_secret'] = False  # Clear plaintext
+                    
+                    if 'vipps_subscription_key' in vals and vals.get('vipps_subscription_key'):
+                        update_data['vipps_subscription_key_encrypted'] = record._encrypt_credential(vals['vipps_subscription_key'])
+                        update_data['vipps_subscription_key'] = False  # Clear plaintext
+                    
+                    if 'vipps_webhook_secret' in vals and vals.get('vipps_webhook_secret'):
+                        update_data['vipps_webhook_secret_encrypted'] = record._encrypt_credential(vals['vipps_webhook_secret'])
+                        update_data['vipps_webhook_secret'] = False  # Clear plaintext
+                    
+                    # Update security metadata
+                    update_data.update({
+                        'vipps_credentials_validated': False,
+                        'vipps_access_token': False,
+                        'vipps_token_expires_at': False,
+                        'vipps_last_validation_error': False,
+                        'vipps_credentials_encrypted': True,
+                        'vipps_last_credential_update': fields.Datetime.now(),
+                    })
+                    
+                    # Generate credential hash for integrity verification
+                    record._update_credential_hash(vals)
+                    
+                    record.sudo().write(update_data)
         
         # Log successful credential update
         if credential_changed:
@@ -906,7 +911,7 @@ class PaymentProvider(models.Model):
                         additional_info="Credential update completed successfully"
                     )
         
-        return result
+        return res
 
     def _track_api_call(self, success=True):
         """Track API call statistics for monitoring"""
