@@ -54,6 +54,7 @@ class PaymentProvider(models.Model):
     vipps_subscription_key = fields.Char(
         string="Subscription Key",
         required_if_provider='vipps',
+        copy=False,
         groups='base.group_system',
         help="Ocp-Apim-Subscription-Key for API access"
     )
@@ -61,6 +62,7 @@ class PaymentProvider(models.Model):
         string="Client ID",
         required_if_provider='vipps',
         groups='base.group_system',
+        copy=False,
         help="Client ID for access token generation"
     )
     vipps_client_secret = fields.Char(
@@ -68,6 +70,7 @@ class PaymentProvider(models.Model):
         required_if_provider='vipps',
         groups='base.group_system',
         help="Client Secret for access token generation"
+        copy=False,
     )
     
     # Encrypted credential storage
@@ -196,6 +199,7 @@ class PaymentProvider(models.Model):
     vipps_webhook_secret = fields.Char(
         string="Webhook Secret",
         groups='base.group_system',
+        copy=False,
         help="Secret key for webhook signature validation"
     )
     
@@ -415,10 +419,12 @@ class PaymentProvider(models.Model):
         # Request new access token
         try:
             token_url = self._get_vipps_access_token_url()
+            client_secret = self.vipps_client_secret_decrypted or self.vipps_client_secret
+            subscription_key = self.vipps_subscription_key_decrypted or self.vipps_subscription_key
             headers = {
                 'client_id': self.vipps_client_id,
-                'client_secret': self.vipps_client_secret_decrypted,
-                'Ocp-Apim-Subscription-Key': self.vipps_subscription_key_decrypted,
+                'client_secret': client_secret,
+                'Ocp-Apim-Subscription-Key': subscription_key,
                 'Merchant-Serial-Number': self.vipps_merchant_serial_number,
                 'Vipps-System-Name': 'Odoo',
                 'Vipps-System-Version': '17.0',
@@ -426,13 +432,8 @@ class PaymentProvider(models.Model):
                 'Vipps-System-Plugin-Version': '1.0.0',
             }
             
-            response = requests.post(token_url, headers=headers, timeout=30)
-            if response.status_code != 200:
-                error_msg = f"Vipps API fejl i {token_url}. Status: {response.status_code}, Besked: {response.text}"
-                _logger.error(error_msg)
-                raise ValidationError(_(error_msg))
-            
-            response.raise_for_status()
+            response = requests.post(token_url, headers=headers, timeout=15)
+            response.raise_for_status() # This will raise an HTTPError for 4xx/5xx responses
             
             token_data = response.json()
             access_token = token_data.get('access_token')
@@ -454,21 +455,22 @@ class PaymentProvider(models.Model):
             return access_token
             
         except requests.exceptions.RequestException as e:
-            error_msg = f"Failed to obtain access token: {str(e)}"
+            error_msg = _("Failed to obtain access token due to a network error: %s") % str(e)
             _logger.error("Vipps access token request failed for provider %s: %s", self.name, error_msg)
             self.sudo().write({
                 'vipps_credentials_validated': False,
                 'vipps_last_validation_error': error_msg,
             })
-            raise ValidationError(_(error_msg))
+            raise ValidationError(error_msg)
         except Exception as e:
-            error_msg = f"Unexpected error obtaining access token: {str(e)}"
+            # This could be a JSON decode error or something else
+            error_msg = _("An unexpected error occurred while obtaining the access token: %s") % str(e)
             _logger.error("Unexpected error in Vipps token request for provider %s: %s", self.name, error_msg)
             self.sudo().write({
                 'vipps_credentials_validated': False,
                 'vipps_last_validation_error': error_msg,
             })
-            raise ValidationError(_(error_msg))
+            raise ValidationError(error_msg)
 
     def _validate_vipps_credentials(self):
         """Validate API credentials by attempting to fetch an access token"""

@@ -8,13 +8,13 @@
                 <div invisible="code != 'vipps'">
                     
                     <!-- Environment Selection -->
-                    <group string="Environment Configuration" col="2">
+                    <group string="Environment Configuration">
                         <field name="vipps_environment" widget="radio" options="{'horizontal': true}"/>
-                        <div colspan="2" class="alert alert-info" invisible="vipps_environment != 'test'">
+                        <div colspan="2" class="alert alert-info" role="alert" invisible="vipps_environment != 'test'">
                             <strong>Test Environment:</strong> Use this for development and testing. 
                             Test payments will not process real money.
                         </div>
-                        <div colspan="2" class="alert alert-warning" invisible="vipps_environment != 'production'">
+                        <div colspan="2" class="alert alert-warning" role="alert" invisible="vipps_environment != 'production'">
                             <strong>Production Environment:</strong> Real payments will be processed. 
                             Ensure all testing is complete before enabling.
                         </div>
@@ -73,21 +73,21 @@
                     </group>
 
                     <!-- Profile Collection Configuration -->
-                    <group string="Profile Information Collection" col="2" invisible="not vipps_collect_user_info">
+                    <group string="Profile Information Collection" invisible="not vipps_collect_user_info">
                         <field name="vipps_profile_scope" widget="radio"/>
                         <field name="vipps_custom_scopes" 
                                invisible="vipps_profile_scope != 'custom'" required="vipps_profile_scope == 'custom'"/>
                         <field name="vipps_data_retention_days"/>
                         <field name="vipps_auto_update_partners"/>
                         <field name="vipps_require_consent"/>
-                        <div colspan="2" class="alert alert-info">
+                        <div colspan="2" class="alert alert-info" role="alert">
                             <strong>Privacy Notice:</strong> Collecting customer information requires compliance with GDPR and local privacy laws. 
                             Ensure you have proper consent mechanisms and data protection policies in place.
                         </div>
-                        <div colspan="2" class="alert alert-info" invisible="vipps_capture_mode != 'manual'">
+                        <div colspan="2" class="alert alert-info" role="alert" invisible="vipps_capture_mode != 'manual'">
                             <strong>Manual Capture:</strong> Payments will be authorized but not captured until you manually capture them or ship the order. This complies with legal requirements for ecommerce.
                         </div>
-                        <div colspan="2" class="alert alert-warning" invisible="vipps_capture_mode != 'automatic'">
+                        <div colspan="2" class="alert alert-warning" role="alert" invisible="vipps_capture_mode != 'automatic'">
                             <strong>Automatic Capture:</strong> Payments will be immediately captured upon authorization. Only use this for Point of Sale transactions.
                         </div>
                     </group>
@@ -114,11 +114,11 @@
                                 type="object" 
                                 class="btn-info"
                                 help="View credential access and modification audit trail"/>
-                        <div colspan="2" class="alert alert-success" invisible="not vipps_credentials_encrypted">
-                            <i class="fa fa-shield"/> <strong>Credentials Encrypted:</strong> All sensitive data is encrypted at rest.
+                        <div colspan="2" class="alert alert-success" role="status" invisible="not vipps_credentials_encrypted">
+                            <i class="fa fa-shield" title="Security" role="img" aria-label="Security icon"/> <strong>Credentials Encrypted:</strong> All sensitive data is encrypted at rest.
                         </div>
-                        <div colspan="2" class="alert alert-warning" invisible="vipps_credentials_encrypted">
-                            <i class="fa fa-exclamation-triangle"/> <strong>Security Notice:</strong> Credentials are stored in plaintext. Click "Encrypt Credentials" to secure them.
+                        <div colspan="2" class="alert alert-warning" role="alert" invisible="vipps_credentials_encrypted">
+                            <i class="fa fa-exclamation-triangle" title="Warning" role="img" aria-label="Warning icon"/> <strong>Security Notice:</strong> Credentials are stored in plaintext. Click "Encrypt Credentials" to secure them.
                         </div>
                     </group>
 
@@ -217,7 +217,7 @@
                         </div>
                         
                         <!-- Compliance Requirements -->
-                        <div class="alert alert-info">
+                        <div class="alert alert-info" role="status">
                             <h5><i class="fa fa-info-circle"/> Integration Requirements</h5>
                             <p>This integration implements all requirements from the Vipps/MobilePay integration checklists:</p>
                             <ul>
@@ -233,15 +233,15 @@
                     </group>
 
                     <!-- Status Indicators -->
-                    <div class="alert alert-success" 
+                    <div class="alert alert-success" role="status"
                          invisible="code != 'vipps'">
-                        <i class="fa fa-check-circle"/> 
+                        <i class="fa fa-check-circle" title="Success" role="img" aria-label="Success icon"/> 
                         <strong>Ready:</strong> Vipps/MobilePay is configured and ready to process payments.
                     </div>
                     
-                    <div class="alert alert-warning" 
+                    <div class="alert alert-warning" role="alert"
                          invisible="code != 'vipps'">
-                        <i class="fa fa-exclamation-triangle"/> 
+                        <i class="fa fa-exclamation-triangle" title="Warning" role="img" aria-label="Warning icon"/> 
                         <strong>Configuration Required:</strong> Please configure and validate your API credentials above.
                     </div>
 
