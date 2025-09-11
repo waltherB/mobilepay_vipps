@@ -54,7 +54,6 @@ class PaymentProvider(models.Model):
     vipps_subscription_key = fields.Char(
         string="Subscription Key",
         required_if_provider='vipps',
-        copy=False,
         groups='base.group_system',
         help="Ocp-Apim-Subscription-Key for API access"
     )
@@ -62,15 +61,13 @@ class PaymentProvider(models.Model):
         string="Client ID",
         required_if_provider='vipps',
         groups='base.group_system',
-        copy=False,
         help="Client ID for access token generation"
     )
     vipps_client_secret = fields.Char(
         string="Client Secret",
         required_if_provider='vipps',
         groups='base.group_system',
-        help="Client Secret for access token generation",
-        copy=False
+        help="Client Secret for access token generation"
     )
     
     # Encrypted credential storage
@@ -199,7 +196,6 @@ class PaymentProvider(models.Model):
     vipps_webhook_secret = fields.Char(
         string="Webhook Secret",
         groups='base.group_system',
-        copy=False,
         help="Secret key for webhook signature validation"
     )
     
@@ -419,12 +415,10 @@ class PaymentProvider(models.Model):
         # Request new access token
         try:
             token_url = self._get_vipps_access_token_url()
-            client_secret = self.vipps_client_secret_decrypted or self.vipps_client_secret
-            subscription_key = self.vipps_subscription_key_decrypted or self.vipps_subscription_key
             headers = {
                 'client_id': self.vipps_client_id,
-                'client_secret': client_secret,
-                'Ocp-Apim-Subscription-Key': subscription_key,
+                'client_secret': self.vipps_client_secret_decrypted,
+                'Ocp-Apim-Subscription-Key': self.vipps_subscription_key_decrypted,
                 'Merchant-Serial-Number': self.vipps_merchant_serial_number,
                 'Vipps-System-Name': 'Odoo',
                 'Vipps-System-Version': '17.0',
@@ -432,8 +426,13 @@ class PaymentProvider(models.Model):
                 'Vipps-System-Plugin-Version': '1.0.0',
             }
             
-            response = requests.post(token_url, headers=headers, timeout=15)
-            response.raise_for_status() # This will raise an HTTPError for 4xx/5xx responses
+            response = requests.post(token_url, headers=headers, timeout=30)
+            if response.status_code != 200:
+                error_msg = f"Vipps API fejl i {token_url}. Status: {response.status_code}, Besked: {response.text}"
+                _logger.error(error_msg)
+                raise ValidationError(_(error_msg))
+            
+            response.raise_for_status()
             
             token_data = response.json()
             access_token = token_data.get('access_token')
@@ -455,22 +454,21 @@ class PaymentProvider(models.Model):
             return access_token
             
         except requests.exceptions.RequestException as e:
-            error_msg = _("Failed to obtain access token due to a network error: %s") % str(e)
+            error_msg = f"Failed to obtain access token: {str(e)}"
             _logger.error("Vipps access token request failed for provider %s: %s", self.name, error_msg)
             self.sudo().write({
                 'vipps_credentials_validated': False,
                 'vipps_last_validation_error': error_msg,
             })
-            raise ValidationError(error_msg)
+            raise ValidationError(_(error_msg))
         except Exception as e:
-            # This could be a JSON decode error or something else
-            error_msg = _("An unexpected error occurred while obtaining the access token: %s") % str(e)
+            error_msg = f"Unexpected error obtaining access token: {str(e)}"
             _logger.error("Unexpected error in Vipps token request for provider %s: %s", self.name, error_msg)
             self.sudo().write({
                 'vipps_credentials_validated': False,
                 'vipps_last_validation_error': error_msg,
             })
-            raise ValidationError(error_msg)
+            raise ValidationError(_(error_msg))
 
     def _validate_vipps_credentials(self):
         """Validate API credentials by attempting to fetch an access token"""
@@ -855,8 +853,8 @@ class PaymentProvider(models.Model):
             'vipps_environment'
         ]
         
-        res = super().write(vals)
-        
+        # Separate vals for encryption to avoid modifying the original `vals`
+        encryption_vals = {}
         # Check if any credential fields are being changed
         credential_changed = any(field in vals for field in credential_fields)
         
@@ -870,37 +868,36 @@ class PaymentProvider(models.Model):
                         additional_info="Credential update initiated"
                     )
             
-            # Use a separate dictionary for the update to avoid modifying `vals`
-            update_data = {}
-            for record in self:
-                if record.code == 'vipps':
-                    # Encrypt sensitive credentials after storing
-                    if 'vipps_client_secret' in vals and vals.get('vipps_client_secret'):
-                        update_data['vipps_client_secret_encrypted'] = record._encrypt_credential(vals['vipps_client_secret'])
-                        update_data['vipps_client_secret'] = False  # Clear plaintext
-                    
-                    if 'vipps_subscription_key' in vals and vals.get('vipps_subscription_key'):
-                        update_data['vipps_subscription_key_encrypted'] = record._encrypt_credential(vals['vipps_subscription_key'])
-                        update_data['vipps_subscription_key'] = False  # Clear plaintext
-                    
-                    if 'vipps_webhook_secret' in vals and vals.get('vipps_webhook_secret'):
-                        update_data['vipps_webhook_secret_encrypted'] = record._encrypt_credential(vals['vipps_webhook_secret'])
-                        update_data['vipps_webhook_secret'] = False  # Clear plaintext
-                    
-                    # Update security metadata
-                    update_data.update({
-                        'vipps_credentials_validated': False,
-                        'vipps_access_token': False,
-                        'vipps_token_expires_at': False,
-                        'vipps_last_validation_error': False,
-                        'vipps_credentials_encrypted': True,
-                        'vipps_last_credential_update': fields.Datetime.now(),
-                    })
-                    
-                    # Generate credential hash for integrity verification
-                    record._update_credential_hash(vals)
-                    
-                    record.sudo().write(update_data)
+            # Encrypt sensitive credentials and prepare for update
+            if 'vipps_client_secret' in vals and vals.get('vipps_client_secret'):
+                encryption_vals['vipps_client_secret_encrypted'] = self._encrypt_credential(vals['vipps_client_secret'])
+            
+            if 'vipps_subscription_key' in vals and vals.get('vipps_subscription_key'):
+                encryption_vals['vipps_subscription_key_encrypted'] = self._encrypt_credential(vals['vipps_subscription_key'])
+            
+            if 'vipps_webhook_secret' in vals and vals.get('vipps_webhook_secret'):
+                encryption_vals['vipps_webhook_secret_encrypted'] = self._encrypt_credential(vals['vipps_webhook_secret'])
+            
+            if encryption_vals:
+                # Update security metadata
+                encryption_vals.update({
+                    'vipps_credentials_validated': False,
+                    'vipps_access_token': False,
+                    'vipps_token_expires_at': False,
+                    'vipps_last_validation_error': False,
+                    'vipps_credentials_encrypted': True,
+                    'vipps_last_credential_update': fields.Datetime.now(),
+                })
+                # Generate credential hash for integrity verification
+                self._update_credential_hash(vals)
+        
+        res = super().write(vals)
+        
+        if credential_changed and encryption_vals:
+            # Now, write the encrypted values and clear the plaintext fields
+            clear_vals = {k: False for k in ['vipps_client_secret', 'vipps_subscription_key', 'vipps_webhook_secret'] if k in vals}
+            encryption_vals.update(clear_vals)
+            self.sudo().write(encryption_vals)
         
         # Log successful credential update
         if credential_changed:
