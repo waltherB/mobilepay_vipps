@@ -1656,7 +1656,7 @@ class PaymentProvider(models.Model):
             self.vipps_last_credential_update = fields.Datetime.now()
             
             # Generate integrity hash
-            self._update_credential_hash()
+            self._update_credential_hash(vals)
             
             # Log successful encryption
             self.env['vipps.credential.audit.log'].log_credential_access(
@@ -1740,7 +1740,7 @@ class PaymentProvider(models.Model):
             return self._decrypt_credential('webhook_secret')
         return self.vipps_webhook_secret
 
-    def _update_credential_hash(self):
+    def _update_credential_hash_v2(self):
         """Update credential integrity hash"""
         self.ensure_one()
         
