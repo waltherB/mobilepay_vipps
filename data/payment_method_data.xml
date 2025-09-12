@@ -11,22 +11,8 @@
 	    <field name="image_128" type="base64" file="mobilepay_vipps/static/description/vipps_mobilepay_logo.svg"/>
         </record>
 
-        <!-- Payment Method for MobilePay -->
-        <record id="payment_method_mobilepay" model="payment.method">
-            <field name="name">MobilePay/Vipps</field>
-            <field name="code">mobilepay</field>
-            <field name="active">True</field>
-            <field name="supported_country_ids" eval="[(6, 0, [
-                ref('base.no'),
-                ref('base.dk'),
-                ref('base.fi')
-            ])]"/>
-            <field name="supported_currency_ids" eval="[(6, 0, [
-                ref('base.NOK'),
-                ref('base.DKK'), 
-                ref('base.EUR')
-            ])]"/>
-        </record>
+        <!-- No separate payment.method created here.
+             We will reuse the core method with code 'mobile_pay' and link to it in code. -->
         
     </data>
 </odoo>

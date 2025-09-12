@@ -1607,17 +1607,18 @@ class PaymentProvider(models.Model):
     def _link_payment_method(self):
         """Link the payment method to this provider"""
         try:
-            # Find the payment method with matching code
-            payment_method = self.env['payment.method'].search([
-                ('code', '=', self.code)
-            ], limit=1)
+            # Prefer the existing core method 'mobile_pay'; fall back to method matching provider code
+            PaymentMethod = self.env['payment.method']
+            payment_method = PaymentMethod.search([('code', '=', 'mobile_pay')], limit=1)
+            if not payment_method:
+                payment_method = PaymentMethod.search([('code', '=', self.code)], limit=1)
             
             if payment_method:
                 # Ensure the payment method is active and has the logo
-                payment_method.write({
-                    'active': True,
-                    'name': 'MobilePay/Vipps',  # Use consistent naming
-                })
+                values = {'active': True}
+                if not payment_method.name or payment_method.name.lower() in ('mobilepay', 'mobile pay', 'vipps', 'mobile_pay'):
+                    values['name'] = 'MobilePay/Vipps'
+                payment_method.write(values)
                 _logger.info("Linked payment method %s to provider %s", payment_method.name, self.name)
             else:
                 _logger.warning("No payment method found with code %s", self.code)
