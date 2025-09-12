@@ -1,152 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    
-    <!-- Profile Scope Configuration Wizard -->
-    <record id="view_vipps_profile_scope_wizard_form" model="ir.ui.view">
+    <record id="vipps_profile_scope_wizard_form_view" model="ir.ui.view">
         <field name="name">vipps.profile.scope.wizard.form</field>
         <field name="model">vipps.profile.scope.wizard</field>
         <field name="arch" type="xml">
-            <form string="Configure Profile Information Collection">
-                <sheet>
-                    <div class="oe_title">
-                        <h1>Profile Information Collection</h1>
-                        <p>Configure what customer information to collect during payments</p>
-                    </div>
-                    
-                    <group>
-                        <group>
-                            <field name="provider_id" invisible="1"/>
-                            <field name="profile_scope" widget="radio"/>
-                            <field name="custom_scopes" invisible="profile_scope != 'custom'" required="profile_scope == 'custom'"/>
-                        </group>
-                        <group>
-                            <field name="data_retention_days"/>
-                            <field name="auto_update_partners"/>
-                            <field name="require_consent"/>
-                        </group>
-                    </group>
-                    
-                    <group string="Scope Preview">
-                        <field name="preview_scopes" readonly="1"/>
-                    </group>
-                    
-                    <div class="alert alert-info" role="alert">
-                        <strong>Privacy Notice:</strong> Collecting customer information requires compliance with GDPR and local privacy laws. 
-                        Ensure you have proper consent mechanisms and data protection policies in place.
-                    </div>
-                </sheet>
+            <form string="Configure Profile Scopes">
+                <group>
+                    <field name="provider_id" invisible="1"/>
+                    <field name="profile_scope" widget="radio"/>
+                    <field name="custom_scopes" widget="many2many_tags"
+                           invisible="profile_scope != 'custom'"/>
+                    <field name="data_retention_days"/>
+                    <field name="auto_update_partners"/>
+                    <field name="require_consent"/>
+                </group>
                 <footer>
-                    <button name="action_apply_configuration" string="Apply Configuration" type="object" class="btn-primary"/>
-                    <button name="action_test_scopes" string="Test Scopes" type="object" class="btn-secondary"/>
+                    <button name="action_apply_configuration" string="Apply" type="object" class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>
     </record>
-
-    <!-- User Information Viewer -->
-    <record id="view_vipps_user_info_viewer_form" model="ir.ui.view">
-        <field name="name">vipps.user.info.viewer.form</field>
-        <field name="model">vipps.user.info.viewer</field>
-        <field name="arch" type="xml">
-            <form string="Collected User Information">
-                <sheet>
-                    <div class="oe_title">
-                        <h1>Collected User Information</h1>
-                        <p>View and manage collected customer data</p>
-                    </div>
-                    
-                    <group>
-                        <group>
-                            <field name="transaction_id" readonly="1"/>
-                            <field name="collection_date" readonly="1"/>
-                            <field name="scopes_collected" readonly="1"/>
-                        </group>
-                        <group>
-                            <field name="retention_expires" readonly="1"/>
-                        </group>
-                    </group>
-                    
-                    <group string="User Data">
-                        <field name="user_data" widget="text" readonly="1"/>
-                    </group>
-                    
-                    <div class="alert alert-warning" role="alert">
-                        <strong>Data Protection:</strong> This information is collected with customer consent and subject to retention policies. 
-                        Handle according to your privacy policy and applicable laws.
-                    </div>
-                </sheet>
-                <footer>
-                    <button name="action_export_user_data" string="Export Data" type="object" class="btn-secondary"/>
-                    <button name="action_delete_user_data" string="Delete Data" type="object" class="btn-danger" 
-                            confirm="Are you sure you want to permanently delete this user data?"/>
-                    <button string="Close" class="btn-secondary" special="cancel"/>
-                </footer>
-            </form>
-        </field>
-    </record>
-
-    <!-- Profile Scope List View -->
-    <record id="view_vipps_profile_scope_tree" model="ir.ui.view">
-        <field name="name">vipps.profile.scope.tree</field>
-        <field name="model">vipps.profile.scope</field>
-        <field name="arch" type="xml">
-            <tree string="Profile Scopes" editable="bottom">
-                <field name="sequence" widget="handle"/>
-                <field name="name"/>
-                <field name="technical_name"/>
-                <field name="description"/>
-                <field name="required_consent"/>
-                <field name="active"/>
-            </tree>
-        </field>
-    </record>
-
-    <record id="view_vipps_profile_scope_form" model="ir.ui.view">
-        <field name="name">vipps.profile.scope.form</field>
-        <field name="model">vipps.profile.scope</field>
-        <field name="arch" type="xml">
-            <form string="Profile Scope">
-                <sheet>
-                    <group>
-                        <group>
-                            <field name="name"/>
-                            <field name="technical_name"/>
-                            <field name="sequence"/>
-                        </group>
-                        <group>
-                            <field name="active"/>
-                            <field name="required_consent"/>
-                        </group>
-                    </group>
-                    <group string="Description">
-                        <field name="description" nolabel="1"/>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
-
-    <!-- Profile Scope Action -->
-    <record id="action_vipps_profile_scope" model="ir.actions.act_window">
-        <field name="name">Profile Scopes</field>
-        <field name="res_model">vipps.profile.scope</field>
-        <field name="view_mode">tree,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Create profile information scopes
-            </p>
-            <p>
-                Define what customer information can be collected during Vipps/MobilePay payments.
-            </p>
-        </field>
-    </record>
-
-    <!-- Menu Items -->
-    <menuitem id="menu_vipps_profile_scopes"
-              name="Profile Scopes"
-              parent="account.menu_finance_configuration"
-              action="action_vipps_profile_scope"
-              sequence="100"/>
-
 </odoo>
