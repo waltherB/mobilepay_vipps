@@ -15,7 +15,6 @@
         <record id="payment_method_mobilepay" model="payment.method">
             <field name="name">MobilePay</field>
             <field name="code">mobilepay</field>
-            <field name="primary_payment_method_id" ref="payment_method_mobilepay"/>
             <field name="supported_country_ids" eval="[(6, 0, [
                 ref('base.no'),
                 ref('base.dk'),
