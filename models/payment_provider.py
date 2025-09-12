@@ -1616,6 +1616,7 @@ class PaymentProvider(models.Model):
                 # Ensure the payment method is active and has the logo
                 payment_method.write({
                     'active': True,
+                    'name': 'MobilePay/Vipps',  # Use consistent naming
                     'image_128': self.image_128,  # Copy logo from provider
                 })
                 _logger.info("Linked payment method %s to provider %s", payment_method.name, self.name)
