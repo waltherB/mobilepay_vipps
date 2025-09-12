@@ -16,7 +16,6 @@
             <field name="name">MobilePay/Vipps</field>
             <field name="code">mobilepay</field>
             <field name="active">True</field>
-            <field name="image_128" type="base64" file="mobilepay_vipps/static/description/vipps_mobilepay_logo.svg"/>
             <field name="supported_country_ids" eval="[(6, 0, [
                 ref('base.no'),
                 ref('base.dk'),
