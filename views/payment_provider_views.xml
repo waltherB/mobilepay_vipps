@@ -69,11 +69,11 @@
                                help="Manual capture is required for ecommerce compliance"/>
                         <field name="vipps_collect_user_info" 
                                help="Collect customer information during payment for improved profiles"/>
-                        <!-- <button name="action_configure_profile_scopes" 
+                        <button name="action_configure_profile_scopes" 
                                 string="Configure Profile Collection" 
                                 type="object" 
                                 class="btn-secondary"
-                                invisible="not vipps_collect_user_info"/> -->
+                                invisible="not vipps_collect_user_info"/>
                     </group>
 
                     <!-- Profile Collection Configuration -->
