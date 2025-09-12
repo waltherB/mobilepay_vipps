@@ -1591,22 +1591,31 @@ class PaymentProvider(models.Model):
 
     def _setup_pos_payment_method(self):
         """Set up POS payment method for Vipps provider"""
-        # Check if POS models are available in the registry
-        if ('pos.payment.method' not in self.env.registry or 
-            'pos.config' not in self.env.registry):
-            _logger.info("POS module not installed - skipping POS payment method setup")
-            return
-            
         try:
-            # Only proceed if the POS models are actually available
-            pos_method_model = self.env.get('pos.payment.method')
-            pos_config_model = self.env.get('pos.config')
+            # Check if POS module is installed by trying to access the models
+            pos_method_model = self.env['pos.payment.method']
+            pos_config_model = self.env['pos.config']
             
-            if not pos_method_model or not pos_config_model:
-                _logger.info("POS models not available - skipping POS setup")
-                return
-                
-            pos_method = pos_method_model._setup_vipps_payment_method(self.id)
+            # Create or find existing POS payment method
+            existing_method = pos_method_model.search([
+                ('use_payment_terminal', '=', 'mobilepay')
+            ], limit=1)
+            
+            if existing_method:
+                pos_method = existing_method
+                _logger.info("Found existing POS payment method for MobilePay")
+            else:
+                # Create new POS payment method
+                pos_method = pos_method_model.create({
+                    'name': 'MobilePay',
+                    'use_payment_terminal': 'mobilepay',
+                    'vipps_enable_qr_flow': True,
+                    'vipps_enable_phone_flow': True,
+                    'vipps_enable_manual_flows': False,
+                    'vipps_payment_timeout': 300,
+                    'vipps_polling_interval': 2,
+                })
+                _logger.info("Created new POS payment method for MobilePay")
             
             # Add to all active POS configurations
             pos_configs = pos_config_model.search([('state', '!=', 'disabled')])
@@ -1616,7 +1625,7 @@ class PaymentProvider(models.Model):
                         'payment_method_ids': [(4, pos_method.id)]
                     })
             
-            _logger.info("Set up POS payment method for Vipps provider: %s", self.name)
+            _logger.info("Set up POS payment method for MobilePay provider: %s", self.name)
             
         except Exception as e:
             _logger.warning("Failed to set up POS payment method for provider %s: %s", self.name, str(e))    
