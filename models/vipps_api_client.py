@@ -58,7 +58,7 @@ class VippsAPIClient:
 
     def _validate_provider(self):
         """Validate that provider has required Vipps configuration"""
-        if not self.provider or self.provider.code != 'vipps':
+        if not self.provider or self.provider.code not in ('vipps', 'mobilepay'):
             raise VippsAPIException("Invalid provider: must be a Vipps payment provider")
         
         # Accept either plaintext or encrypted (decrypted) values
