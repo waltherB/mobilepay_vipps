@@ -1210,6 +1210,22 @@ class PaymentProvider(models.Model):
             'context': {'default_provider_id': self.id},
         }
 
+    def action_configure_profile_scopes(self):
+        """Open profile scope configuration wizard from provider form.
+        This matches the button `name` used in `views/payment_provider_views.xml`.
+        """
+        self.ensure_one()
+        return {
+            'name': _('Configure Profile Information Collection'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'vipps.profile.scope.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_provider_id': self.id,
+            }
+        }
+
     @api.model
     def _auto_encrypt_new_credentials(self):
         """Auto-encrypt credentials for new providers (called by cron)"""
