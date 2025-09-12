@@ -1572,7 +1572,7 @@ class PaymentProvider(models.Model):
         """Override create to set up default configuration"""
         provider = super().create(vals)
         
-        if provider.code == 'vipps':
+        if provider.code in ('vipps', 'mobilepay'):
             # Set default profile scopes if not specified
             if not provider.vipps_custom_scopes:
                 default_scopes = self.env['vipps.profile.scope'].search([
@@ -1586,8 +1586,44 @@ class PaymentProvider(models.Model):
                 provider._setup_pos_payment_method()
             except Exception as e:
                 _logger.info("POS setup skipped: %s", str(e))
+            
+            # Link payment method to provider
+            provider._link_payment_method()
         
         return provider
+
+    def write(self, vals):
+        """Override write to handle state changes"""
+        result = super().write(vals)
+        
+        # If state is being changed to enabled/test, ensure payment method is linked
+        if 'state' in vals and vals['state'] in ('enabled', 'test'):
+            for provider in self:
+                if provider.code in ('vipps', 'mobilepay'):
+                    provider._link_payment_method()
+        
+        return result
+
+    def _link_payment_method(self):
+        """Link the payment method to this provider"""
+        try:
+            # Find the payment method with matching code
+            payment_method = self.env['payment.method'].search([
+                ('code', '=', self.code)
+            ], limit=1)
+            
+            if payment_method:
+                # Ensure the payment method is active and has the logo
+                payment_method.write({
+                    'active': True,
+                    'image_128': self.image_128,  # Copy logo from provider
+                })
+                _logger.info("Linked payment method %s to provider %s", payment_method.name, self.name)
+            else:
+                _logger.warning("No payment method found with code %s", self.code)
+                
+        except Exception as e:
+            _logger.error("Failed to link payment method for provider %s: %s", self.name, str(e))
 
     def _setup_pos_payment_method(self):
         """Set up POS payment method for Vipps provider"""
