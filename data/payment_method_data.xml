@@ -11,8 +11,11 @@
 	    <field name="image_128" type="base64" file="mobilepay_vipps/static/description/vipps_mobilepay_logo.svg"/>
         </record>
 
-        <!-- No separate payment.method created here.
-             We will reuse the core method with code 'mobile_pay' and link to it in code. -->
+        <record id="payment_method_mobilepay" model="payment.method">
+            <field name="name">MobilePay</field>
+            <field name="code">mobilepay</field>
+            <field name="active" eval="True"/>
+        </record>
         
     </data>
 </odoo>
