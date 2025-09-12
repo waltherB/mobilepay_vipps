@@ -10,6 +10,30 @@
             <!-- Set official Vipps/MobilePay approved logo on the provider record -->
 	    <field name="image_128" type="base64" file="mobilepay_vipps/static/description/vipps_mobilepay_logo.svg"/>
         </record>
+
+        <!-- Payment Method for MobilePay -->
+        <record id="payment_method_mobilepay" model="payment.method">
+            <field name="name">MobilePay</field>
+            <field name="code">mobilepay</field>
+            <field name="primary_payment_method_id" ref="payment_method_mobilepay"/>
+            <field name="supported_country_ids" eval="[(6, 0, [
+                ref('base.no'),
+                ref('base.dk'),
+                ref('base.fi')
+            ])]"/>
+            <field name="supported_currency_ids" eval="[(6, 0, [
+                ref('base.NOK'),
+                ref('base.DKK'), 
+                ref('base.EUR')
+            ])]"/>
+        </record>
+
+        <!-- Payment Method Line to link MobilePay method to MobilePay provider -->
+        <record id="payment_method_line_mobilepay" model="payment.method.line">
+            <field name="name">MobilePay</field>
+            <field name="payment_method_id" ref="payment_method_mobilepay"/>
+            <field name="provider_ids" eval="[(4, ref('payment_provider_vipps_mobilepay'))]"/>
+        </record>
         
     </data>
 </odoo>
