@@ -120,7 +120,7 @@ Website: https://github.com/waltherB/mobilepay_vipps
     'price': 0.00,
     'currency': 'EUR',
     'support': 'community',
-    'maintainer': 'Vipps/MobilePay Integration Team',
+    'maintainer': 'GDP and Community',
     'contributors': [
         'Development Team',
         'Security Team',

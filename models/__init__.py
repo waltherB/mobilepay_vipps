@@ -1,5 +1,6 @@
 from . import vipps_profile_wizard
 from . import payment_provider
+from . import payment_provider_audit
 from . import payment_transaction
 from . import res_partner
 
