@@ -113,11 +113,7 @@
                                 type="object" 
                                 class="btn-secondary"
                                 help="Configure automatic credential rotation schedule"/>
-                        <button name="action_view_credential_audit_log" 
-                                string="View Audit Log" 
-                                type="object" 
-                                class="btn-info"
-                                help="View credential access and modification audit trail"/>
+                        <!-- Audit log functionality will be added in future version -->
                         <div colspan="2" class="alert alert-success" role="status" invisible="not vipps_credentials_encrypted">
                             <i class="fa fa-shield" title="Security" role="img" aria-label="Security icon"/> <strong>Credentials Encrypted:</strong> All sensitive data is encrypted at rest.
                         </div>
@@ -134,11 +130,7 @@
                         <field name="vipps_webhook_secret" 
                                password="True"
                                help="Secret key for webhook signature validation"/>
-                        <button name="action_generate_webhook_secret" 
-                                string="Generate New Secret" 
-                                type="object" 
-                                class="btn-secondary"
-                                help="Generate a new cryptographically secure webhook secret"/>
+                        <!-- Webhook secret generation will be added in future version -->
                     </group>
 
                     <!-- Webhook Security Configuration -->
@@ -154,16 +146,7 @@
                         <field name="vipps_webhook_allowed_ips" 
                                placeholder="213.52.3.0/24, 213.52.4.0/24"
                                help="Comma-separated list of allowed IP addresses or CIDR ranges"/>
-                        <button name="action_test_webhook_security" 
-                                string="Test Webhook Security" 
-                                type="object" 
-                                class="btn-info"
-                                help="Test webhook security configuration"/>
-                        <button name="action_view_webhook_security_logs" 
-                                string="View Security Logs" 
-                                type="object" 
-                                class="btn-secondary"
-                                help="View webhook security event logs"/>
+                        <!-- Webhook security testing will be added in future version -->
                     </group>
 
                     <!-- Compliance & Monitoring -->
@@ -171,16 +154,7 @@
                         <field name="vipps_api_call_count" readonly="1"/>
                         <field name="vipps_error_count" readonly="1"/>
                         <field name="vipps_last_api_call" readonly="1"/>
-                        <button name="action_show_compliance_status" 
-                                string="Check Compliance Status" 
-                                type="object" 
-                                class="btn-info"
-                                help="Verify integration compliance with Vipps requirements"/>
-                        <button name="action_test_api_connection" 
-                                string="Test API Connection" 
-                                type="object" 
-                                class="btn-secondary"
-                                help="Test API connectivity and authentication"/>
+                        <!-- Compliance and API testing will be added in future version -->
                     </group>
 
                     <!-- Token Information (Read-only) -->

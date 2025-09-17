@@ -147,6 +147,29 @@ class PaymentTransaction(models.Model):
         # Default to ecommerce for compliance (manual capture)
         return 'ecommerce'
 
+    def _get_effective_capture_mode(self):
+        """
+        Get the effective capture mode based on provider configuration and payment context
+        
+        Returns:
+            str: 'manual' or 'automatic' based on context and configuration
+        """
+        self.ensure_one()
+        
+        # Get provider capture mode setting
+        provider_mode = self.provider_id.vipps_capture_mode
+        
+        # If provider is set to context_aware, determine based on payment context
+        if provider_mode == 'context_aware':
+            payment_context = self._get_payment_context()
+            if payment_context == 'pos':
+                return 'automatic'  # POS payments should be captured immediately
+            else:
+                return 'manual'     # eCommerce payments should be captured manually
+        
+        # Otherwise use the provider's explicit setting
+        return provider_mode
+
     def _generate_vipps_reference(self):
         """Generate unique payment reference for Vipps"""
         self.ensure_one()
@@ -315,9 +338,7 @@ class PaymentTransaction(models.Model):
             # Handle order confirmation based on payment state
             if current_state == 'AUTHORIZED':
                 # Determine effective capture mode based on context
-                effective_capture_mode = self.provider_id._get_effective_capture_mode(
-                    context=self._get_payment_context()
-                )
+                effective_capture_mode = self._get_effective_capture_mode()
                 
                 # For manual capture mode (ecommerce compliance), authorized is success
                 if effective_capture_mode == 'manual':
@@ -1800,9 +1821,7 @@ class PaymentTransaction(models.Model):
         
         try:
             # For automatic capture mode, capture the payment if only authorized
-            effective_capture_mode = self.provider_id._get_effective_capture_mode(
-                context=self._get_payment_context()
-            )
+            effective_capture_mode = self._get_effective_capture_mode()
             if (effective_capture_mode == 'automatic' and 
                 self.vipps_payment_state == 'AUTHORIZED'):
                 self._capture_payment()
