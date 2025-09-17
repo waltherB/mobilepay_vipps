@@ -74,3 +74,21 @@ The module should now:
 2. Show the payment provider configuration form
 3. Use automatic capture for POS payments and manual capture for eCommerce
 4. Display Danish translations where available
+## Add
+itional Fix Applied
+
+### ✅ **Fixed Published Field Issue**
+**Problem**: The view referenced a `published` field that doesn't exist in the payment.provider model.
+
+**Root Cause**: The field for controlling eCommerce availability is called `is_published` and requires the `website_sale` module.
+
+**Solution**: 
+- Added `website_sale` to module dependencies
+- Changed field reference from `published` to `is_published`
+- This field controls whether the payment provider appears in eCommerce checkout
+
+**Files Modified**:
+- `__manifest__.py` (added website_sale dependency)
+- `views/payment_provider_views.xml` (corrected field name)
+
+The `is_published` field is indeed the standard Odoo field for controlling whether a payment provider is available for customers to select during eCommerce checkout.

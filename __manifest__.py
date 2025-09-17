@@ -81,6 +81,7 @@ Website: https://github.com/waltherB/mobilepay_vipps
     'depends': [
         'base',
         'payment',
+        'website_sale',
     ],
     'data': [
         # Security

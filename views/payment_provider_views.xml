@@ -5,8 +5,8 @@
         <field name="inherit_id" ref="payment.payment_provider_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='state']" position="after">
-                <!-- Publish toggle -->
-                <field name="published" widget="boolean_toggle"/>
+                <!-- Publish toggle for eCommerce availability -->
+                <field name="is_published" widget="boolean_toggle"/>
             </xpath>
             <xpath expr="//field[@name='code']" position="after">
                 <div invisible="code not in ('vipps','mobilepay')">

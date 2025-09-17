@@ -41,8 +41,8 @@ class PaymentProvider(models.Model):
     _inherit = 'payment.provider'
 
     code = fields.Selection(
-        selection_add=[('vipps', 'Vipps/MobilePay'), ('mobilepay', 'MobilePay')],
-        ondelete={'vipps': 'set default', 'mobilepay': 'set default'}
+        selection_add=[('vipps', 'Vipps/MobilePay')],
+        ondelete={'vipps': 'set default'}
     )
     
     # Core Configuration Fields
