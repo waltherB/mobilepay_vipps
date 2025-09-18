@@ -368,6 +368,17 @@ class PaymentProvider(models.Model):
         
         return scope_mapping.get(self.vipps_profile_scope, [])
 
+    def _track_api_call(self, success=True):
+        """Track API call statistics for monitoring"""
+        self.ensure_one()
+        
+        # Update API call statistics
+        self.sudo().write({
+            'vipps_last_api_call': fields.Datetime.now(),
+            'vipps_api_call_count': self.vipps_api_call_count + 1,
+            'vipps_error_count': self.vipps_error_count + (0 if success else 1)
+        })
+
     @api.model
     def _get_supported_currencies(self):
         """Return supported currencies for Vipps/MobilePay"""

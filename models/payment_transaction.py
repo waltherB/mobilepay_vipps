@@ -295,14 +295,10 @@ class PaymentTransaction(models.Model):
                 "paymentMethod": {
                     "type": "WALLET"
                 },
-                "customer": {
-                    "phoneNumber": self.partner_phone or ""
-                },
                 "merchantInfo": {
                     "merchantSerialNumber": self.provider_id.vipps_merchant_serial_number,
                     "callbackPrefix": self.provider_id._get_vipps_webhook_url(),
-                    "fallBack": self._get_return_url(),
-                    "callbackAuthorizationToken": self.provider_id.vipps_webhook_secret or ""
+                    "fallBack": self._get_return_url()
                 },
                 "transaction": {
                     "amount": {
@@ -314,6 +310,16 @@ class PaymentTransaction(models.Model):
                 },
                 "userFlow": "WEB_REDIRECT"
             }
+            
+            # Add customer phone number if available
+            if hasattr(self, 'partner_phone') and self.partner_phone:
+                payload["customer"] = {
+                    "phoneNumber": self.partner_phone
+                }
+            
+            # Add callback authorization token if configured
+            if self.provider_id.vipps_webhook_secret:
+                payload["merchantInfo"]["callbackAuthorizationToken"] = self.provider_id.vipps_webhook_secret
 
             # Add profile scope if user info collection is enabled
             if self.provider_id.vipps_collect_user_info:

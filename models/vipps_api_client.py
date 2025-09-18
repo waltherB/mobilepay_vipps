@@ -306,12 +306,20 @@ class VippsAPIClient:
         error_code = error_data.get('type', 'UNKNOWN_ERROR')
         error_detail = error_data.get('detail', f'HTTP {response.status_code}')
         trace_id = error_data.get('traceId', 'N/A')
+        extra_details = error_data.get('extraDetails', [])
         
-        # Log comprehensive error information
-        _logger.error(
-            "Vipps API error in %s for provider %s: %s (Code: %s, TraceId: %s, Status: %d)",
-            operation, self.provider.name, error_detail, error_code, trace_id, response.status_code
-        )
+        # Log comprehensive error information including extraDetails
+        if extra_details:
+            extra_info = "; ".join([f"{detail.get('name', 'Unknown')}: {detail.get('reason', 'No reason')}" for detail in extra_details])
+            _logger.error(
+                "Vipps API error in %s for provider %s: %s (Code: %s, TraceId: %s, Status: %d, ExtraDetails: %s)",
+                operation, self.provider.name, error_detail, error_code, trace_id, response.status_code, extra_info
+            )
+        else:
+            _logger.error(
+                "Vipps API error in %s for provider %s: %s (Code: %s, TraceId: %s, Status: %d)",
+                operation, self.provider.name, error_detail, error_code, trace_id, response.status_code
+            )
         
         # Update provider error tracking
         self.provider._track_api_call(success=False)
