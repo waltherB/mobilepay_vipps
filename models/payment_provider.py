@@ -142,6 +142,11 @@ class PaymentProvider(models.Model):
     ], string="Environment", default='test', required_if_provider='vipps',
        help="Select the Vipps/MobilePay environment to use")
     
+    # Form view references
+    redirect_form_view_id = fields.Many2one(
+        default=lambda self: self.env.ref('payment_vipps_mobilepay.vipps_redirect_form', raise_if_not_found=False)
+    )
+    
     # Feature Configuration
     vipps_capture_mode = fields.Selection([
         ('manual', 'Manual Capture (Recommended for eCommerce)'),

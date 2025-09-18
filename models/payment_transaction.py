@@ -237,6 +237,41 @@ class PaymentTransaction(models.Model):
             _logger.error("Error processing Vipps notification for transaction %s: %s", self.reference, str(e))
             self._set_error(f"Notification processing failed: {str(e)}")
 
+    def _get_processing_values(self):
+        """
+        Return the processing values for Vipps payment transactions.
+        
+        This method is called by Odoo to get the values needed to process the payment.
+        For Vipps, we need to create a payment request and return the redirect URL.
+        
+        :return: The processing values
+        :rtype: dict
+        """
+        res = super()._get_processing_values()
+        
+        if self.provider_code != 'vipps':
+            return res
+        
+        try:
+            # Create payment request with Vipps API
+            payment_response = self._send_payment_request()
+            
+            if payment_response and payment_response.get('url'):
+                # Return the redirect URL for the payment form
+                res.update({
+                    'api_url': payment_response['url'],
+                    'vipps_payment_id': payment_response.get('orderId'),
+                })
+            else:
+                # If no redirect URL, there was an error
+                self._set_error("Failed to create Vipps payment request")
+                
+        except Exception as e:
+            _logger.error("Error getting processing values for transaction %s: %s", self.reference, str(e))
+            self._set_error(f"Payment processing failed: {str(e)}")
+        
+        return res
+
     def _send_payment_request(self):
         """Create payment request for online ecommerce flow"""
         if self.provider_code != 'vipps':
