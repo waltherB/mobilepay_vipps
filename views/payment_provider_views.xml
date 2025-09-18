@@ -102,12 +102,7 @@
                         <field name="vipps_credential_access_level"/>
                         <field name="vipps_last_credential_update" readonly="1"/>
                         <field name="vipps_credential_rotation_enabled" readonly="1"/>
-                        <button name="action_encrypt_credentials" 
-                                string="Encrypt Credentials" 
-                                type="object" 
-                                class="btn-primary"
-                                invisible="vipps_credentials_encrypted"
-                                help="Encrypt all sensitive credentials for secure storage"/>
+                        <!-- Credential encryption will be added in future version -->
                         <button name="action_setup_credential_rotation" 
                                 string="Setup Credential Rotation" 
                                 type="object" 
