@@ -288,6 +288,7 @@ class PaymentTransaction(models.Model):
             
             # Build payment payload according to Vipps API specification
             payload = {
+                "reference": payment_reference,  # Required at root level
                 "amount": {
                     "currency": self.currency_id.name,
                     "value": int(self.amount * 100)  # Convert to øre/cents
@@ -311,11 +312,14 @@ class PaymentTransaction(models.Model):
                 "userFlow": "WEB_REDIRECT"
             }
             
-            # Add customer phone number if available
+            # Add customer phone number if available and valid
             if hasattr(self, 'partner_phone') and self.partner_phone:
-                payload["customer"] = {
-                    "phoneNumber": self.partner_phone
-                }
+                # Clean phone number to match Vipps regex: ^\d{9,15}$
+                clean_phone = ''.join(filter(str.isdigit, self.partner_phone))
+                if len(clean_phone) >= 9 and len(clean_phone) <= 15:
+                    payload["customer"] = {
+                        "phoneNumber": clean_phone
+                    }
             
             # Add callback authorization token if configured
             if self.provider_id.vipps_webhook_secret:
