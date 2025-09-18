@@ -287,8 +287,10 @@ class PaymentTransaction(models.Model):
             idempotency_key = str(uuid.uuid4())
             
             # Build payment payload according to Vipps API specification
+            return_url = self._get_return_url()
             payload = {
                 "reference": payment_reference,  # Required at root level
+                "returnUrl": return_url,  # Required for WEB_REDIRECT flow
                 "amount": {
                     "currency": self.currency_id.name,
                     "value": int(self.amount * 100)  # Convert to øre/cents
@@ -299,7 +301,7 @@ class PaymentTransaction(models.Model):
                 "merchantInfo": {
                     "merchantSerialNumber": self.provider_id.vipps_merchant_serial_number,
                     "callbackPrefix": self.provider_id._get_vipps_webhook_url(),
-                    "fallBack": self._get_return_url()
+                    "fallBack": return_url
                 },
                 "transaction": {
                     "amount": {
