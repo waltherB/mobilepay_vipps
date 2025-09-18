@@ -14,9 +14,10 @@
             </div>
             
             <script type="text/javascript">
+                <![CDATA[
                 // Auto-redirect to Vipps payment page
                 document.addEventListener('DOMContentLoaded', function() {
-                    var apiUrl = '<t t-esc="api_url"/>';
+                    var apiUrl = ']]><t t-esc="api_url"/><![CDATA[';
                     if (apiUrl && apiUrl !== 'False') {
                         // Redirect to Vipps payment page
                         window.location.href = apiUrl;
@@ -28,6 +29,7 @@
                             '<a href="/shop/cart" class="btn btn-secondary">Return to Cart</a>';
                     }
                 });
+                ]]>
             </script>
         </template>
     </data>
