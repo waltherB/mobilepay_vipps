@@ -330,6 +330,44 @@ class PaymentProvider(models.Model):
             else:
                 record.vipps_webhook_url = False
 
+    def _get_vipps_webhook_url(self):
+        """Get webhook URL for Vipps configuration"""
+        self.ensure_one()
+        base_url = self.get_base_url()
+        return f"{base_url}/payment/vipps/webhook"
+
+    def _get_profile_scope_string(self):
+        """Get profile scope string for API requests"""
+        self.ensure_one()
+        if not self.vipps_collect_user_info:
+            return ""
+        
+        # Map profile scope selection to actual scopes
+        scope_mapping = {
+            'basic': 'name phoneNumber',
+            'standard': 'name phoneNumber email',
+            'extended': 'name phoneNumber email address',
+            'custom': ' '.join(self.vipps_custom_scopes.mapped('technical_name'))
+        }
+        
+        return scope_mapping.get(self.vipps_profile_scope, '')
+
+    def _get_profile_scopes(self):
+        """Get list of profile scopes for data collection"""
+        self.ensure_one()
+        if not self.vipps_collect_user_info:
+            return []
+        
+        # Map profile scope selection to list of scopes
+        scope_mapping = {
+            'basic': ['name', 'phoneNumber'],
+            'standard': ['name', 'phoneNumber', 'email'],
+            'extended': ['name', 'phoneNumber', 'email', 'address'],
+            'custom': self.vipps_custom_scopes.mapped('technical_name')
+        }
+        
+        return scope_mapping.get(self.vipps_profile_scope, [])
+
     @api.model
     def _get_supported_currencies(self):
         """Return supported currencies for Vipps/MobilePay"""
