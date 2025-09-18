@@ -74,6 +74,11 @@
                                 type="object" 
                                 class="btn-secondary"
                                 invisible="not vipps_collect_user_info"/>
+                        <button name="action_create_payment_method" 
+                                string="Create Payment Method" 
+                                type="object" 
+                                class="btn-warning"
+                                help="Manually create and link the Vipps payment method"/>
                     </group>
 
                     <!-- Profile Collection Configuration -->

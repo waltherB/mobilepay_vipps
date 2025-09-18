@@ -960,24 +960,65 @@ class PaymentProvider(models.Model):
     def _link_payment_method(self):
         """Link the payment method to this provider"""
         try:
-            # Prefer the existing core method 'mobile_pay'; fall back to method matching provider code
             PaymentMethod = self.env['payment.method']
-            payment_method = PaymentMethod.search([('code', '=', 'mobile_pay')], limit=1)
-            if not payment_method:
-                payment_method = PaymentMethod.search([('code', '=', self.code)], limit=1)
             
-            if payment_method:
-                # Ensure the payment method is active and has the logo
-                values = {'active': True}
-                if not payment_method.name or payment_method.name.lower() in ('mobilepay', 'mobile pay', 'vipps', 'mobile_pay'):
-                    values['name'] = 'MobilePay/Vipps'
-                payment_method.write(values)
-                _logger.info("Linked payment method %s to provider %s", payment_method.name, self.name)
+            # Look for existing payment method
+            payment_method = PaymentMethod.search([('code', '=', self.code)], limit=1)
+            
+            if not payment_method:
+                # Create payment method if it doesn't exist
+                payment_method = PaymentMethod.create({
+                    'name': 'Vipps/MobilePay',
+                    'code': self.code,
+                    'active': True,
+                })
+                _logger.info("Created payment method %s for provider %s", payment_method.name, self.name)
             else:
-                _logger.warning("No payment method found with code %s", self.code)
+                # Ensure existing method is active
+                if not payment_method.active:
+                    payment_method.active = True
+                _logger.info("Found existing payment method %s for provider %s", payment_method.name, self.name)
+            
+            # Link payment method to this provider
+            if payment_method.id not in self.payment_method_ids.ids:
+                self.payment_method_ids = [(4, payment_method.id)]
+                _logger.info("Linked payment method %s to provider %s", payment_method.name, self.name)
+            
+        except Exception as e:
+            _logger.error("Failed to link payment method for provider %s: %s", self.name, str(e))
                 
         except Exception as e:
             _logger.error("Failed to link payment method for provider %s: %s", self.name, str(e))
+
+    def action_create_payment_method(self):
+        """Manual action to create and link payment method"""
+        self.ensure_one()
+        
+        if self.code != 'vipps':
+            raise UserError(_("This action is only available for Vipps providers"))
+        
+        try:
+            self._link_payment_method()
+            
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Payment Method Created'),
+                    'message': _('Vipps/MobilePay payment method has been created and linked successfully.'),
+                    'type': 'success',
+                }
+            }
+        except Exception as e:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Error'),
+                    'message': _('Failed to create payment method: %s') % str(e),
+                    'type': 'danger',
+                }
+            }
 
     def _setup_pos_payment_method(self):
         """Set up POS payment method for Vipps provider"""

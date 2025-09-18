@@ -15,6 +15,7 @@
             <field name="name">Vipps/MobilePay</field>
             <field name="code">vipps</field>
             <field name="active" eval="True"/>
+            <field name="brand_ids" eval="[(6, 0, [])]"/>
         </record>
         
     </data>
