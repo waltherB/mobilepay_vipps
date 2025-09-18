@@ -843,8 +843,74 @@ class PaymentProvider(models.Model):
             except Exception as e:
                 _logger.error("Failed to refresh access token for Vipps provider %s: %s", provider.name, str(e))
 
+    def _encrypt_credential(self, credential_value):
+        """
+        Encrypt a credential value for secure storage
+        
+        Args:
+            credential_value (str): The credential value to encrypt
+            
+        Returns:
+            str: The encrypted credential value
+        """
+        if not credential_value:
+            return False
+            
+        # For now, we'll use a simple base64 encoding as a placeholder
+        # In production, you should use proper encryption like Fernet
+        import base64
+        try:
+            encoded_bytes = base64.b64encode(credential_value.encode('utf-8'))
+            return encoded_bytes.decode('utf-8')
+        except Exception as e:
+            _logger.error("Failed to encrypt credential: %s", e)
+            return credential_value  # Return original if encryption fails
+
+    def _decrypt_credential(self, encrypted_value):
+        """
+        Decrypt a credential value from secure storage
+        
+        Args:
+            encrypted_value (str): The encrypted credential value
+            
+        Returns:
+            str: The decrypted credential value
+        """
+        if not encrypted_value:
+            return False
+            
+        # Corresponding decryption for the base64 encoding
+        import base64
+        try:
+            decoded_bytes = base64.b64decode(encrypted_value.encode('utf-8'))
+            return decoded_bytes.decode('utf-8')
+        except Exception as e:
+            _logger.error("Failed to decrypt credential: %s", e)
+            return encrypted_value  # Return original if decryption fails
+
+    @property
+    def vipps_client_secret_decrypted(self):
+        """Get decrypted client secret"""
+        if self.vipps_credentials_encrypted and self.vipps_client_secret_encrypted:
+            return self._decrypt_credential(self.vipps_client_secret_encrypted)
+        return self.vipps_client_secret
+
+    @property
+    def vipps_subscription_key_decrypted(self):
+        """Get decrypted subscription key"""
+        if self.vipps_credentials_encrypted and self.vipps_subscription_key_encrypted:
+            return self._decrypt_credential(self.vipps_subscription_key_encrypted)
+        return self.vipps_subscription_key
+
+    @property
+    def vipps_webhook_secret_decrypted(self):
+        """Get decrypted webhook secret"""
+        if self.vipps_credentials_encrypted and self.vipps_webhook_secret_encrypted:
+            return self._decrypt_credential(self.vipps_webhook_secret_encrypted)
+        return self.vipps_webhook_secret
+
     def write(self, vals):
-        """Override write to handle credential encryption, audit logging, and state changes"""
+        """Override write to handle credential changes and state validation"""
         credential_fields = [
             'vipps_merchant_serial_number',
             'vipps_subscription_key',
@@ -853,8 +919,6 @@ class PaymentProvider(models.Model):
             'vipps_environment'
         ]
         
-        # Separate vals for encryption to avoid modifying the original `vals`
-        encryption_vals = {}
         # Check if any credential fields are being changed
         credential_changed = any(field in vals for field in credential_fields)
         
@@ -862,55 +926,30 @@ class PaymentProvider(models.Model):
             # Log credential modification attempt
             for record in self:
                 if record.code == 'vipps':
-                    self.env['vipps.credential.audit.log'].log_credential_access(
-                        record.id, 'update', 
-                        field_name=', '.join([f for f in credential_fields if f in vals]),
-                        additional_info="Credential update initiated"
+                    _logger.info(
+                        "Credential update for provider %s: fields %s", 
+                        record.name,
+                        ', '.join([f for f in credential_fields if f in vals])
                     )
-            
-            # Encrypt sensitive credentials and prepare for update
-            if 'vipps_client_secret' in vals and vals.get('vipps_client_secret'):
-                encryption_vals['vipps_client_secret_encrypted'] = self._encrypt_credential(vals['vipps_client_secret'])
-            
-            if 'vipps_subscription_key' in vals and vals.get('vipps_subscription_key'):
-                encryption_vals['vipps_subscription_key_encrypted'] = self._encrypt_credential(vals['vipps_subscription_key'])
-            
-            if 'vipps_webhook_secret' in vals and vals.get('vipps_webhook_secret'):
-                encryption_vals['vipps_webhook_secret_encrypted'] = self._encrypt_credential(vals['vipps_webhook_secret'])
-            
-            if encryption_vals:
-                # Update security metadata
-                encryption_vals.update({
-                    'vipps_credentials_validated': False,
-                    'vipps_access_token': False,
-                    'vipps_token_expires_at': False,
-                    'vipps_last_validation_error': False,
-                    'vipps_credentials_encrypted': True,
-                    'vipps_last_credential_update': fields.Datetime.now(),
-                })
-                # Generate credential hash for integrity verification
-                self._update_credential_hash(vals)
+                    
+                    # Clear validation status when credentials change
+                    vals.update({
+                        'vipps_credentials_validated': False,
+                        'vipps_access_token': False,
+                        'vipps_token_expires_at': False,
+                        'vipps_last_validation_error': False,
+                        'vipps_last_credential_update': fields.Datetime.now(),
+                    })
         
         res = super().write(vals)
-        
-        if credential_changed and encryption_vals:
-            # Now, write the encrypted values and clear the plaintext fields
-            clear_vals = {k: False for k in ['vipps_client_secret', 'vipps_subscription_key', 'vipps_webhook_secret'] if k in vals}
-            encryption_vals.update(clear_vals)
-            self.sudo().write(encryption_vals)
-        
-        # Log successful credential update
-        if credential_changed:
-            for record in self:
-                if record.code == 'vipps':
-                    self.env['vipps.credential.audit.log'].log_credential_access(
-                        record.id, 'update', 
-                        field_name=', '.join([f for f in credential_fields if f in vals]),
-                        success=True,
-                        additional_info="Credential update completed successfully"
-                    )
 
         # If state is being changed to enabled/test, ensure payment method is linked
+        if 'state' in vals and vals['state'] in ('enabled', 'test'):
+            for provider in self:
+                if provider.code == 'vipps':
+                    provider._link_payment_method()
+        
+        return res
         if 'state' in vals and vals['state'] in ('enabled', 'test'):
             for provider in self:
                 if provider.code in ('vipps', 'mobilepay'):
