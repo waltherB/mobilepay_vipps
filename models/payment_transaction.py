@@ -257,15 +257,24 @@ class PaymentTransaction(models.Model):
             payment_response = self._send_payment_request()
             
             if payment_response and payment_response.get('url'):
-                # Return the redirect URL for the payment form
+                # For redirect flow, we need to set the redirect URL directly
+                # This will cause Odoo to redirect immediately instead of using a form
                 res.update({
                     'api_url': payment_response['url'],
                     'vipps_payment_id': payment_response.get('orderId'),
                 })
+                
+                # Force immediate redirect by setting the redirect URL
+                import werkzeug
+                raise werkzeug.exceptions.Redirect(payment_response['url'])
+                
             else:
                 # If no redirect URL, there was an error
                 self._set_error("Failed to create Vipps payment request")
                 
+        except werkzeug.exceptions.Redirect:
+            # Re-raise redirect exceptions
+            raise
         except Exception as e:
             _logger.error("Error getting processing values for transaction %s: %s", self.reference, str(e))
             self._set_error(f"Payment processing failed: {str(e)}")
