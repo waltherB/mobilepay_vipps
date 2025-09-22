@@ -16,7 +16,7 @@
 	    <field name="image_128" type="base64" file="mobilepay_vipps/static/description/vipps_mobilepay_logo.svg"/>
         </record>
 
-        <!-- Payment method will be created automatically when provider is enabled -->
+
         
     </data>
 </odoo>

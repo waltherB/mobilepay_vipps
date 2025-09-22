@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-
-from . import hooks
-
 {
     'name': 'Vipps/MobilePay Payment Integration Minimal',
     'version': '1.0.1',
@@ -117,7 +114,7 @@ Website: https://github.com/waltherB/mobilepay_vipps
     'installable': True,
     'auto_install': False,
     'application': False,
-    'post_init_hook': 'post_init_hook',
+
     'external_dependencies': {
         'python': ['requests', 'cryptography'],
     },
