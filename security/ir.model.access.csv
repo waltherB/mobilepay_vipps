@@ -8,3 +8,6 @@ access_vipps_webhook_security_log,access.vipps.webhook.security.log,model_vipps_
 access_vipps_data_retention_log,access.vipps.data.retention.log,model_vipps_data_retention_log,base.group_system,1,0,0,0
 access_vipps_data_export_wizard,access.vipps.data.export.wizard,model_vipps_data_export_wizard,base.group_user,1,1,1,1
 access_vipps_data_deletion_wizard,access.vipps.data.deletion.wizard,model_vipps_data_deletion_wizard,base.group_user,1,1,1,1
+access_payment_provider_audit,access.payment.provider.audit,model_payment_provider_audit,base.group_system,1,0,1,0
+access_vipps_data_audit_log,access.vipps.data.audit.log,model_vipps_data_audit_log,base.group_system,1,0,1,0
+access_vipps_onboarding_wizard,access.vipps.onboarding.wizard,model_vipps_onboarding_wizard,base.group_user,1,1,1,1
