@@ -3,6 +3,10 @@
     <data>
         <!-- Vipps/MobilePay Redirect Form Template -->
         <template id="vipps_redirect_form" name="Vipps/MobilePay Redirect Form">
+            <form name="vipps_redirect_form" class="d-none" t-att-action="api_url" method="post">
+                <input type="hidden" name="vipps_payment_id" t-att-value="vipps_payment_id"/>
+            </form>
+            
             <div class="card">
                 <div class="card-body text-center">
                     <h4>Redirecting to Vipps/MobilePay...</h4>
@@ -22,8 +26,13 @@
                     
                     if (apiUrl && apiUrl !== 'False' && apiUrl !== 'None' && apiUrl !== '') {
                         console.log('Redirecting to Vipps:', apiUrl);
-                        // Redirect to Vipps payment page
-                        window.location.href = apiUrl;
+                        // Use the form for redirect or direct window location
+                        var form = document.querySelector('form[name="vipps_redirect_form"]');
+                        if (form && form.action) {
+                            form.submit();
+                        } else {
+                            window.location.href = apiUrl;
+                        }
                     } else {
                         console.error('No valid API URL found:', apiUrl);
                         // Show error if no redirect URL
