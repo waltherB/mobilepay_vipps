@@ -18,14 +18,19 @@
                 // Auto-redirect to Vipps payment page
                 document.addEventListener('DOMContentLoaded', function() {
                     var apiUrl = ']]><t t-esc="api_url"/><![CDATA[';
-                    if (apiUrl && apiUrl !== 'False') {
+                    console.log('Vipps API URL:', apiUrl);
+                    
+                    if (apiUrl && apiUrl !== 'False' && apiUrl !== 'None' && apiUrl !== '') {
+                        console.log('Redirecting to Vipps:', apiUrl);
                         // Redirect to Vipps payment page
                         window.location.href = apiUrl;
                     } else {
+                        console.error('No valid API URL found:', apiUrl);
                         // Show error if no redirect URL
                         document.querySelector('.card-body').innerHTML = 
                             '<h4 class="text-danger">Payment Error</h4>' +
                             '<p>Unable to initialize payment. Please try again.</p>' +
+                            '<p><small>Debug: API URL = "' + apiUrl + '"</small></p>' +
                             '<a href="/shop/cart" class="btn btn-secondary">Return to Cart</a>';
                     }
                 });
