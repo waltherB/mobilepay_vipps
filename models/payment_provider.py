@@ -368,12 +368,12 @@ class PaymentProvider(models.Model):
         
         return scope_mapping.get(self.vipps_profile_scope, [])
 
-    def _get_redirect_form_view(self):
+    def _get_redirect_form_view(self, **kwargs):
         """Get the redirect form view for Vipps payments"""
         self.ensure_one()
         if self.code == 'vipps':
             return self.env.ref('payment_vipps_mobilepay.vipps_redirect_form', raise_if_not_found=False)
-        return super()._get_redirect_form_view()
+        return super()._get_redirect_form_view(**kwargs)
 
     def _track_api_call(self, success=True):
         """Track API call statistics for monitoring"""
