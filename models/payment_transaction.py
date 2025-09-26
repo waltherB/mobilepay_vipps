@@ -244,6 +244,7 @@ class PaymentTransaction(models.Model):
             self._set_error(f"Notification processing failed: {str(e)}")
 
     def _get_processing_values(self):
+        _logger.info("GEMINI_DEBUG: _get_processing_values called")
         """
         Return the processing values for Vipps payment transactions.
         
