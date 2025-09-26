@@ -120,6 +120,12 @@ class PaymentTransaction(models.Model):
         default=False
     )
 
+    vipps_payment_events = fields.Text(
+        string="Vipps Payment Events",
+        copy=False,
+        help="Log of events for this payment from Vipps API"
+    )
+
     def _get_vipps_api_client(self):
         """Get Vipps API client instance"""
         self.ensure_one()
@@ -332,6 +338,22 @@ class PaymentTransaction(models.Model):
                 scope_string = self.provider_id._get_profile_scope_string()
                 if scope_string:
                     payload["scope"] = scope_string
+
+            # Add order details if available
+            if self.sale_order_ids:
+                order_lines = []
+                for line in self.sale_order_ids.order_line:
+                    order_lines.append({
+                        "name": line.name,
+                        "quantity": line.product_uom_qty,
+                        "unitPrice": {
+                            "currency": self.currency_id.name,
+                            "value": int(line.price_unit * 100)
+                        }
+                    })
+                payload["orderDetails"] = {
+                    "orderLines": order_lines
+                }
 
             # Make API request
             response = api_client._make_request(
@@ -1826,6 +1848,48 @@ class PaymentTransaction(models.Model):
                 self.reference, str(e)
             )
             return {}
+
+    def _get_payment_events(self):
+        """Get payment events from Vipps API and store them"""
+        self.ensure_one()
+        if self.provider_code != 'vipps':
+            return
+
+        if not self.vipps_payment_reference:
+            raise ValidationError(_("No Vipps payment reference found"))
+
+        try:
+            api_client = self._get_vipps_api_client()
+            
+            # Get payment events from API
+            response = api_client._make_request(
+                'GET', 
+                f'payments/{self.vipps_payment_reference}/events'
+            )
+
+            # Store events as a formatted string
+            if response and isinstance(response, list):
+                events_str = json.dumps(response, indent=2)
+                self.write({
+                    'vipps_payment_events': events_str
+                })
+                _logger.info(
+                    "Updated payment events for transaction %s",
+                    self.reference
+                )
+            else:
+                self.write({
+                    'vipps_payment_events': 'No events found.'
+                })
+
+        except VippsAPIException as e:
+            _logger.error(
+                "Failed to get payment events for transaction %s: %s",
+                self.reference, str(e)
+            )
+            self.write({
+                'vipps_payment_events': f"Error fetching events: {str(e)}"
+            })
 
     def action_view_collected_user_info(self):
         """Action to view collected user information"""
