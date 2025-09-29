@@ -117,13 +117,15 @@ class PaymentTransaction(models.Model):
     vipps_webhook_received = fields.Boolean(
         string="Webhook Received", 
         copy=False, 
-        default=False
+        default=False,
+        store=True
     )
 
     vipps_payment_events = fields.Text(
         string="Vipps Payment Events",
         copy=False,
-        help="Log of events for this payment from Vipps API"
+        help="Log of events for this payment from Vipps API",
+        store=True
     )
 
     def _get_vipps_api_client(self):
