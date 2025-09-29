@@ -267,7 +267,7 @@ class PaymentTransaction(models.Model):
             if payment_response and payment_response.get('url'):
                 # Return the redirect URL for the payment form
                 res.update({
-                    'api_url': payment_response['url'],
+                    'redirection_url': payment_response['url'],
                     'vipps_payment_id': payment_response.get('orderId'),
                 })
                 
