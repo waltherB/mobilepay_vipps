@@ -90,7 +90,6 @@ Website: https://github.com/waltherB/mobilepay_vipps
         
         # Data
         'data/payment_method_data.xml',
-        'data/force_payment_method.xml',
         
         # Views
         'views/payment_provider_views.xml',
