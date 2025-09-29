@@ -89,7 +89,6 @@ Website: https://github.com/waltherB/mobilepay_vipps
         'security/ir.model.access.csv',
         
         # Data
-        'data/payment_provider_data.xml',
         'data/payment_method_data.xml',
         'data/force_payment_method.xml',
         
