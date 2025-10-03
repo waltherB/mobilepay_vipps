@@ -94,7 +94,6 @@ Website: https://github.com/waltherB/mobilepay_vipps
         # Views
         'views/payment_provider_views.xml',
         'views/payment_transaction_views.xml',
-        'views/vipps_payment_transaction_views.xml',
         'views/payment_form_templates.xml',
         'views/checkout_templates.xml',
         'views/vipps_onboarding_wizard_views.xml',
