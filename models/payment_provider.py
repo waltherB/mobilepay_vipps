@@ -195,54 +195,11 @@ class PaymentProvider(models.Model):
         help="Require customer consent before collecting profile information"
     )
     
-    # Security Configuration
+    # Webhook Configuration (Internal - managed automatically)
     vipps_webhook_secret = fields.Char(
         string="Webhook Secret",
         groups='base.group_system',
-        help="Secret key for webhook signature validation"
-    )
-    
-    # Enhanced webhook security fields
-    vipps_webhook_allowed_ips = fields.Text(
-        string="Allowed Webhook IPs",
-        groups='base.group_system',
-        help="Comma-separated list of IP addresses/ranges allowed to send webhooks"
-    )
-    vipps_webhook_rate_limit_enabled = fields.Boolean(
-        string="Enable Rate Limiting",
-        default=True,
-        groups='base.group_system',
-        help="Enable rate limiting for webhook requests"
-    )
-    vipps_webhook_max_requests = fields.Integer(
-        string="Max Requests per Window",
-        default=100,
-        groups='base.group_system',
-        help="Maximum webhook requests allowed per time window"
-    )
-    vipps_webhook_window_seconds = fields.Integer(
-        string="Rate Limit Window (seconds)",
-        default=300,
-        groups='base.group_system',
-        help="Time window for rate limiting in seconds"
-    )
-    vipps_webhook_signature_required = fields.Boolean(
-        string="Require Signature Validation",
-        default=True,
-        groups='base.group_system',
-        help="Require HMAC signature validation for all webhooks"
-    )
-    vipps_webhook_timestamp_tolerance = fields.Integer(
-        string="Timestamp Tolerance (seconds)",
-        default=300,
-        groups='base.group_system',
-        help="Maximum age of webhook timestamps to prevent replay attacks"
-    )
-    vipps_webhook_security_logging = fields.Boolean(
-        string="Enable Security Logging",
-        default=True,
-        groups='base.group_system',
-        help="Log all webhook security events for audit and monitoring"
+        help="Secret key for webhook signature validation (auto-generated)"
     )
     
     # POS Configuration
@@ -385,6 +342,110 @@ class PaymentProvider(models.Model):
             'vipps_api_call_count': self.vipps_api_call_count + 1,
             'vipps_error_count': self.vipps_error_count + (0 if success else 1)
         })
+
+    def _register_webhook(self):
+        """Register webhook endpoint with Vipps using Webhooks API"""
+        self.ensure_one()
+        
+        if self.code != 'vipps':
+            return False
+            
+        try:
+            webhook_url = self._get_vipps_webhook_url()
+            
+            # Generate webhook secret if not exists
+            if not self.vipps_webhook_secret:
+                import secrets
+                webhook_secret = secrets.token_urlsafe(32)
+                self.sudo().write({'vipps_webhook_secret': webhook_secret})
+            
+            # Webhook registration payload according to Vipps Webhooks API
+            payload = {
+                "url": webhook_url,
+                "events": [
+                    "epayment.payment.created.v1",
+                    "epayment.payment.authorized.v1", 
+                    "epayment.payment.captured.v1",
+                    "epayment.payment.cancelled.v1",
+                    "epayment.payment.expired.v1",
+                    "epayment.payment.terminated.v1"
+                ]
+            }
+            
+            # Make webhook registration request
+            response = self._make_api_request('POST', 'webhooks', payload=payload)
+            
+            if response:
+                _logger.info("Successfully registered webhook for provider %s: %s", self.name, webhook_url)
+                return True
+            else:
+                _logger.error("Failed to register webhook for provider %s", self.name)
+                return False
+                
+        except Exception as e:
+            _logger.error("Error registering webhook for provider %s: %s", self.name, str(e))
+            return False
+
+    def _unregister_webhook(self):
+        """Unregister webhook endpoint with Vipps"""
+        self.ensure_one()
+        
+        if self.code != 'vipps':
+            return False
+            
+        try:
+            # Get list of registered webhooks
+            response = self._make_api_request('GET', 'webhooks')
+            
+            if response and 'webhooks' in response:
+                webhook_url = self._get_vipps_webhook_url()
+                
+                # Find and delete matching webhook
+                for webhook in response['webhooks']:
+                    if webhook.get('url') == webhook_url:
+                        webhook_id = webhook.get('id')
+                        if webhook_id:
+                            delete_response = self._make_api_request('DELETE', f'webhooks/{webhook_id}')
+                            if delete_response:
+                                _logger.info("Successfully unregistered webhook %s for provider %s", webhook_id, self.name)
+                                return True
+                
+                _logger.warning("No matching webhook found to unregister for provider %s", self.name)
+                return False
+            else:
+                _logger.error("Failed to get webhook list for provider %s", self.name)
+                return False
+                
+        except Exception as e:
+            _logger.error("Error unregistering webhook for provider %s: %s", self.name, str(e))
+            return False
+
+    def action_register_webhook(self):
+        """Action method to register webhook from UI"""
+        self.ensure_one()
+        
+        if self._register_webhook():
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Success'),
+                    'message': _('Webhook registered successfully with Vipps!'),
+                    'type': 'success',
+                    'sticky': False,
+                }
+            }
+        else:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Registration Failed'),
+                    'message': _('Failed to register webhook. Please check your credentials and try again.'),
+                    'type': 'danger',
+                    'sticky': True,
+                }
+            }
 
     @api.model
     def _get_supported_currencies(self):
@@ -638,8 +699,8 @@ class PaymentProvider(models.Model):
             _logger.warning("Missing signature or timestamp in webhook")
             return False
         
-        # Use configured timestamp tolerance
-        tolerance = self.vipps_webhook_timestamp_tolerance or 300
+        # Use default timestamp tolerance (5 minutes)
+        tolerance = 300
         
         # Validate timestamp to prevent replay attacks
         try:
@@ -972,6 +1033,16 @@ class PaymentProvider(models.Model):
 
     def write(self, vals):
         """Override write to handle credential changes and state validation"""
+        # Check if provider is being enabled
+        if vals.get('state') == 'enabled' and self.code == 'vipps':
+            # Auto-register webhook when provider is enabled
+            self._register_webhook()
+        
+        # Check if provider is being disabled
+        if vals.get('state') == 'disabled' and self.code == 'vipps':
+            # Auto-unregister webhook when provider is disabled
+            self._unregister_webhook()
+        
         credential_fields = [
             'vipps_merchant_serial_number',
             'vipps_subscription_key',
