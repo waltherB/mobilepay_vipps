@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import base64
+import email.utils
 import hashlib
 import hmac
 import ipaddress
 import json
 import logging
 import time
-from collections import defaultdict
 from datetime import datetime, timedelta
 
-from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError, UserError
-from odoo.tools import config
+from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -150,19 +150,31 @@ class VippsWebhookSecurity(models.AbstractModel):
         """Extract relevant headers for validation"""
         headers = {}
         
-        # Required Vipps headers
+        # Required Vipps webhook headers according to official specification
         vipps_headers = [
             'Authorization',
-            'Vipps-Timestamp', 
-            'Vipps-Idempotency-Key',
+            'x-ms-date',
+            'x-ms-content-sha256',
+            'Host',
             'Content-Type',
             'User-Agent'
         ]
         
+        # Extract headers with case-insensitive matching
         for header in vipps_headers:
+            # Try exact case first, then case-insensitive
             value = request.httprequest.headers.get(header)
+            if not value:
+                # Case-insensitive fallback
+                for req_header, req_value in request.httprequest.headers.items():
+                    if req_header.lower() == header.lower():
+                        value = req_value
+                        break
+            
             if value:
-                headers[header.lower().replace('-', '_')] = value
+                # Normalize header names to lowercase with underscores
+                normalized_name = header.lower().replace('-', '_')
+                headers[normalized_name] = value
         
         return headers
 
@@ -353,20 +365,27 @@ class VippsWebhookSecurity(models.AbstractModel):
             }
 
     def _validate_hmac_signature(self, payload, headers, provider):
-        """Validate HMAC signature for webhook authenticity"""
-        signature = headers.get('authorization', '')
-        timestamp = headers.get('vipps_timestamp', '')
+        """Validate HMAC signature for webhook authenticity according to Vipps specification"""
+        authorization = headers.get('authorization', '')
+        ms_date = headers.get('x_ms_date', '')
+        content_sha256 = headers.get('x_ms_content_sha256', '')
+        host = headers.get('host', '')
         
-        if not signature:
+        # Validate required headers
+        missing_headers = []
+        if not authorization:
+            missing_headers.append('Authorization')
+        if not ms_date:
+            missing_headers.append('x-ms-date')
+        if not content_sha256:
+            missing_headers.append('x-ms-content-sha256')
+        if not host:
+            missing_headers.append('Host')
+            
+        if missing_headers:
             return {
                 'valid': False,
-                'error': 'Missing webhook signature'
-            }
-        
-        if not timestamp:
-            return {
-                'valid': False,
-                'error': 'Missing webhook timestamp'
+                'error': f'Missing required headers: {", ".join(missing_headers)}'
             }
         
         try:
@@ -378,10 +397,48 @@ class VippsWebhookSecurity(models.AbstractModel):
                     'error': 'Webhook secret not configured'
                 }
             
+            # Parse Authorization header
+            # Format: HMAC-SHA256 SignedHeaders=x-ms-date;host;x-ms-content-sha256&Signature=<signature>
+            if not authorization.startswith('HMAC-SHA256 '):
+                return {
+                    'valid': False,
+                    'error': 'Invalid Authorization header format'
+                }
+            
+            auth_parts = authorization[12:]  # Remove 'HMAC-SHA256 ' prefix
+            signature = None
+            signed_headers = None
+            
+            for part in auth_parts.split('&'):
+                if part.startswith('Signature='):
+                    signature = part[10:]  # Remove 'Signature=' prefix
+                elif part.startswith('SignedHeaders='):
+                    signed_headers = part[14:]  # Remove 'SignedHeaders=' prefix
+            
+            if not signature:
+                return {
+                    'valid': False,
+                    'error': 'Missing signature in Authorization header'
+                }
+            
+            if not signed_headers:
+                return {
+                    'valid': False,
+                    'error': 'Missing SignedHeaders in Authorization header'
+                }
+            
             # Validate timestamp format and freshness
             try:
-                webhook_time = int(timestamp)
-                current_time = int(time.time())
+                # Parse RFC 2822 date format: "Thu, 30 Mar 2023 08:38:32 GMT"
+                timestamp_tuple = email.utils.parsedate_tz(ms_date)
+                if timestamp_tuple is None:
+                    return {
+                        'valid': False,
+                        'error': f'Invalid x-ms-date format: {ms_date}'
+                    }
+                
+                webhook_time = email.utils.mktime_tz(timestamp_tuple)
+                current_time = time.time()
                 
                 # Allow 5 minutes tolerance for clock skew
                 max_age = int(self.env['ir.config_parameter'].sudo().get_param(
@@ -391,28 +448,47 @@ class VippsWebhookSecurity(models.AbstractModel):
                 if abs(current_time - webhook_time) > max_age:
                     return {
                         'valid': False,
-                        'error': f'Webhook timestamp too old or in future: {timestamp}'
+                        'error': f'Webhook timestamp too old or in future: {ms_date}'
                     }
-            except (ValueError, TypeError):
+            except Exception as e:
                 return {
                     'valid': False,
-                    'error': f'Invalid timestamp format: {timestamp}'
+                    'error': f'Invalid timestamp format: {ms_date} - {str(e)}'
                 }
             
-            # Remove 'Bearer ' prefix if present
-            if signature.startswith('Bearer '):
-                signature = signature[7:]
+            # Validate content SHA-256 hash
+            try:
+                expected_content_hash = hashlib.sha256(payload.encode('utf-8')).digest()
+                expected_content_hash_b64 = base64.b64encode(expected_content_hash).decode('utf-8')
+                
+                if content_sha256 != expected_content_hash_b64:
+                    return {
+                        'valid': False,
+                        'error': 'Content SHA-256 hash mismatch'
+                    }
+            except Exception as e:
+                return {
+                    'valid': False,
+                    'error': f'Content hash validation failed: {str(e)}'
+                }
             
-            # Create message for signature verification
-            # Vipps format: timestamp + "." + payload
-            message = f"{timestamp}.{payload}"
+            # Create canonical request for signature verification
+            # According to Vipps spec, the signed string includes:
+            # - x-ms-date header value
+            # - host header value  
+            # - x-ms-content-sha256 header value
+            canonical_headers = f"x-ms-date:{ms_date}\nhost:{host}\nx-ms-content-sha256:{content_sha256}\n"
+            
+            # Create string to sign
+            string_to_sign = canonical_headers
             
             # Calculate expected signature
-            expected_signature = hmac.new(
-                webhook_secret.encode('utf-8'),
-                message.encode('utf-8'),
+            expected_signature_bytes = hmac.new(
+                base64.b64decode(webhook_secret),
+                string_to_sign.encode('utf-8'),
                 hashlib.sha256
-            ).hexdigest()
+            ).digest()
+            expected_signature = base64.b64encode(expected_signature_bytes).decode('utf-8')
             
             # Secure comparison
             is_valid = hmac.compare_digest(signature, expected_signature)
@@ -433,21 +509,23 @@ class VippsWebhookSecurity(models.AbstractModel):
             }
 
     def _check_replay_attack(self, headers, webhook_data):
-        """Check for replay attacks using idempotency keys and timestamps"""
-        idempotency_key = headers.get('vipps_idempotency_key')
-        event_id = webhook_data.get('eventId')
+        """Check for replay attacks using timestamps and request signatures"""
+        ms_date = headers.get('x_ms_date', '')
+        authorization = headers.get('authorization', '')
         
-        # Use idempotency key or event ID for replay detection
-        unique_id = idempotency_key or event_id
-        
-        if not unique_id:
+        # Use timestamp + signature hash for replay detection
+        if not ms_date or not authorization:
             return {
                 'valid': False,
-                'error': 'Missing idempotency key or event ID for replay protection'
+                'error': 'Missing required headers for replay protection'
             }
         
         try:
-            # Check if we've seen this webhook before
+            # Create unique identifier from timestamp and signature
+            signature_hash = hashlib.sha256(authorization.encode('utf-8')).hexdigest()[:16]
+            unique_id = f"{ms_date}_{signature_hash}"
+            
+            # Check if we've seen this exact request before
             cache_key = f"webhook_processed_{unique_id}"
             
             existing_record = self.env['ir.config_parameter'].sudo().search([
@@ -467,7 +545,8 @@ class VippsWebhookSecurity(models.AbstractModel):
                 'key': cache_key,
                 'value': json.dumps({
                     'processed_at': datetime.now().isoformat(),
-                    'reference': webhook_data.get('reference')
+                    'reference': webhook_data.get('reference'),
+                    'ms_date': ms_date
                 })
             })
             
@@ -479,22 +558,18 @@ class VippsWebhookSecurity(models.AbstractModel):
             return {'valid': True}
 
     def _validate_idempotency(self, headers, webhook_data):
-        """Validate idempotency key format and uniqueness"""
-        idempotency_key = headers.get('vipps_idempotency_key')
+        """Validate request uniqueness using timestamp and signature"""
+        ms_date = headers.get('x_ms_date', '')
+        authorization = headers.get('authorization', '')
         
-        if not idempotency_key:
+        if not ms_date or not authorization:
             return {
                 'valid': True,
-                'warning': 'No idempotency key provided'
+                'warning': 'Missing headers for idempotency validation'
             }
         
-        # Validate format (should be UUID-like)
-        if len(idempotency_key) < 16:
-            return {
-                'valid': True,
-                'warning': f'Idempotency key too short: {idempotency_key}'
-            }
-        
+        # For Vipps webhooks, uniqueness is ensured by the combination of
+        # timestamp and signature, which is already handled in replay attack prevention
         return {'valid': True}
 
     @api.model

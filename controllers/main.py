@@ -119,15 +119,24 @@ class VippsController(http.Controller):
                 for error in validation_result['errors']:
                     _logger.error("Webhook validation failed: %s", error)
                 
-                # Return appropriate error response
-                if any('rate limit' in error.lower() for error in validation_result['errors']):
+                # Return appropriate error response based on specific error types
+                error_messages = validation_result['errors']
+                
+                # Check for specific error types and return appropriate HTTP status codes
+                if any('rate limit' in error.lower() for error in error_messages):
                     return request.make_response('Too Many Requests', status=429)
-                elif any('signature' in error.lower() for error in validation_result['errors']):
+                elif any('signature' in error.lower() or 'authorization' in error.lower() for error in error_messages):
                     return request.make_response('Unauthorized: Invalid signature', status=401)
-                elif any('unauthorized ip' in error.lower() for error in validation_result['errors']):
+                elif any('unauthorized ip' in error.lower() for error in error_messages):
                     return request.make_response('Forbidden: Unauthorized IP', status=403)
-                elif any('replay' in error.lower() for error in validation_result['errors']):
+                elif any('replay' in error.lower() or 'already processed' in error.lower() for error in error_messages):
                     return request.make_response('Conflict: Duplicate request', status=409)
+                elif any('missing' in error.lower() and 'header' in error.lower() for error in error_messages):
+                    return request.make_response('Bad Request: Missing required headers', status=400)
+                elif any('content' in error.lower() and 'hash' in error.lower() for error in error_messages):
+                    return request.make_response('Bad Request: Content hash mismatch', status=400)
+                elif any('timestamp' in error.lower() for error in error_messages):
+                    return request.make_response('Bad Request: Invalid timestamp', status=400)
                 else:
                     return request.make_response('Bad Request: Validation failed', status=400)
             

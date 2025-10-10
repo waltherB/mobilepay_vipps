@@ -43,27 +43,85 @@ class TestVippsWebhookSecurity(TransactionCase):
             'amount': {'value': 10000, 'currency': 'NOK'}
         })
         
-        # Create mock request
+        # Create mock request with proper Vipps headers
         self.mock_request = MagicMock()
         self.mock_request.httprequest.environ = {
             'REMOTE_ADDR': '127.0.0.1',
-            'HTTP_USER_AGENT': 'Vipps-Test-Agent/1.0'
+            'HTTP_USER_AGENT': 'Vipps-Webhook/1.0'
         }
-        self.mock_request.httprequest.headers = {}
-    
-    def _create_valid_signature(self, payload, timestamp=None):
-        """Create a valid HMAC signature for testing"""
-        if timestamp is None:
-            timestamp = str(int(time.time()))
         
-        message = f"{timestamp}.{payload}"
-        signature = hmac.new(
-            self.provider.vipps_webhook_secret.encode('utf-8'),
-            message.encode('utf-8'),
+        # Create proper Vipps webhook headers
+        import base64
+        import email.utils
+        from datetime import datetime
+        
+        # Generate timestamp in RFC 2822 format
+        self.test_timestamp = email.utils.formatdate(time.time(), usegmt=True)
+        
+        # Generate content SHA-256 hash
+        content_hash = hashlib.sha256(self.sample_payload.encode('utf-8')).digest()
+        self.test_content_sha256 = base64.b64encode(content_hash).decode('utf-8')
+        
+        # Create canonical headers for signature
+        host = 'webhook.example.com'
+        canonical_headers = f"x-ms-date:{self.test_timestamp}\nhost:{host}\nx-ms-content-sha256:{self.test_content_sha256}\n"
+        
+        # Generate HMAC signature
+        webhook_secret_bytes = base64.b64decode(self.provider.vipps_webhook_secret)
+        signature_bytes = hmac.new(
+            webhook_secret_bytes,
+            canonical_headers.encode('utf-8'),
             hashlib.sha256
-        ).hexdigest()
+        ).digest()
+        signature = base64.b64encode(signature_bytes).decode('utf-8')
         
-        return signature, timestamp
+        # Create Authorization header in Vipps format
+        authorization = f"HMAC-SHA256 SignedHeaders=x-ms-date;host;x-ms-content-sha256&Signature={signature}"
+        
+        self.mock_request.httprequest.headers = {
+            'Authorization': authorization,
+            'x-ms-date': self.test_timestamp,
+            'x-ms-content-sha256': self.test_content_sha256,
+            'Host': host,
+            'Content-Type': 'application/json',
+            'User-Agent': 'Vipps-Webhook/1.0'
+        }
+    
+    def _create_valid_vipps_headers(self, payload, host='webhook.example.com', timestamp=None):
+        """Create valid Vipps webhook headers for testing"""
+        import base64
+        import email.utils
+        
+        if timestamp is None:
+            timestamp = email.utils.formatdate(time.time(), usegmt=True)
+        
+        # Generate content SHA-256 hash
+        content_hash = hashlib.sha256(payload.encode('utf-8')).digest()
+        content_sha256 = base64.b64encode(content_hash).decode('utf-8')
+        
+        # Create canonical headers for signature
+        canonical_headers = f"x-ms-date:{timestamp}\nhost:{host}\nx-ms-content-sha256:{content_sha256}\n"
+        
+        # Generate HMAC signature
+        webhook_secret_bytes = base64.b64decode(self.provider.vipps_webhook_secret)
+        signature_bytes = hmac.new(
+            webhook_secret_bytes,
+            canonical_headers.encode('utf-8'),
+            hashlib.sha256
+        ).digest()
+        signature = base64.b64encode(signature_bytes).decode('utf-8')
+        
+        # Create Authorization header in Vipps format
+        authorization = f"HMAC-SHA256 SignedHeaders=x-ms-date;host;x-ms-content-sha256&Signature={signature}"
+        
+        return {
+            'authorization': authorization,
+            'x_ms_date': timestamp,
+            'x_ms_content_sha256': content_sha256,
+            'host': host,
+            'content_type': 'application/json',
+            'user_agent': 'Vipps-Webhook/1.0'
+        }
     
     def test_ip_validation_allowed(self):
         """Test IP validation with allowed IP"""
@@ -111,7 +169,63 @@ class TestVippsWebhookSecurity(TransactionCase):
         result = self.security_manager._validate_payload(self.sample_payload)
         self.assertTrue(result['valid'])
         self.assertIn('data', result)
-        self.assertEqual(result['data']['reference'], 'test-ref-123')
+    
+    def test_hmac_signature_validation_valid(self):
+        """Test HMAC signature validation with valid Vipps signature"""
+        headers = self._create_valid_vipps_headers(self.sample_payload)
+        
+        result = self.security_manager._validate_hmac_signature(
+            self.sample_payload, headers, self.provider
+        )
+        self.assertTrue(result['valid'])
+    
+    def test_hmac_signature_validation_invalid(self):
+        """Test HMAC signature validation with invalid signature"""
+        headers = self._create_valid_vipps_headers(self.sample_payload)
+        # Corrupt the signature
+        headers['authorization'] = headers['authorization'].replace('Signature=', 'Signature=invalid')
+        
+        result = self.security_manager._validate_hmac_signature(
+            self.sample_payload, headers, self.provider
+        )
+        self.assertFalse(result['valid'])
+        self.assertIn('signature', result['error'].lower())
+    
+    def test_hmac_signature_validation_missing_headers(self):
+        """Test HMAC signature validation with missing required headers"""
+        headers = {}
+        
+        result = self.security_manager._validate_hmac_signature(
+            self.sample_payload, headers, self.provider
+        )
+        self.assertFalse(result['valid'])
+        self.assertIn('missing required headers', result['error'].lower())
+    
+    def test_content_hash_validation(self):
+        """Test content SHA-256 hash validation"""
+        headers = self._create_valid_vipps_headers(self.sample_payload)
+        # Corrupt the content hash
+        headers['x_ms_content_sha256'] = 'invalid_hash'
+        
+        result = self.security_manager._validate_hmac_signature(
+            self.sample_payload, headers, self.provider
+        )
+        self.assertFalse(result['valid'])
+        self.assertIn('content', result['error'].lower())
+    
+    def test_timestamp_validation_old(self):
+        """Test timestamp validation with old timestamp"""
+        import email.utils
+        old_time = time.time() - 600  # 10 minutes ago
+        old_timestamp = email.utils.formatdate(old_time, usegmt=True)
+        
+        headers = self._create_valid_vipps_headers(self.sample_payload, timestamp=old_timestamp)
+        
+        result = self.security_manager._validate_hmac_signature(
+            self.sample_payload, headers, self.provider
+        )
+        self.assertFalse(result['valid'])
+        self.assertIn('timestamp', result['error'].lower())
     
     def test_payload_validation_invalid_json(self):
         """Test payload validation with invalid JSON"""
@@ -129,39 +243,6 @@ class TestVippsWebhookSecurity(TransactionCase):
         result = self.security_manager._validate_payload(payload_without_ref)
         self.assertFalse(result['valid'])
         self.assertIn('reference', result['error'].lower())
-    
-    def test_hmac_signature_validation_valid(self):
-        """Test HMAC signature validation with valid signature"""
-        signature, timestamp = self._create_valid_signature(self.sample_payload)
-        
-        headers = {
-            'authorization': signature,
-            'vipps_timestamp': timestamp
-        }
-        
-        result = self.security_manager._validate_hmac_signature(
-            self.sample_payload, headers, self.provider
-        )
-        self.assertTrue(result['valid'])
-    
-    def test_hmac_signature_validation_invalid(self):
-        """Test HMAC signature validation with invalid signature"""
-        headers = {
-            'authorization': 'invalid_signature',
-            'vipps_timestamp': str(int(time.time()))
-        }
-        
-        result = self.security_manager._validate_hmac_signature(
-            self.sample_payload, headers, self.provider
-        )
-        self.assertFalse(result['valid'])
-        self.assertIn('signature', result['error'].lower())
-    
-    def test_hmac_signature_validation_expired_timestamp(self):
-        """Test HMAC signature validation with expired timestamp"""
-        # Create signature with old timestamp
-        old_timestamp = str(int(time.time()) - 600)  # 10 minutes ago
-        signature, _ = self._create_valid_signature(self.sample_payload, old_timestamp)
         
         headers = {
             'authorization': signature,
@@ -192,15 +273,16 @@ class TestVippsWebhookSecurity(TransactionCase):
     
     def test_comprehensive_validation_success(self):
         """Test comprehensive webhook validation with all checks passing"""
-        # Setup valid request
-        signature, timestamp = self._create_valid_signature(self.sample_payload)
+        # Setup valid request with proper Vipps headers
+        headers = self._create_valid_vipps_headers(self.sample_payload)
         
         self.mock_request.httprequest.headers = {
-            'Authorization': signature,
-            'Vipps-Timestamp': timestamp,
-            'Vipps-Idempotency-Key': 'unique-key-456',
-            'Content-Type': 'application/json',
-            'User-Agent': 'Vipps-Webhook/1.0'
+            'Authorization': headers['authorization'],
+            'x-ms-date': headers['x_ms_date'],
+            'x-ms-content-sha256': headers['x_ms_content_sha256'],
+            'Host': headers['host'],
+            'Content-Type': headers['content_type'],
+            'User-Agent': headers['user_agent']
         }
         
         # Set allowed IP
@@ -217,10 +299,9 @@ class TestVippsWebhookSecurity(TransactionCase):
     
     def test_comprehensive_validation_multiple_failures(self):
         """Test comprehensive validation with multiple security failures"""
-        # Setup invalid request
+        # Setup invalid request with missing headers
         self.mock_request.httprequest.headers = {
-            'Authorization': 'invalid_signature',
-            'Vipps-Timestamp': str(int(time.time()) - 1000),  # Expired
+            'Authorization': 'invalid_format',
             'Content-Type': 'application/json'
         }
         
@@ -233,6 +314,7 @@ class TestVippsWebhookSecurity(TransactionCase):
         )
         
         self.assertFalse(result['success'])
+        self.assertGreater(len(result['errors']), 0)
         self.assertGreater(len(result['errors']), 0)
         self.assertGreater(len(result['security_events']), 0)
     

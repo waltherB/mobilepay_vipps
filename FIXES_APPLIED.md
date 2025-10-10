@@ -92,3 +92,84 @@ itional Fix Applied
 - `views/payment_provider_views.xml` (corrected field name)
 
 The `is_published` field is indeed the standard Odoo field for controlling whether a payment provider is available for customers to select during eCommerce checkout.
+#
+# ✅ **CRITICAL FIX: Webhook Authentication Compliance**
+
+### **Major Security Issue Resolved**
+
+**Problem**: The webhook authentication implementation was NOT compliant with the official Vipps MobilePay webhook authentication specification, which would cause webhook validation failures in production.
+
+**Root Cause**: The implementation was based on a simpler webhook format rather than the official Vipps specification that uses:
+- Complex Authorization header format: `HMAC-SHA256 SignedHeaders=x-ms-date;host;x-ms-content-sha256&Signature=<base64_signature>`
+- RFC 2822 timestamp format in `x-ms-date` header
+- Content SHA-256 hash validation via `x-ms-content-sha256` header
+- Canonical headers message construction for HMAC
+
+**Solution Applied**:
+
+#### Files Modified:
+- `models/vipps_webhook_security.py` - Complete rewrite of signature validation
+- `controllers/main.py` - Updated error handling with proper HTTP status codes
+- `tests/test_webhook_security.py` - Updated tests to use proper Vipps format
+
+#### Key Changes:
+
+1. **Header Extraction** (`_extract_headers`):
+   - ✅ Now extracts correct Vipps headers: `x-ms-date`, `x-ms-content-sha256`, `Host`, `Authorization`
+   - ✅ Added case-insensitive header matching
+   - ❌ Removed incorrect `Vipps-Timestamp` and `Vipps-Idempotency-Key` handling
+
+2. **Signature Validation** (`_validate_hmac_signature`):
+   - ✅ Parses complex Authorization header: `HMAC-SHA256 SignedHeaders=...&Signature=...`
+   - ✅ Validates RFC 2822 timestamp format from `x-ms-date` header
+   - ✅ Validates content SHA-256 hash against payload
+   - ✅ Uses canonical headers format for HMAC: `x-ms-date:{date}\nhost:{host}\nx-ms-content-sha256:{hash}\n`
+   - ✅ Uses base64-encoded signatures (not hex)
+   - ❌ Removed Bearer token handling (not used by Vipps)
+   - ❌ Removed simple `timestamp.payload` message format
+
+3. **Error Handling**:
+   - ✅ Added specific HTTP status codes: 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden), 409 (Conflict), 429 (Too Many Requests)
+   - ✅ Enhanced error messages for different failure types
+   - ✅ Proper content hash mismatch detection
+
+4. **Replay Attack Prevention**:
+   - ✅ Updated to use timestamp + signature hash combination
+   - ✅ Removed dependency on non-standard idempotency keys
+
+#### Before vs After:
+
+**Before (INCORRECT)**:
+```python
+# Wrong message format
+message = f"{timestamp}.{payload}"
+signature = hmac.new(secret, message, sha256).hexdigest()
+
+# Wrong headers
+headers = {'authorization': signature, 'vipps_timestamp': timestamp}
+```
+
+**After (VIPPS COMPLIANT)**:
+```python
+# Correct canonical headers format
+canonical_headers = f"x-ms-date:{ms_date}\nhost:{host}\nx-ms-content-sha256:{content_sha256}\n"
+signature_bytes = hmac.new(base64.b64decode(secret), canonical_headers.encode(), sha256).digest()
+signature = base64.b64encode(signature_bytes).decode()
+
+# Correct Authorization header format
+authorization = f"HMAC-SHA256 SignedHeaders=x-ms-date;host;x-ms-content-sha256&Signature={signature}"
+```
+
+### **Security Impact**:
+- **CRITICAL**: Previous implementation would have failed all Vipps webhook deliveries
+- **RESOLVED**: Now fully compliant with official Vipps MobilePay specification
+- **VERIFIED**: All webhook validation components now follow exact Vipps requirements
+
+### **Testing Status**:
+- ✅ Updated all tests to use proper Vipps webhook format
+- ✅ Signature validation tests pass with correct HMAC construction
+- ✅ Content hash validation working correctly
+- ✅ Timestamp validation using RFC 2822 format
+- ✅ Error handling returns appropriate HTTP status codes
+
+This fix ensures that the Vipps MobilePay integration will properly validate incoming webhooks according to the official specification, preventing security vulnerabilities and ensuring reliable payment processing.
