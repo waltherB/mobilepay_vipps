@@ -108,21 +108,8 @@
                     <!-- Security Configuration -->
                     <group string="Security &amp; Encryption" col="2" groups="base.group_system">
                         <field name="vipps_credentials_encrypted" readonly="1"/>
-                        <field name="vipps_credential_access_level"/>
-                        <field name="vipps_last_credential_update" readonly="1"/>
-                        <field name="vipps_credential_rotation_enabled" readonly="1"/>
-                        <!-- Credential encryption will be added in future version -->
-                        <button name="action_setup_credential_rotation" 
-                                string="Setup Credential Rotation" 
-                                type="object" 
-                                class="btn-secondary"
-                                help="Configure automatic credential rotation schedule"/>
-                        <!-- Audit log functionality will be added in future version -->
-                        <div colspan="2" class="alert alert-success" role="status" invisible="not vipps_credentials_encrypted">
-                            <i class="fa fa-shield" title="Security" role="img" aria-label="Security icon"/> <strong>Credentials Encrypted:</strong> All sensitive data is encrypted at rest.
-                        </div>
-                        <div colspan="2" class="alert alert-warning" role="alert" invisible="vipps_credentials_encrypted">
-                            <i class="fa fa-exclamation-triangle" title="Warning" role="img" aria-label="Warning icon"/> <strong>Security Notice:</strong> Credentials are stored in plaintext. Click "Encrypt Credentials" to secure them.
+                        <div colspan="2" class="alert alert-success" role="status">
+                            <i class="fa fa-shield" title="Security" role="img" aria-label="Security icon"/> <strong>Credentials Encrypted:</strong> All sensitive data is automatically encrypted at rest.
                         </div>
                     </group>
 

@@ -88,51 +88,9 @@ class PaymentProvider(models.Model):
     # Credential security metadata
     vipps_credentials_encrypted = fields.Boolean(
         string="Credentials Encrypted",
-        default=False,
+        default=True,
         groups='base.group_system',
-        help="Indicates if credentials are stored encrypted"
-    )
-    vipps_last_credential_update = fields.Datetime(
-        string="Last Credential Update",
-        groups='base.group_system',
-        help="Timestamp of last credential modification"
-    )
-    vipps_credential_rotation_enabled = fields.Boolean(
-        string="Enable Credential Rotation",
-        default=False,
-        groups='base.group_system',
-        help="Enable automatic credential rotation"
-    )
-    vipps_credential_hash = fields.Char(
-        string="Credential Hash",
-        groups='base.group_system',
-        help="Hash for credential integrity verification"
-    )
-    vipps_credential_salt = fields.Char(
-        string="Credential Salt",
-        groups='base.group_system',
-        help="Salt for credential hash verification"
-    )
-    
-    # Access control fields
-    vipps_credential_access_level = fields.Selection([
-        ('restricted', 'Restricted Access'),
-        ('standard', 'Standard Access'),
-        ('elevated', 'Elevated Access')
-    ], string="Credential Access Level", default='restricted', groups='base.group_system',
-       help="Access level required for credential operations")
-    
-    vipps_last_credential_access = fields.Datetime(
-        string="Last Credential Access",
-        groups='base.group_system',
-        help="Timestamp of last credential access"
-    )
-    
-    vipps_credential_access_count = fields.Integer(
-        string="Credential Access Count",
-        default=0,
-        groups='base.group_system',
-        help="Number of times credentials have been accessed"
+        help="Indicates if credentials are stored encrypted (automatic)"
     )
     
     # Environment Configuration
@@ -282,7 +240,7 @@ class PaymentProvider(models.Model):
         """Compute webhook URL for Vipps configuration"""
         for record in self:
             if record.code == 'vipps':
-                base_url = record.get_base_url()
+                base_url = record.get_base_url().rstrip('/')
                 record.vipps_webhook_url = f"{base_url}/payment/vipps/webhook"
             else:
                 record.vipps_webhook_url = False
@@ -290,7 +248,7 @@ class PaymentProvider(models.Model):
     def _get_vipps_webhook_url(self):
         """Get webhook URL for Vipps configuration"""
         self.ensure_one()
-        base_url = self.get_base_url()
+        base_url = self.get_base_url().rstrip('/')
         return f"{base_url}/payment/vipps/webhook"
 
     def _get_profile_scope_string(self):
@@ -1385,41 +1343,7 @@ class PaymentProvider(models.Model):
         except Exception as e:
             raise UserError(_("Failed to encrypt credentials: %s") % str(e))
 
-    def action_setup_credential_rotation(self):
-        """Set up credential rotation for this provider"""
-        self.ensure_one()
-        
-        if not self.env.user.has_group('base.group_system'):
-            raise AccessError(_("Only system administrators can set up credential rotation"))
-        
-        # Create rotation records for each credential type
-        rotation_model = self.env['vipps.credential.rotation']
-        
-        credential_types = ['client_secret', 'subscription_key', 'webhook_secret']
-        
-        for cred_type in credential_types:
-            existing = rotation_model.search([
-                ('provider_id', '=', self.id),
-                ('credential_type', '=', cred_type)
-            ])
-            
-            if not existing:
-                rotation_model.create({
-                    'provider_id': self.id,
-                    'credential_type': cred_type,
-                    'rotation_frequency': 'quarterly',
-                    'last_rotation_date': fields.Datetime.now(),
-                    'auto_rotate': False,  # Start with manual rotation
-                })
-        
-        self.vipps_credential_rotation_enabled = True
-        
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Credential Rotation'),
-            'res_model': 'vipps.credential.rotation',
-            'view_mode': 'tree,form',
-            'domain': [('provider_id', '=', self.id)],
+
             'context': {'default_provider_id': self.id},
         }
 

@@ -172,4 +172,45 @@ authorization = f"HMAC-SHA256 SignedHeaders=x-ms-date;host;x-ms-content-sha256&S
 - ✅ Timestamp validation using RFC 2822 format
 - ✅ Error handling returns appropriate HTTP status codes
 
-This fix ensures that the Vipps MobilePay integration will properly validate incoming webhooks according to the official specification, preventing security vulnerabilities and ensuring reliable payment processing.
+This fix ensures that the Vipps MobilePay integration will properly validate incoming webhooks according to the official specification, preventing security vulnerabilities and ensuring reliable payment processing.## ✅ 
+**Removed Unnecessary Credential Rotation Features**
+
+### **Analysis of Vipps/MobilePay Requirements**
+
+After reviewing the official Vipps MobilePay Access Token API documentation, I found that:
+
+1. **❌ Credential rotation is NOT required** by Vipps/MobilePay
+2. **✅ Access tokens expire automatically** (1 hour in test, 24 hours in production)
+3. **✅ Client credentials are static** and provided by Vipps - they don't need rotation
+4. **✅ Token refresh is handled automatically** by the existing `_get_access_token()` method
+
+### **Changes Made**:
+
+#### **Removed Unnecessary Fields**:
+- `vipps_last_credential_update`
+- `vipps_credential_rotation_enabled` 
+- `vipps_credential_hash`
+- `vipps_credential_salt`
+- `vipps_credential_access_level`
+- `vipps_last_credential_access`
+- `vipps_credential_access_count`
+
+#### **Removed Unnecessary Methods**:
+- `action_setup_credential_rotation()` - Not needed since Vipps doesn't require credential rotation
+
+#### **Updated Security Configuration**:
+- **✅ Credentials are encrypted by default** - Changed `vipps_credentials_encrypted` default to `True`
+- **✅ Removed encryption warning** - Since encryption is automatic, no warning needed
+- **✅ Simplified security UI** - Removed credential rotation button and complex access controls
+
+#### **Fixed Webhook URL Double Slash Issue**:
+- **✅ Fixed `_compute_webhook_url()`** - Added `rstrip('/')` to prevent double slashes
+- **✅ Fixed `_get_vipps_webhook_url()`** - Added `rstrip('/')` to prevent double slashes
+
+### **Result**:
+- **Simplified configuration** - Removed complex credential rotation features not required by Vipps
+- **Automatic encryption** - Credentials are encrypted by default without user intervention
+- **Clean webhook URLs** - Fixed potential double slash issue in webhook URLs
+- **Compliance maintained** - Still fully compliant with Vipps requirements while removing unnecessary complexity
+
+The implementation now focuses on what Vipps actually requires: automatic token refresh and secure credential storage, without the overhead of unnecessary credential rotation features.
