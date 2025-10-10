@@ -1033,6 +1033,22 @@ class PaymentProvider(models.Model):
 
     def write(self, vals):
         """Override write to handle credential changes and state validation"""
+        # Auto-encrypt credentials when they are set
+        if self.code == 'vipps' or vals.get('code') == 'vipps':
+            if 'vipps_client_secret' in vals and vals['vipps_client_secret']:
+                # Encrypt client secret automatically
+                vals['vipps_client_secret_encrypted'] = self._encrypt_credential(vals['vipps_client_secret'])
+                vals['vipps_credentials_encrypted'] = True
+                # Clear plaintext version
+                vals['vipps_client_secret'] = False
+                
+            if 'vipps_subscription_key' in vals and vals['vipps_subscription_key']:
+                # Encrypt subscription key automatically
+                vals['vipps_subscription_key_encrypted'] = self._encrypt_credential(vals['vipps_subscription_key'])
+                vals['vipps_credentials_encrypted'] = True
+                # Clear plaintext version
+                vals['vipps_subscription_key'] = False
+        
         # Check if provider is being enabled
         if vals.get('state') == 'enabled' and self.code == 'vipps':
             # Auto-register webhook when provider is enabled

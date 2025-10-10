@@ -32,14 +32,18 @@
                         <field name="vipps_subscription_key" 
                                password="True"
                                placeholder="Your subscription key"
-                               help="Ocp-Apim-Subscription-Key from Vipps/MobilePay portal"/>
+                               help="Ocp-Apim-Subscription-Key from Vipps/MobilePay portal (automatically encrypted)"/>
                         <field name="vipps_client_id" 
                                placeholder="Your client ID"
                                help="Client ID for access token generation"/>
                         <field name="vipps_client_secret" 
                                password="True"
                                placeholder="Your client secret"
-                               help="Client Secret for access token generation"/>
+                               help="Client Secret for access token generation (automatically encrypted)"/>
+                        <field name="vipps_credentials_encrypted" readonly="1" invisible="1"/>
+                        <div colspan="2" class="alert alert-success" role="alert" invisible="not vipps_credentials_encrypted">
+                            <i class="fa fa-lock"/> <strong>Security:</strong> Credentials are automatically encrypted and stored securely.
+                        </div>
                     </group>
 
                     <!-- Credential Validation -->
@@ -122,31 +126,15 @@
                         </div>
                     </group>
 
-                    <!-- Webhook Configuration -->
-                    <group string="Webhook Configuration" col="2" groups="base.group_system">
+                    <!-- Webhook Configuration (Managed Automatically) -->
+                    <group string="Webhook Information" col="2" groups="base.group_system">
                         <field name="vipps_webhook_url" 
                                readonly="1"
-                               help="Configure this URL in your Vipps/MobilePay portal"/>
-                        <field name="vipps_webhook_secret" 
-                               password="True"
-                               help="Secret key for webhook signature validation"/>
-                        <!-- Webhook secret generation will be added in future version -->
-                    </group>
-
-                    <!-- Webhook Security Configuration -->
-                    <group string="Webhook Security" col="2" groups="base.group_system">
-                        <field name="vipps_webhook_signature_required"/>
-                        <field name="vipps_webhook_security_logging"/>
-                        <field name="vipps_webhook_timestamp_tolerance"/>
-                        <field name="vipps_webhook_rate_limit_enabled"/>
-                        <field name="vipps_webhook_max_requests" 
-                               invisible="not vipps_webhook_rate_limit_enabled"/>
-                        <field name="vipps_webhook_window_seconds" 
-                               invisible="not vipps_webhook_rate_limit_enabled"/>
-                        <field name="vipps_webhook_allowed_ips" 
-                               placeholder="213.52.3.0/24, 213.52.4.0/24"
-                               help="Comma-separated list of allowed IP addresses or CIDR ranges"/>
-                        <!-- Webhook security testing will be added in future version -->
+                               help="Webhook URL (automatically registered with Vipps when provider is enabled)"/>
+                        <div colspan="2" class="alert alert-info" role="alert">
+                            <strong>Automatic Webhook Management:</strong> Webhooks are automatically registered/unregistered 
+                            with Vipps when you enable/disable this provider. No manual configuration needed.
+                        </div>
                     </group>
 
                     <!-- Compliance & Monitoring -->
