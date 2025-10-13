@@ -1343,10 +1343,6 @@ class PaymentProvider(models.Model):
         except Exception as e:
             raise UserError(_("Failed to encrypt credentials: %s") % str(e))
 
-
-            'context': {'default_provider_id': self.id},
-        }
-
     def action_configure_profile_scopes(self):
         """Open profile scope configuration wizard from provider form.
         This matches the button `name` used in `views/payment_provider_views.xml`.

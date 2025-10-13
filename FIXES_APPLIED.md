@@ -213,4 +213,24 @@ After reviewing the official Vipps MobilePay Access Token API documentation, I f
 - **Clean webhook URLs** - Fixed potential double slash issue in webhook URLs
 - **Compliance maintained** - Still fully compliant with Vipps requirements while removing unnecessary complexity
 
-The implementation now focuses on what Vipps actually requires: automatic token refresh and secure credential storage, without the overhead of unnecessary credential rotation features.
+The implementation now focuses on what Vipps actually requires: automatic token refresh and secure credential storage, without the overhead of unnecessary credential rotation features.#
+# ✅ **Fixed Syntax Error in Payment Provider Model**
+
+### **Issue**:
+- **❌ SyntaxError: unmatched '}'** at line 1348 in `models/payment_provider.py`
+- **❌ Module loading failed** due to orphaned code from removed credential rotation method
+
+### **Root Cause**:
+When removing the `action_setup_credential_rotation()` method, some orphaned lines were left behind:
+```python
+            'context': {'default_provider_id': self.id},
+        }
+```
+
+### **Fix Applied**:
+- **✅ Removed orphaned lines** that were causing the syntax error
+- **✅ Verified Python syntax** with `py_compile` - now passes without errors
+- **✅ Module should now load successfully** in Odoo
+
+### **Result**:
+The module now loads without syntax errors and the credential rotation cleanup is complete.
