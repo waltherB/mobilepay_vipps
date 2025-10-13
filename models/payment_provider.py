@@ -225,6 +225,11 @@ class PaymentProvider(models.Model):
         string="Last Credential Update",
         help="Timestamp of the last credential update"
     )
+    vipps_webhook_security_logging = fields.Boolean(
+        string="Enable Webhook Security Logging",
+        default=True,
+        help="Enable detailed security logging for webhook events"
+    )
 
     @api.constrains('vipps_merchant_serial_number')
     def _check_vipps_merchant_serial_number(self):
@@ -358,9 +363,18 @@ class PaymentProvider(models.Model):
                     _logger.info("✅ DEBUG: Response: %s", response)
                 _logger.info("Successfully registered webhook for provider %s: %s", self.name, webhook_url)
                 
-                # Store webhook ID if provided
+                # Store webhook ID and secret from Vipps response
+                update_vals = {}
                 if response.get('id'):
-                    self.sudo().write({'vipps_webhook_id': response['id']})
+                    update_vals['vipps_webhook_id'] = response['id']
+                if response.get('secret'):
+                    update_vals['vipps_webhook_secret'] = response['secret']
+                
+                if update_vals:
+                    self.sudo().write(update_vals)
+                    if self.vipps_environment == 'test':
+                        _logger.info("🔧 DEBUG: Stored webhook ID: %s", response.get('id'))
+                        _logger.info("🔧 DEBUG: Stored webhook secret: %s", 'Yes' if response.get('secret') else 'No')
                 
                 return True
             else:
