@@ -473,12 +473,7 @@ The webhook registration method exists but may be failing silently. Added compre
 ### **Webhook Configuration**:
 
 #### **✅ Registered Events**:
-- `epayment.payment.created.v1`
-- `epayment.payment.authorized.v1`
-- `epayment.payment.captured.v1`
-- `epayment.payment.cancelled.v1`
-- `epayment.payment.expired.v1`
-- `epayment.payment.terminated.v1`
+- `epayments.payment.created.v1` (primary event for payment creation)
 
 #### **✅ API Endpoints**:
 - **Test**: `https://apitest.vipps.no/webhooks/v1/webhooks`

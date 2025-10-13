@@ -338,15 +338,11 @@ class PaymentProvider(models.Model):
                     _logger.info("🔧 DEBUG: Generated new webhook secret")
             
             # Webhook registration payload according to Vipps Webhooks API
+            # Start with basic payment created event as per Vipps documentation
             payload = {
                 "url": webhook_url,
                 "events": [
-                    "epayment.payment.created.v1",
-                    "epayment.payment.authorized.v1", 
-                    "epayment.payment.captured.v1",
-                    "epayment.payment.cancelled.v1",
-                    "epayment.payment.expired.v1",
-                    "epayment.payment.terminated.v1"
+                    "epayments.payment.created.v1"
                 ]
             }
             
