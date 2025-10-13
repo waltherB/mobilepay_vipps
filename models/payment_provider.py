@@ -221,6 +221,10 @@ class PaymentProvider(models.Model):
         default=0,
         help="Number of API errors encountered"
     )
+    vipps_last_credential_update = fields.Datetime(
+        string="Last Credential Update",
+        help="Timestamp of the last credential update"
+    )
 
     @api.constrains('vipps_merchant_serial_number')
     def _check_vipps_merchant_serial_number(self):
@@ -1385,21 +1389,24 @@ class PaymentProvider(models.Model):
         """Get decrypted client secret"""
         if self.vipps_credentials_encrypted and self.vipps_client_secret_encrypted:
             return self._decrypt_credential(self.vipps_client_secret_encrypted)
-        return self.vipps_client_secret
+        # Return plaintext version only if it's not False
+        return self.vipps_client_secret if self.vipps_client_secret else None
 
     @property
     def vipps_subscription_key_decrypted(self):
         """Get decrypted subscription key"""
         if self.vipps_credentials_encrypted and self.vipps_subscription_key_encrypted:
             return self._decrypt_credential(self.vipps_subscription_key_encrypted)
-        return self.vipps_subscription_key
+        # Return plaintext version only if it's not False
+        return self.vipps_subscription_key if self.vipps_subscription_key else None
 
     @property
     def vipps_webhook_secret_decrypted(self):
         """Get decrypted webhook secret"""
         if self.vipps_credentials_encrypted and self.vipps_webhook_secret_encrypted:
             return self._decrypt_credential(self.vipps_webhook_secret_encrypted)
-        return self.vipps_webhook_secret
+        # Return plaintext version only if it's not False
+        return self.vipps_webhook_secret if self.vipps_webhook_secret else None
 
     def write(self, vals):
         """Override write to handle credential changes and state validation"""
