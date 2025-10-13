@@ -372,4 +372,67 @@ The implementation now provides extensive debugging capabilities for the test en
 6. **Create test payment** - Process a payment to see debug logs
 7. **Check MobilePay portal** - Verify webhook appears in developer portal
 
-The debug logging should now appear for all payment operations in test environment, and webhooks should register automatically when the provider is properly configured.
+The debug logging should now appear for all payment operations in test environment, and webhooks should register automatically when the provider is properly configured.## ✅ **I
+mplemented Proper Webhook Registration via API**
+
+### **Correct Webhook Registration Approach**
+
+You're absolutely right! Webhooks should be registered programmatically through the Vipps Webhook API, not manually in the developer portal. 
+
+### **Webhook Registration Flow (Per Vipps Documentation)**:
+
+1. **Get Access Token** - `POST /accesstoken/get`
+2. **Register Webhook** - `POST /webhooks/v1/webhooks`  
+3. **Trigger Event** - Create payment to trigger webhook
+4. **Verify Registration** - `GET /webhooks/v1/webhooks`
+
+### **Implementation Added**:
+
+#### **✅ Complete Webhook API Integration**:
+- **`_make_webhook_api_request()`** - Dedicated method for webhook API calls
+- **`_register_webhook()`** - Programmatic webhook registration
+- **`action_test_webhook_flow()`** - Test complete webhook flow
+- **`action_list_webhooks()`** - List registered webhooks via API
+
+#### **✅ Test Buttons Added**:
+- **"Test Webhook Flow"** - Tests the complete flow: access token → register webhook → list webhooks
+- **"List Webhooks"** - Shows all registered webhooks via API
+- **"Register Webhook"** - Manual webhook registration trigger
+
+#### **✅ Automatic Registration**:
+- **Provider enabled** - Auto-registers webhook when provider is enabled
+- **Credentials updated** - Auto-registers when credentials change
+- **Debug logging** - Full visibility into registration process
+
+### **How to Test Webhook Registration**:
+
+1. **Configure Vipps credentials** in test environment
+2. **Enable the provider** (should auto-register webhook)
+3. **Click "Test Webhook Flow"** to test complete process
+4. **Click "List Webhooks"** to verify registration
+5. **Check logs** for detailed debug information
+
+### **Expected Debug Output**:
+```
+🔧 DEBUG: Testing Complete Webhook Flow
+🔧 Step 1: Get Access Token
+✅ DEBUG: Access token obtained successfully
+🔧 Step 2: Register Webhook
+🔧 DEBUG: Webhook Registration Payload: {
+  "url": "https://yourdomain.com/payment/vipps/webhook",
+  "events": ["epayment.payment.created.v1", ...]
+}
+✅ DEBUG: Webhook registration successful
+🔧 Step 3: List Registered Webhooks
+✅ DEBUG: Found 1 registered webhooks
+```
+
+### **Webhook Events Registered**:
+- `epayment.payment.created.v1`
+- `epayment.payment.authorized.v1`
+- `epayment.payment.captured.v1`
+- `epayment.payment.cancelled.v1`
+- `epayment.payment.expired.v1`
+- `epayment.payment.terminated.v1`
+
+The webhook registration is now implemented correctly according to the Vipps documentation - it's done programmatically via the API, not manually in the developer portal.

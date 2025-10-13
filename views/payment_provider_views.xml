@@ -130,6 +130,17 @@
                                 class="btn-secondary"
                                 invisible="vipps_environment != 'test'"
                                 help="Test debug logging functionality"/>
+                        <button name="action_test_webhook_flow" 
+                                string="Test Webhook Flow" 
+                                type="object" 
+                                class="btn-info"
+                                invisible="vipps_environment != 'test'"
+                                help="Test complete webhook registration flow as per Vipps documentation"/>
+                        <button name="action_list_webhooks" 
+                                string="List Webhooks" 
+                                type="object" 
+                                class="btn-secondary"
+                                help="List all registered webhooks via API"/>
                         <div colspan="2" class="alert alert-info" role="alert">
                             <strong>Automatic Webhook Management:</strong> Webhooks are automatically registered/unregistered 
                             with Vipps when you enable/disable this provider. Use the button above for manual registration.

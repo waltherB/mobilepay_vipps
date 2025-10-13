@@ -440,6 +440,58 @@ class PaymentProvider(models.Model):
                 }
             }
 
+    def action_list_webhooks(self):
+        """List all registered webhooks"""
+        self.ensure_one()
+        
+        try:
+            response = self._make_webhook_api_request('GET', 'webhooks/v1/webhooks')
+            
+            if response and 'webhooks' in response:
+                webhooks = response['webhooks']
+                webhook_count = len(webhooks)
+                
+                if self.vipps_environment == 'test':
+                    _logger.info("🔧 DEBUG: Found %d registered webhooks", webhook_count)
+                    for webhook in webhooks:
+                        _logger.info("🔧 DEBUG: Webhook ID: %s, URL: %s, Events: %s", 
+                                   webhook.get('id'), webhook.get('url'), webhook.get('events'))
+                
+                message = _('Found %d registered webhooks. Check logs for details.') % webhook_count
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _('Webhooks Listed'),
+                        'message': message,
+                        'type': 'info',
+                        'sticky': False,
+                    }
+                }
+            else:
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _('No Webhooks'),
+                        'message': _('No webhooks found or failed to retrieve webhook list.'),
+                        'type': 'warning',
+                        'sticky': False,
+                    }
+                }
+        except Exception as e:
+            _logger.error("Failed to list webhooks: %s", str(e))
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Error'),
+                    'message': _('Failed to list webhooks: %s') % str(e),
+                    'type': 'danger',
+                    'sticky': True,
+                }
+            }
+
     @api.model
     def _get_supported_currencies(self):
         """Return supported currencies for Vipps/MobilePay"""
@@ -689,27 +741,136 @@ class PaymentProvider(models.Model):
                 }
             }
 
-    def _get_api_headers(self, include_auth=True, idempotency_key=None):
-        """Get standard API headers for Vipps requests"""
+    def action_test_webhook_flow(self):
+        """Test the complete webhook registration flow as per Vipps documentation"""
         self.ensure_one()
         
+        if self.vipps_environment == 'test':
+            _logger.info("🔧 DEBUG: Testing Complete Webhook Flow")
+            _logger.info("🔧 Step 1: Get Access Token")
+            
+            try:
+                # Step 1: Get access token
+                access_token = self._get_access_token()
+                _logger.info("✅ DEBUG: Access token obtained successfully")
+                
+                # Step 2: Register webhook
+                _logger.info("🔧 Step 2: Register Webhook")
+                webhook_result = self._register_webhook()
+                
+                if webhook_result:
+                    _logger.info("✅ DEBUG: Webhook registered successfully")
+                    
+                    # Step 3: List webhooks to verify
+                    _logger.info("🔧 Step 3: List Registered Webhooks")
+                    response = self._make_webhook_api_request('GET', 'webhooks/v1/webhooks')
+                    
+                    if response:
+                        _logger.info("✅ DEBUG: Webhook list retrieved: %s", response)
+                        webhook_count = len(response.get('webhooks', []))
+                        
+                        return {
+                            'type': 'ir.actions.client',
+                            'tag': 'display_notification',
+                            'params': {
+                                'title': _('Webhook Test Success'),
+                                'message': _('Webhook flow completed successfully! Found %d registered webhooks. Check logs for details.') % webhook_count,
+                                'type': 'success',
+                                'sticky': False,
+                            }
+                        }
+                    else:
+                        _logger.error("❌ DEBUG: Failed to list webhooks")
+                        return {
+                            'type': 'ir.actions.client',
+                            'tag': 'display_notification',
+                            'params': {
+                                'title': _('Webhook Test Failed'),
+                                'message': _('Failed to list webhooks. Check logs for details.'),
+                                'type': 'danger',
+                                'sticky': True,
+                            }
+                        }
+                else:
+                    _logger.error("❌ DEBUG: Webhook registration failed")
+                    return {
+                        'type': 'ir.actions.client',
+                        'tag': 'display_notification',
+                        'params': {
+                            'title': _('Webhook Test Failed'),
+                            'message': _('Webhook registration failed. Check logs for details.'),
+                            'type': 'danger',
+                            'sticky': True,
+                        }
+                    }
+                    
+            except Exception as e:
+                _logger.error("❌ DEBUG: Webhook flow test failed: %s", str(e))
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _('Webhook Test Error'),
+                        'message': _('Webhook flow test failed: %s') % str(e),
+                        'type': 'danger',
+                        'sticky': True,
+                    }
+                }
+        else:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Webhook Test'),
+                    'message': _('Webhook testing only works in test environment.'),
+                    'type': 'warning',
+                    'sticky': False,
+                }
+            }
+
+    def _get_api_headers(self, include_auth=True, idempotency_key=None):
+        """Get standard API headers for Vipps requests according to HTTP headers specification"""
+        self.ensure_one()
+        
+        # Get Odoo version dynamically
+        from odoo.release import version_info
+        odoo_version = f"{version_info[0]}.{version_info[1]}"
+        
+        # Required headers according to Vipps HTTP headers documentation
         headers = {
+            # Required authentication headers
             'Ocp-Apim-Subscription-Key': self.vipps_subscription_key_decrypted,
             'Merchant-Serial-Number': self.vipps_merchant_serial_number,
-            'Vipps-System-Name': 'Odoo',
-            'Vipps-System-Version': '17.0',
-            'Vipps-System-Plugin-Name': 'mobilepay-vipps',
-            'Vipps-System-Plugin-Version': '1.0.0',
+            
+            # Required system identification headers (max 30 characters each)
+            'Vipps-System-Name': 'Odoo ERP',  # The name of the solution
+            'Vipps-System-Version': odoo_version,  # Version of Odoo
+            'Vipps-System-Plugin-Name': 'vipps-mobilepay-odoo',  # Plugin name
+            'Vipps-System-Plugin-Version': '1.0.0',  # Plugin version
+            
+            # Standard HTTP headers
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
         }
         
+        # Add authorization header if requested
         if include_auth:
             access_token = self._get_access_token()
             headers['Authorization'] = f'Bearer {access_token}'
         
-        # Add idempotency key for POST requests (required by Vipps checklist)
+        # Add idempotency key for POST requests (required by Vipps for idempotent operations)
         if idempotency_key:
             headers['Idempotency-Key'] = idempotency_key
+        
+        # Enhanced debug logging for test environment
+        if self.vipps_environment == 'test':
+            _logger.info("🔧 DEBUG: API Headers Generated")
+            # Log headers without sensitive data
+            safe_headers = {k: v for k, v in headers.items() 
+                          if k.lower() not in ['authorization', 'ocp-apim-subscription-key']}
+            safe_headers['Authorization'] = 'Bearer [REDACTED]' if include_auth else 'Not included'
+            safe_headers['Ocp-Apim-Subscription-Key'] = '[REDACTED]'
+            _logger.info("🔧 DEBUG: Headers: %s", safe_headers)
             
         return headers
 
