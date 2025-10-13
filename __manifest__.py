@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Vipps/MobilePay Payment Integration Minimal',
-    'version': '1.0.1',
+    'version': '1.0.2',
     'category': 'Accounting/Payment Providers',
     'sequence': 350,
     'summary': 'Complete Vipps/MobilePay payment integration for Odoo with eCommerce and POS support',
