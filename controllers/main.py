@@ -104,6 +104,16 @@ class VippsController(http.Controller):
                 _logger.error("No active Vipps provider found for webhook")
                 return request.make_response('Not Found: Provider not configured', status=404)
             
+            # Enhanced debug logging for test environment
+            if provider.vipps_environment == 'test':
+                _logger.info("🔧 DEBUG: Webhook Received")
+                _logger.info("🔧 Environment: %s", provider.vipps_environment)
+                _logger.info("🔧 Request Method: %s", request.httprequest.method)
+                _logger.info("🔧 Request URL: %s", request.httprequest.url)
+                _logger.info("🔧 Request Headers: %s", dict(request.httprequest.headers))
+                _logger.info("🔧 Payload Length: %s bytes", len(payload))
+                _logger.info("🔧 Payload: %s", payload[:500] + '...' if len(payload) > 500 else payload)
+            
             # Perform comprehensive security validation
             validation_result = provider.validate_webhook_request_comprehensive(request, payload)
             
@@ -112,6 +122,9 @@ class VippsController(http.Controller):
             
             # Log webhook reception
             _logger.info("Received Vipps webhook from %s", client_ip)
+            
+            if provider.vipps_environment == 'test':
+                _logger.info("🔧 DEBUG: Validation Result: %s", validation_result)
             
             # Check validation result
             if not validation_result['success']:

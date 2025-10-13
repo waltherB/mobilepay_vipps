@@ -1966,22 +1966,31 @@ class PaymentTransaction(models.Model):
     def create_pos_payment(self, payment_data):
         """Create a new POS payment transaction"""
         try:
-            # Validate required data
-            required_fields = ['amount', 'currency', 'reference', 'flow']
-            for field in required_fields:
-                if field not in payment_data:
-                    return {
-                        'success': False,
-                        'error': f'Missing required field: {field}'
-                    }
-
-            # Get Vipps payment provider
+            # Enhanced debug logging for test environment
             provider = self.env['payment.provider'].search([
                 ('code', '=', 'vipps'),
                 ('state', '!=', 'disabled')
             ], limit=1)
             
+            if provider and provider.vipps_environment == 'test':
+                _logger.info("🔧 DEBUG: Creating POS Payment")
+                _logger.info("🔧 Environment: %s", provider.vipps_environment)
+                _logger.info("🔧 Payment Data: %s", payment_data)
+                _logger.info("🔧 Provider: %s (ID: %s)", provider.name, provider.id)
+            
+            # Validate required data
+            required_fields = ['amount', 'currency', 'reference', 'flow']
+            for field in required_fields:
+                if field not in payment_data:
+                    if provider and provider.vipps_environment == 'test':
+                        _logger.error("❌ DEBUG: Missing required field: %s", field)
+                    return {
+                        'success': False,
+                        'error': f'Missing required field: {field}'
+                    }
+            
             if not provider:
+                _logger.error("❌ DEBUG: No active Vipps payment provider found")
                 return {
                     'success': False,
                     'error': 'No active Vipps payment provider found'

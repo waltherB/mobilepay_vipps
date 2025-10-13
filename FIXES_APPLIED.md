@@ -233,4 +233,75 @@ When removing the `action_setup_credential_rotation()` method, some orphaned lin
 - **✅ Module should now load successfully** in Odoo
 
 ### **Result**:
-The module now loads without syntax errors and the credential rotation cleanup is complete.
+The module now loads without syntax errors and the credential rotation cleanup is complete.## ✅ **
+Added Debug Logging and Vipps API Compliance**
+
+### **Enhanced Debug Logging for Test Environment**
+
+Added comprehensive debug logging throughout the payment process to help with testing and troubleshooting:
+
+#### **API Request Debugging**:
+- **✅ Enhanced `_make_api_request()`** - Added detailed logging for test environment
+- **✅ Added `_make_webhook_api_request()`** - Separate method for webhook API calls
+- **✅ Request/Response logging** - Full request and response details in test mode
+- **✅ Error debugging** - Enhanced error messages with debug context
+
+#### **Payment Process Debugging**:
+- **✅ POS Payment Creation** - Debug logging in `create_pos_payment()`
+- **✅ Webhook Processing** - Enhanced webhook reception logging
+- **✅ Transaction State Changes** - Detailed state transition logging
+
+#### **Debug Log Format**:
+```
+🔧 DEBUG: [Context] - [Details]
+✅ DEBUG: [Success message]
+❌ DEBUG: [Error message]
+```
+
+### **Vipps API Compliance Verification**
+
+#### **✅ Correct API URLs**:
+- **Test Environment**: `https://apitest.vipps.no/`
+- **Production Environment**: `https://api.vipps.no/`
+- **Access Token**: `/accesstoken/get`
+- **ePayment API**: `/epayment/v1/`
+- **Webhook API**: `/webhooks/v1/webhooks`
+
+#### **✅ Webhook Registration Compliance**:
+- **Correct endpoint**: `POST /webhooks/v1/webhooks`
+- **Proper event types**: 
+  - `epayment.payment.created.v1`
+  - `epayment.payment.authorized.v1`
+  - `epayment.payment.captured.v1`
+  - `epayment.payment.cancelled.v1`
+  - `epayment.payment.expired.v1`
+  - `epayment.payment.terminated.v1`
+
+#### **✅ API Headers Compliance**:
+- **Authorization**: `Bearer {access_token}`
+- **Ocp-Apim-Subscription-Key**: Required for all requests
+- **Merchant-Serial-Number**: Required for all requests
+- **Idempotency-Key**: Added for POST requests
+- **Content-Type**: `application/json`
+
+#### **✅ Webhook Authentication Compliance**:
+- **HMAC-SHA256 signature validation** using correct Vipps specification
+- **Proper header extraction**: `x-ms-date`, `x-ms-content-sha256`, `Host`, `Authorization`
+- **Content hash validation** against SHA-256 hash
+- **Timestamp validation** using RFC 2822 format
+
+### **Test Environment Features**:
+- **🔧 Debug mode activated** when `vipps_environment = 'test'`
+- **📝 Comprehensive logging** of all API interactions
+- **🔍 Request/response inspection** for troubleshooting
+- **⚡ Real-time debugging** during payment flows
+- **🛡️ Security validation logging** for webhook processing
+
+### **Benefits**:
+- **Easier troubleshooting** during integration testing
+- **Full API compliance** with Vipps MobilePay specifications
+- **Better error diagnostics** for failed payments
+- **Complete audit trail** of all API interactions
+- **Simplified debugging** for webhook issues
+
+The implementation now provides extensive debugging capabilities for the test environment while maintaining full compliance with the official Vipps MobilePay API specifications.

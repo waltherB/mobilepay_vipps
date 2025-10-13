@@ -330,8 +330,8 @@ class PaymentProvider(models.Model):
                 ]
             }
             
-            # Make webhook registration request
-            response = self._make_api_request('POST', 'webhooks', payload=payload)
+            # Make webhook registration request using correct webhook API endpoint
+            response = self._make_webhook_api_request('POST', 'webhooks/v1/webhooks', payload=payload)
             
             if response:
                 _logger.info("Successfully registered webhook for provider %s: %s", self.name, webhook_url)
@@ -353,7 +353,7 @@ class PaymentProvider(models.Model):
             
         try:
             # Get list of registered webhooks
-            response = self._make_api_request('GET', 'webhooks')
+            response = self._make_webhook_api_request('GET', 'webhooks/v1/webhooks')
             
             if response and 'webhooks' in response:
                 webhook_url = self._get_vipps_webhook_url()
@@ -363,7 +363,7 @@ class PaymentProvider(models.Model):
                     if webhook.get('url') == webhook_url:
                         webhook_id = webhook.get('id')
                         if webhook_id:
-                            delete_response = self._make_api_request('DELETE', f'webhooks/{webhook_id}')
+                            delete_response = self._make_webhook_api_request('DELETE', f'webhooks/v1/webhooks/{webhook_id}')
                             if delete_response:
                                 _logger.info("Successfully unregistered webhook %s for provider %s", webhook_id, self.name)
                                 return True
@@ -464,6 +464,14 @@ class PaymentProvider(models.Model):
             return "https://api.vipps.no/accesstoken/get"
         else:
             return "https://apitest.vipps.no/accesstoken/get"
+
+    def _get_vipps_webhook_api_url(self):
+        """Return the webhook API base URL based on environment"""
+        self.ensure_one()
+        if self.vipps_environment == 'production':
+            return "https://api.vipps.no/"
+        else:
+            return "https://apitest.vipps.no/"
 
     def _get_vipps_api_client(self):
         """
@@ -777,6 +785,19 @@ class PaymentProvider(models.Model):
         url = self._get_vipps_api_url() + endpoint.lstrip('/')
         headers = self._get_api_headers(include_auth=True, idempotency_key=idempotency_key)
         
+        # Enhanced debug logging for test environment
+        if self.vipps_environment == 'test':
+            _logger.info("🔧 DEBUG: Vipps API Request Details")
+            _logger.info("🔧 Environment: %s", self.vipps_environment)
+            _logger.info("🔧 Method: %s", method.upper())
+            _logger.info("🔧 URL: %s", url)
+            _logger.info("🔧 Endpoint: %s", endpoint)
+            _logger.info("🔧 Headers: %s", {k: v for k, v in headers.items() if k.lower() not in ['authorization', 'client_secret']})
+            if payload:
+                _logger.info("🔧 Payload: %s", payload)
+            if idempotency_key:
+                _logger.info("🔧 Idempotency-Key: %s", idempotency_key)
+        
         max_retries = 3
         base_delay = 1.0  # Start with 1 second
         last_exception = None
@@ -790,13 +811,29 @@ class PaymentProvider(models.Model):
                     response = requests.post(url, headers=headers, json=payload, timeout=30)
                 elif method.upper() == 'PUT':
                     response = requests.put(url, headers=headers, json=payload, timeout=30)
+                elif method.upper() == 'DELETE':
+                    response = requests.delete(url, headers=headers, timeout=30)
                 else:
                     _logger.error("Unsupported HTTP method: %s", method)
                     raise ValueError(_("Unsupported HTTP method: %s") % method)
                 
+                # Enhanced debug logging for test environment
+                if self.vipps_environment == 'test':
+                    _logger.info("🔧 DEBUG: Response Status: %s", response.status_code)
+                    _logger.info("🔧 DEBUG: Response Headers: %s", dict(response.headers))
+                    if response.content:
+                        try:
+                            response_data = response.json()
+                            _logger.info("🔧 DEBUG: Response Body: %s", response_data)
+                        except:
+                            _logger.info("🔧 DEBUG: Response Body (raw): %s", response.text[:500])
+                
                 # Handle successful responses
                 if response.status_code in [200, 201, 202]:
-                    return response.json() if response.content else {}
+                    result = response.json() if response.content else {}
+                    if self.vipps_environment == 'test':
+                        _logger.info("✅ DEBUG: API request successful")
+                    return result
                 
                 # Retry on 5xx server errors
                 if 500 <= response.status_code < 600:
@@ -806,6 +843,8 @@ class PaymentProvider(models.Model):
                     )
                 else:
                     # Handle non-retryable client errors
+                    if self.vipps_environment == 'test':
+                        _logger.error("❌ DEBUG: API request failed with status %s", response.status_code)
                     return self._handle_api_error(response, f"{method} {endpoint}")
                 
             except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
@@ -820,6 +859,63 @@ class PaymentProvider(models.Model):
         
         _logger.error("Vipps API request failed after %d attempts. Last error: %s", max_retries, last_exception)
         raise ValidationError(_("Maximum retry attempts exceeded. Last error: %s") % last_exception)
+
+    def _make_webhook_api_request(self, method, endpoint, payload=None, idempotency_key=None):
+        """Make webhook API request with proper error handling"""
+        self.ensure_one()
+        
+        url = self._get_vipps_webhook_api_url() + endpoint.lstrip('/')
+        headers = self._get_api_headers(include_auth=True, idempotency_key=idempotency_key)
+        
+        # Enhanced debug logging for test environment
+        if self.vipps_environment == 'test':
+            _logger.info("🔧 DEBUG: Vipps Webhook API Request Details")
+            _logger.info("🔧 Environment: %s", self.vipps_environment)
+            _logger.info("🔧 Method: %s", method.upper())
+            _logger.info("🔧 URL: %s", url)
+            _logger.info("🔧 Endpoint: %s", endpoint)
+            _logger.info("🔧 Headers: %s", {k: v for k, v in headers.items() if k.lower() not in ['authorization', 'client_secret']})
+            if payload:
+                _logger.info("🔧 Payload: %s", payload)
+        
+        try:
+            if method.upper() == 'GET':
+                response = requests.get(url, headers=headers, timeout=30)
+            elif method.upper() == 'POST':
+                response = requests.post(url, headers=headers, json=payload, timeout=30)
+            elif method.upper() == 'DELETE':
+                response = requests.delete(url, headers=headers, timeout=30)
+            else:
+                _logger.error("Unsupported HTTP method: %s", method)
+                raise ValueError(_("Unsupported HTTP method: %s") % method)
+            
+            # Enhanced debug logging for test environment
+            if self.vipps_environment == 'test':
+                _logger.info("🔧 DEBUG: Webhook API Response Status: %s", response.status_code)
+                _logger.info("🔧 DEBUG: Webhook API Response Headers: %s", dict(response.headers))
+                if response.content:
+                    try:
+                        response_data = response.json()
+                        _logger.info("🔧 DEBUG: Webhook API Response Body: %s", response_data)
+                    except:
+                        _logger.info("🔧 DEBUG: Webhook API Response Body (raw): %s", response.text[:500])
+            
+            # Handle successful responses
+            if response.status_code in [200, 201, 202, 204]:
+                result = response.json() if response.content else {}
+                if self.vipps_environment == 'test':
+                    _logger.info("✅ DEBUG: Webhook API request successful")
+                return result
+            else:
+                if self.vipps_environment == 'test':
+                    _logger.error("❌ DEBUG: Webhook API request failed with status %s", response.status_code)
+                return self._handle_api_error(response, f"{method} {endpoint}")
+                
+        except Exception as e:
+            _logger.error("Webhook API request failed: %s", str(e))
+            if self.vipps_environment == 'test':
+                _logger.error("❌ DEBUG: Webhook API request exception: %s", str(e))
+            raise
 
     @api.constrains('vipps_webhook_secret')
     def _check_webhook_secret_strength(self):
