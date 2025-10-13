@@ -375,6 +375,55 @@ class PaymentProvider(models.Model):
             _logger.error("Error registering webhook for provider %s: %s", self.name, str(e))
             return False
 
+    def action_check_webhook_status(self):
+        """Check webhook registration status with Vipps"""
+        self.ensure_one()
+        try:
+            response = self._make_webhook_api_request('GET', 'webhooks/v1/webhooks')
+            
+            if response and 'webhooks' in response:
+                webhook_url = self._get_vipps_webhook_url()
+                registered_webhooks = []
+                our_webhook = None
+                
+                for webhook in response['webhooks']:
+                    registered_webhooks.append(f"ID: {webhook.get('id')}, URL: {webhook.get('url')}")
+                    if webhook.get('url') == webhook_url:
+                        our_webhook = webhook
+                
+                if our_webhook:
+                    message = f"✅ Webhook is registered!\n\nWebhook ID: {our_webhook.get('id')}\nURL: {our_webhook.get('url')}\nEvents: {', '.join(our_webhook.get('events', []))}"
+                    msg_type = 'success'
+                else:
+                    message = f"❌ Webhook not found!\n\nExpected URL: {webhook_url}\n\nRegistered webhooks:\n" + '\n'.join(registered_webhooks)
+                    msg_type = 'warning'
+            else:
+                message = "❌ No webhooks found or API error"
+                msg_type = 'danger'
+                
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Webhook Status'),
+                    'message': message,
+                    'type': msg_type,
+                    'sticky': True,
+                }
+            }
+            
+        except Exception as e:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Error'),
+                    'message': f'Failed to check webhook status: {str(e)}',
+                    'type': 'danger',
+                    'sticky': True,
+                }
+            }
+
     def _unregister_webhook(self):
         """Unregister webhook endpoint with Vipps"""
         self.ensure_one()
@@ -694,6 +743,44 @@ class PaymentProvider(models.Model):
                         'message': _('Vipps/MobilePay credentials validated successfully!'),
                         'type': 'success',
                         'sticky': False,
+                    }
+                }
+        except ValidationError as e:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Validation Failed'),
+                    'message': str(e),
+                    'type': 'danger',
+                    'sticky': True,
+                }
+            }
+
+    def action_register_webhook(self):
+        """Manual action to register webhook from UI"""
+        self.ensure_one()
+        try:
+            if self._register_webhook():
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _('Success'),
+                        'message': _('Webhook registered successfully with Vipps!'),
+                        'type': 'success',
+                        'sticky': False,
+                    }
+                }
+            else:
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _('Registration Failed'),
+                        'message': _('Failed to register webhook. Check logs for details.'),
+                        'type': 'warning',
+                        'sticky': True,
                     }
                 }
         except ValidationError as e:

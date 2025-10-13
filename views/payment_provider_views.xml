@@ -59,6 +59,18 @@
                                 type="object" 
                                 class="btn-secondary"
                                 invisible="not vipps_credentials_validated"/>
+                        <button name="action_register_webhook" 
+                                string="Register Webhook" 
+                                type="object" 
+                                class="btn-info"
+                                help="Manually register webhook with Vipps"
+                                invisible="state != 'enabled'"/>
+                        <button name="action_check_webhook_status" 
+                                string="Check Webhook Status" 
+                                type="object" 
+                                class="btn-secondary"
+                                help="Check if webhook is registered with Vipps"
+                                invisible="state != 'enabled'"/>
                         <field name="vipps_last_validation_error" 
                                readonly="1" 
                                colspan="2"

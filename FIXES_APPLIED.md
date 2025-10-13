@@ -436,3 +436,99 @@ You're absolutely right! Webhooks should be registered programmatically through 
 - `epayment.payment.terminated.v1`
 
 The webhook registration is now implemented correctly according to the Vipps documentation - it's done programmatically via the API, not manually in the developer portal.
+## ✅
+ **Webhook Registration Troubleshooting Tools Added**
+
+### **Issue Identified**: Webhook Not Being Created
+
+The webhook registration method exists but may be failing silently. Added comprehensive debugging tools.
+
+### **New Debugging Features**:
+
+#### **✅ Manual Webhook Actions**:
+- **"Register Webhook" Button** - Manually trigger webhook registration
+- **"Check Webhook Status" Button** - Verify webhook registration with Vipps
+- **Enhanced Error Messages** - Clear feedback on registration success/failure
+
+#### **✅ Automatic Registration Triggers**:
+- **Provider Enabled** - Webhook registered when provider state = 'enabled'
+- **Credentials Updated** - Webhook re-registered when credentials change
+- **Error Handling** - Graceful failure with detailed logging
+
+#### **✅ Debug Logging Enhanced**:
+```
+🔧 DEBUG: Registering Webhook with Vipps
+🔧 Environment: test
+🔧 Provider: Vipps/MobilePay (ID: 1)
+🔧 DEBUG: Webhook URL: https://your-domain.com/payment/vipps/webhook
+🔧 DEBUG: Webhook Registration Payload: {...}
+✅ DEBUG: Webhook registration successful
+```
+
+#### **✅ Status Checking**:
+- **Real-time Status** - Check current webhook registration with Vipps API
+- **Webhook Listing** - Shows all registered webhooks for comparison
+- **URL Verification** - Confirms correct webhook URL registration
+
+### **Webhook Configuration**:
+
+#### **✅ Registered Events**:
+- `epayment.payment.created.v1`
+- `epayment.payment.authorized.v1`
+- `epayment.payment.captured.v1`
+- `epayment.payment.cancelled.v1`
+- `epayment.payment.expired.v1`
+- `epayment.payment.terminated.v1`
+
+#### **✅ API Endpoints**:
+- **Test**: `https://apitest.vipps.no/webhooks/v1/webhooks`
+- **Production**: `https://api.vipps.no/webhooks/v1/webhooks`
+
+#### **✅ Webhook URL Format**:
+```
+https://your-domain.com/payment/vipps/webhook
+```
+
+### **Troubleshooting Guide Created**:
+
+Created comprehensive `WEBHOOK_TROUBLESHOOTING.md` with:
+- **Step-by-step debugging process**
+- **Common issues and solutions**
+- **Manual testing commands**
+- **Debug information collection**
+- **Quick checklist for verification**
+
+### **Common Issues Addressed**:
+
+#### **🔴 401 Unauthorized**:
+- **Cause**: Invalid credentials
+- **Solution**: Re-validate credentials, check Vipps Developer Portal
+
+#### **🔴 400 Bad Request**:
+- **Cause**: Invalid webhook URL or payload
+- **Solution**: Verify HTTPS, check URL accessibility
+
+#### **🔴 Network Issues**:
+- **Cause**: Connectivity problems
+- **Solution**: Check firewall, test API connectivity
+
+#### **🔴 Webhook URL Not Accessible**:
+- **Cause**: Vipps cannot reach endpoint
+- **Solution**: Ensure public accessibility, valid SSL
+
+### **Next Steps for User**:
+
+1. **Check Status**: Use "Check Webhook Status" button
+2. **Manual Registration**: Use "Register Webhook" button if needed
+3. **Review Logs**: Check server logs for detailed error messages
+4. **Verify Accessibility**: Ensure webhook URL is publicly accessible
+5. **Test Connection**: Verify HTTPS and SSL certificate
+
+### **Benefits**:
+- **✅ Clear Debugging** - Easy identification of webhook issues
+- **✅ Manual Control** - Ability to manually register webhooks
+- **✅ Real-time Status** - Live verification of webhook registration
+- **✅ Comprehensive Logging** - Detailed debug information
+- **✅ User-friendly** - Clear error messages and guidance
+
+The webhook registration system now has comprehensive debugging tools to identify and resolve any registration issues! 🔧
