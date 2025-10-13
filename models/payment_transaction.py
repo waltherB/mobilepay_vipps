@@ -260,9 +260,20 @@ class PaymentTransaction(models.Model):
         if self.provider_code != 'vipps':
             return res
         
+        # Enhanced debug logging for test environment
+        if self.provider_id.vipps_environment == 'test':
+            _logger.info("🔧 DEBUG: Getting Processing Values for eCommerce Payment")
+            _logger.info("🔧 Environment: %s", self.provider_id.vipps_environment)
+            _logger.info("🔧 Transaction Reference: %s", self.reference)
+            _logger.info("🔧 Amount: %s %s", self.amount, self.currency_id.name)
+            _logger.info("🔧 Provider: %s (ID: %s)", self.provider_id.name, self.provider_id.id)
+        
         try:
             # Create payment request with Vipps API
             payment_response = self._send_payment_request()
+            
+            if self.provider_id.vipps_environment == 'test':
+                _logger.info("🔧 DEBUG: Payment Response: %s", payment_response)
             
             if payment_response and payment_response.get('url'):
                 # Return the redirect URL for the payment form
@@ -271,11 +282,18 @@ class PaymentTransaction(models.Model):
                     'vipps_payment_id': payment_response.get('orderId'),
                 })
                 
+                if self.provider_id.vipps_environment == 'test':
+                    _logger.info("✅ DEBUG: Payment request successful - Redirect URL: %s", payment_response['url'])
+                
             else:
                 # If no redirect URL, there was an error
+                if self.provider_id.vipps_environment == 'test':
+                    _logger.error("❌ DEBUG: No redirect URL in payment response")
                 self._set_error("Failed to create Vipps payment request")
         except Exception as e:
             _logger.error("Error getting processing values for transaction %s: %s", self.reference, str(e))
+            if self.provider_id.vipps_environment == 'test':
+                _logger.error("❌ DEBUG: Exception in _get_processing_values: %s", str(e))
             self._set_error(f"Payment processing failed: {str(e)}")
         
         return res
@@ -287,12 +305,22 @@ class PaymentTransaction(models.Model):
 
         self.ensure_one()
         
+        # Enhanced debug logging for test environment
+        if self.provider_id.vipps_environment == 'test':
+            _logger.info("🔧 DEBUG: Sending Payment Request to Vipps API")
+            _logger.info("🔧 Environment: %s", self.provider_id.vipps_environment)
+            _logger.info("🔧 Transaction: %s", self.reference)
+        
         try:
             api_client = self._get_vipps_api_client()
             
             # Generate payment reference and idempotency key
             payment_reference = self._generate_vipps_reference()
             idempotency_key = str(uuid.uuid4())
+            
+            if self.provider_id.vipps_environment == 'test':
+                _logger.info("🔧 DEBUG: Generated Payment Reference: %s", payment_reference)
+                _logger.info("🔧 DEBUG: Idempotency Key: %s", idempotency_key)
             
             # Build payment payload according to Vipps API specification
             return_url = self._get_return_url()

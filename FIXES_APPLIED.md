@@ -304,4 +304,72 @@ Added comprehensive debug logging throughout the payment process to help with te
 - **Complete audit trail** of all API interactions
 - **Simplified debugging** for webhook issues
 
-The implementation now provides extensive debugging capabilities for the test environment while maintaining full compliance with the official Vipps MobilePay API specifications.
+The implementation now provides extensive debugging capabilities for the test environment while maintaining full compliance with the official Vipps MobilePay API specifications.## 
+✅ **Fixed Debug Logging and Webhook Registration Issues**
+
+### **Issue 1: Debug Logging Not Appearing**
+
+**Problem**: Debug logging wasn't appearing in the logs during payment processing.
+
+**Root Cause**: Debug logging was only implemented for POS payments, not eCommerce payments.
+
+**Solution Applied**:
+- **✅ Added debug logging to `_get_processing_values()`** - Main eCommerce payment method
+- **✅ Added debug logging to `_send_payment_request()`** - Payment API request method
+- **✅ Enhanced webhook processing logging** - More detailed webhook reception logging
+- **✅ Added test debug logging button** - Manual test button for debug functionality
+
+### **Issue 2: No Webhooks Registered in MobilePay**
+
+**Problem**: Webhooks were not being registered automatically with Vipps/MobilePay.
+
+**Root Cause**: Webhook registration was only triggered when provider state changed to 'enabled', not when credentials were updated.
+
+**Solution Applied**:
+- **✅ Enhanced webhook registration in `write()` method** - Now triggers on credential changes
+- **✅ Added manual webhook registration button** - UI button to manually register webhooks
+- **✅ Added webhook ID field** - Store webhook ID returned by Vipps API
+- **✅ Enhanced debug logging for webhook registration** - Detailed logging of registration process
+- **✅ Added `_make_webhook_api_request()` method** - Separate method for webhook API calls
+
+### **Debug Features Added**:
+
+#### **eCommerce Payment Debug Logging**:
+```
+🔧 DEBUG: Getting Processing Values for eCommerce Payment
+🔧 Environment: test
+🔧 Transaction Reference: S00001-3
+🔧 Amount: 1.25 EUR
+✅ DEBUG: Payment request successful - Redirect URL: https://...
+```
+
+#### **Webhook Registration Debug Logging**:
+```
+🔧 DEBUG: Registering Webhook with Vipps
+🔧 Environment: test
+🔧 Webhook URL: https://yourdomain.com/payment/vipps/webhook
+🔧 DEBUG: Webhook Registration Payload: {...}
+✅ DEBUG: Webhook registration successful
+```
+
+#### **Manual Testing Features**:
+- **🔧 Test Debug Logging Button** - Verify debug logging is working
+- **🔧 Manual Webhook Registration Button** - Force webhook registration
+- **🔧 Webhook ID Display** - Show registered webhook ID from Vipps
+
+### **Webhook Registration Triggers**:
+- **✅ Provider enabled** - Automatic registration when provider is enabled
+- **✅ Credentials updated** - Automatic registration when credentials change
+- **✅ Manual trigger** - Button to manually register webhooks
+- **✅ Auto-unregister** - Automatic unregistration when provider is disabled
+
+### **Next Steps for Testing**:
+1. **Enable test environment** - Set `vipps_environment = 'test'`
+2. **Configure credentials** - Add client_id, client_secret, subscription_key
+3. **Enable provider** - Set state to 'enabled' 
+4. **Test debug logging** - Click "Test Debug Logging" button
+5. **Register webhook** - Click "Register Webhook" button
+6. **Create test payment** - Process a payment to see debug logs
+7. **Check MobilePay portal** - Verify webhook appears in developer portal
+
+The debug logging should now appear for all payment operations in test environment, and webhooks should register automatically when the provider is properly configured.

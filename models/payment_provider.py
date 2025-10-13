@@ -159,6 +159,11 @@ class PaymentProvider(models.Model):
         groups='base.group_system',
         help="Secret key for webhook signature validation (auto-generated)"
     )
+    vipps_webhook_id = fields.Char(
+        string="Webhook ID",
+        groups='base.group_system',
+        help="Webhook ID returned by Vipps API"
+    )
     
     # POS Configuration
     vipps_shop_mobilepay_number = fields.Char(
@@ -307,15 +312,26 @@ class PaymentProvider(models.Model):
         
         if self.code != 'vipps':
             return False
+        
+        # Enhanced debug logging for test environment
+        if self.vipps_environment == 'test':
+            _logger.info("🔧 DEBUG: Registering Webhook with Vipps")
+            _logger.info("🔧 Environment: %s", self.vipps_environment)
+            _logger.info("🔧 Provider: %s (ID: %s)", self.name, self.id)
             
         try:
             webhook_url = self._get_vipps_webhook_url()
+            
+            if self.vipps_environment == 'test':
+                _logger.info("🔧 DEBUG: Webhook URL: %s", webhook_url)
             
             # Generate webhook secret if not exists
             if not self.vipps_webhook_secret:
                 import secrets
                 webhook_secret = secrets.token_urlsafe(32)
                 self.sudo().write({'vipps_webhook_secret': webhook_secret})
+                if self.vipps_environment == 'test':
+                    _logger.info("🔧 DEBUG: Generated new webhook secret")
             
             # Webhook registration payload according to Vipps Webhooks API
             payload = {
@@ -330,17 +346,32 @@ class PaymentProvider(models.Model):
                 ]
             }
             
+            if self.vipps_environment == 'test':
+                _logger.info("🔧 DEBUG: Webhook Registration Payload: %s", payload)
+            
             # Make webhook registration request using correct webhook API endpoint
             response = self._make_webhook_api_request('POST', 'webhooks/v1/webhooks', payload=payload)
             
             if response:
+                if self.vipps_environment == 'test':
+                    _logger.info("✅ DEBUG: Webhook registration successful")
+                    _logger.info("✅ DEBUG: Response: %s", response)
                 _logger.info("Successfully registered webhook for provider %s: %s", self.name, webhook_url)
+                
+                # Store webhook ID if provided
+                if response.get('id'):
+                    self.sudo().write({'vipps_webhook_id': response['id']})
+                
                 return True
             else:
+                if self.vipps_environment == 'test':
+                    _logger.error("❌ DEBUG: Webhook registration failed - no response")
                 _logger.error("Failed to register webhook for provider %s", self.name)
                 return False
                 
         except Exception as e:
+            if self.vipps_environment == 'test':
+                _logger.error("❌ DEBUG: Webhook registration exception: %s", str(e))
             _logger.error("Error registering webhook for provider %s: %s", self.name, str(e))
             return False
 
@@ -381,6 +412,10 @@ class PaymentProvider(models.Model):
     def action_register_webhook(self):
         """Action method to register webhook from UI"""
         self.ensure_one()
+        
+        # Enhanced debug logging for test environment
+        if self.vipps_environment == 'test':
+            _logger.info("🔧 DEBUG: Manual webhook registration triggered")
         
         if self._register_webhook():
             return {
@@ -618,6 +653,39 @@ class PaymentProvider(models.Model):
                     'message': str(e),
                     'type': 'danger',
                     'sticky': True,
+                }
+            }
+
+    def action_test_debug_logging(self):
+        """Test method to verify debug logging is working"""
+        self.ensure_one()
+        
+        if self.vipps_environment == 'test':
+            _logger.info("🔧 DEBUG: Test Debug Logging Action")
+            _logger.info("🔧 Environment: %s", self.vipps_environment)
+            _logger.info("🔧 Provider: %s (ID: %s)", self.name, self.id)
+            _logger.info("🔧 Credentials Configured: %s", bool(self.vipps_client_id and self.vipps_client_secret_decrypted))
+            _logger.info("✅ DEBUG: Debug logging test completed")
+            
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Debug Test'),
+                    'message': _('Debug logging test completed. Check the logs for debug messages.'),
+                    'type': 'info',
+                    'sticky': False,
+                }
+            }
+        else:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Debug Test'),
+                    'message': _('Debug logging only works in test environment.'),
+                    'type': 'warning',
+                    'sticky': False,
                 }
             }
 
@@ -1103,15 +1171,7 @@ class PaymentProvider(models.Model):
                 # Clear plaintext version
                 vals['vipps_subscription_key'] = False
         
-        # Check if provider is being enabled
-        if vals.get('state') == 'enabled' and self.code == 'vipps':
-            # Auto-register webhook when provider is enabled
-            self._register_webhook()
-        
-        # Check if provider is being disabled
-        if vals.get('state') == 'disabled' and self.code == 'vipps':
-            # Auto-unregister webhook when provider is disabled
-            self._unregister_webhook()
+
         
         credential_fields = [
             'vipps_merchant_serial_number',
@@ -1150,6 +1210,23 @@ class PaymentProvider(models.Model):
             for provider in self:
                 if provider.code == 'vipps':
                     provider._link_payment_method()
+        
+        # Auto-register webhook when provider is enabled or credentials are updated
+        for provider in self:
+            if provider.code == 'vipps':
+                # Check if provider is being enabled or credentials are updated
+                if (vals.get('state') == 'enabled' or credential_changed) and provider.state == 'enabled':
+                    try:
+                        provider._register_webhook()
+                    except Exception as e:
+                        _logger.error("Failed to auto-register webhook for provider %s: %s", provider.name, str(e))
+                
+                # Check if provider is being disabled
+                elif vals.get('state') == 'disabled':
+                    try:
+                        provider._unregister_webhook()
+                    except Exception as e:
+                        _logger.error("Failed to auto-unregister webhook for provider %s: %s", provider.name, str(e))
         
         return res
         if 'state' in vals and vals['state'] in ('enabled', 'test'):

@@ -118,9 +118,21 @@
                         <field name="vipps_webhook_url" 
                                readonly="1"
                                help="Webhook URL (automatically registered with Vipps when provider is enabled)"/>
+                        <field name="vipps_webhook_id" readonly="1" help="Webhook ID from Vipps API"/>
+                        <button name="action_register_webhook" 
+                                string="Register Webhook" 
+                                type="object" 
+                                class="btn-primary"
+                                help="Manually register webhook with Vipps"/>
+                        <button name="action_test_debug_logging" 
+                                string="Test Debug Logging" 
+                                type="object" 
+                                class="btn-secondary"
+                                invisible="vipps_environment != 'test'"
+                                help="Test debug logging functionality"/>
                         <div colspan="2" class="alert alert-info" role="alert">
                             <strong>Automatic Webhook Management:</strong> Webhooks are automatically registered/unregistered 
-                            with Vipps when you enable/disable this provider. No manual configuration needed.
+                            with Vipps when you enable/disable this provider. Use the button above for manual registration.
                         </div>
                     </group>
 
