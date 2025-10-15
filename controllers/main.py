@@ -12,6 +12,72 @@ _logger = logging.getLogger(__name__)
 class VippsController(http.Controller):
     """Controller for handling Vipps/MobilePay webhooks and redirects"""
 
+    @http.route('/payment/vipps/redirect/<int:transaction_id>', type='http', auth='public', methods=['GET'], csrf=False)
+    def vipps_redirect(self, transaction_id, **kwargs):
+        """Simple redirect controller that bypasses Odoo's complex payment flow"""
+        try:
+            # Find the transaction
+            transaction = request.env['payment.transaction'].sudo().browse(transaction_id)
+            
+            if not transaction.exists() or transaction.provider_code != 'vipps':
+                return request.not_found()
+            
+            # Get the redirect URL by calling the payment processing
+            payment_response = transaction._send_payment_request()
+            
+            if payment_response and payment_response.get('url'):
+                # Direct redirect to Vipps
+                return request.redirect(payment_response['url'])
+            else:
+                # Return error page
+                return request.render('payment.payment_error', {
+                    'error_msg': 'Failed to initialize Vipps payment'
+                })
+                
+        except Exception as e:
+            _logger.error("Error in Vipps redirect: %s", str(e))
+            return request.render('payment.payment_error', {
+                'error_msg': 'Payment initialization failed'
+            })
+
+    @http.route('/payment/vipps/status/<int:transaction_id>', type='json', auth='public', methods=['GET'], csrf=False)
+    def vipps_payment_status(self, transaction_id, **kwargs):
+        """Check payment status for Vipps-compliant polling"""
+        try:
+            # Find the transaction
+            transaction = request.env['payment.transaction'].sudo().browse(transaction_id)
+            
+            if not transaction.exists() or transaction.provider_code != 'vipps':
+                return {'status': 'error', 'message': 'Transaction not found'}
+            
+            # Return current transaction state
+            if transaction.state == 'done':
+                return {
+                    'status': 'done',
+                    'message': 'Payment successful',
+                    'redirect_url': '/shop/payment/validate'
+                }
+            elif transaction.state == 'cancel':
+                return {
+                    'status': 'cancel',
+                    'message': 'Payment cancelled'
+                }
+            elif transaction.state == 'error':
+                return {
+                    'status': 'error',
+                    'message': transaction.state_message or 'Payment failed'
+                }
+            else:
+                # Still pending
+                return {
+                    'status': 'pending',
+                    'message': 'Payment in progress'
+                }
+                
+        except Exception as e:
+            _logger.error("Error checking Vipps payment status: %s", str(e))
+            return {'status': 'error', 'message': 'Status check failed'}
+
     def _validate_webhook_ip(self, request_ip):
         """Validate webhook source IP against Vipps IP ranges"""
         # Vipps webhook IP ranges (these should be configurable in production)

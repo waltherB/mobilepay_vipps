@@ -276,18 +276,15 @@ class PaymentTransaction(models.Model):
                 _logger.info("🔧 DEBUG: Payment Response: %s", payment_response)
             
             if payment_response and payment_response.get('url'):
-                # For Odoo 17, return a direct redirect action
-                redirect_url = payment_response['url']
+                # Store the redirect URL and transaction info for Vipps-compliant flow
+                res.update({
+                    'api_url': payment_response['url'],
+                    'vipps_payment_id': payment_response.get('orderId'),
+                    'transaction_id': self.id,  # For status polling
+                })
                 
                 if self.provider_id.vipps_environment == 'test':
-                    _logger.info("✅ DEBUG: Payment request successful - Redirect URL: %s", redirect_url)
-                
-                # Return redirect action that Odoo will execute automatically
-                return {
-                    'type': 'ir.actions.act_url',
-                    'url': redirect_url,
-                    'target': 'self'
-                }
+                    _logger.info("✅ DEBUG: Payment request successful - Redirect URL: %s", payment_response['url'])
                 
             else:
                 # If no redirect URL, there was an error
