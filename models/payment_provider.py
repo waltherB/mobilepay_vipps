@@ -102,6 +102,9 @@ class PaymentProvider(models.Model):
     
     # Form view references
     redirect_form_view_id = fields.Many2one(
+        'ir.ui.view',
+        string='Redirect Form Template',
+        help='Template used for payment redirect',
         default=lambda self: self.env.ref('payment_vipps_mobilepay.vipps_redirect_form', raise_if_not_found=False)
     )
     

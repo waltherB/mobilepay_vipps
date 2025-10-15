@@ -40,6 +40,11 @@ class VippsController(http.Controller):
                 'error_msg': 'Payment initialization failed'
             })
 
+    @http.route('/payment/vipps/test_redirect', type='http', auth='public', methods=['GET'], csrf=False)
+    def vipps_test_redirect(self, **kwargs):
+        """Test redirect to see if direct redirects work"""
+        return request.redirect('https://pay-mt.mobilepay.dk/?token=test')
+
     @http.route('/payment/vipps/status/<int:transaction_id>', type='json', auth='public', methods=['GET'], csrf=False)
     def vipps_payment_status(self, transaction_id, **kwargs):
         """Check payment status for Vipps-compliant polling"""
