@@ -653,11 +653,19 @@ class PaymentProvider(models.Model):
         # Request new access token
         try:
             token_url = self._get_vipps_access_token_url()
+            
+            # Sanitize credentials to remove problematic Unicode characters
+            def sanitize_credential(value):
+                if not value:
+                    return value
+                # Remove problematic Unicode characters and ensure ASCII encoding
+                return ''.join(char for char in str(value) if ord(char) < 128).strip()
+            
             headers = {
-                'client_id': self.vipps_client_id,
-                'client_secret': self.vipps_client_secret_decrypted,
-                'Ocp-Apim-Subscription-Key': self.vipps_subscription_key_decrypted,
-                'Merchant-Serial-Number': self.vipps_merchant_serial_number,
+                'client_id': sanitize_credential(self.vipps_client_id),
+                'client_secret': sanitize_credential(self.vipps_client_secret_decrypted),
+                'Ocp-Apim-Subscription-Key': sanitize_credential(self.vipps_subscription_key_decrypted),
+                'Merchant-Serial-Number': sanitize_credential(self.vipps_merchant_serial_number),
                 'Vipps-System-Name': 'Odoo',
                 'Vipps-System-Version': '17.0',
                 'Vipps-System-Plugin-Name': 'mobilepay-vipps',
@@ -933,6 +941,13 @@ class PaymentProvider(models.Model):
         """Get standard API headers for Vipps requests according to HTTP headers specification"""
         self.ensure_one()
         
+        # Sanitize credentials to remove problematic Unicode characters
+        def sanitize_credential(value):
+            if not value:
+                return value
+            # Remove problematic Unicode characters and ensure ASCII encoding
+            return ''.join(char for char in str(value) if ord(char) < 128).strip()
+        
         # Get Odoo version dynamically
         from odoo.release import version_info
         odoo_version = f"{version_info[0]}.{version_info[1]}"
@@ -940,8 +955,8 @@ class PaymentProvider(models.Model):
         # Required headers according to Vipps HTTP headers documentation
         headers = {
             # Required authentication headers
-            'Ocp-Apim-Subscription-Key': self.vipps_subscription_key_decrypted,
-            'Merchant-Serial-Number': self.vipps_merchant_serial_number,
+            'Ocp-Apim-Subscription-Key': sanitize_credential(self.vipps_subscription_key_decrypted),
+            'Merchant-Serial-Number': sanitize_credential(self.vipps_merchant_serial_number),
             
             # Required system identification headers (max 30 characters each)
             'Vipps-System-Name': 'Odoo ERP',  # The name of the solution
