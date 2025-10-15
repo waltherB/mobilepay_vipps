@@ -21,9 +21,10 @@
             </div>
             
             <script type="text/javascript">
+                <![CDATA[
                 // Simple immediate redirect - no complex DOM manipulation
                 (function() {
-                    var redirectUrl = '<t t-esc="api_url"/>';
+                    var redirectUrl = ']]><t t-esc="api_url"/><![CDATA[';
                     if (redirectUrl && redirectUrl !== 'False' && redirectUrl !== '') {
                         console.log('Vipps: Redirecting to', redirectUrl);
                         // Immediate redirect
@@ -32,6 +33,7 @@
                         console.error('Vipps: No redirect URL found');
                     }
                 })();
+                ]]>
             </script>
         </template>
     </data>
