@@ -13,39 +13,22 @@
 
                     <!-- API Credentials -->
                     <group string="API Credentials" col="2" groups="base.group_system">
-                        <field name="vipps_merchant_serial_number" 
-                               placeholder="e.g., 123456"
-                               help="Your Merchant Serial Number from Vipps/MobilePay portal"/>
-                        <field name="vipps_subscription_key" 
-                               password="True"
-                               placeholder="Your subscription key"
-                               help="Ocp-Apim-Subscription-Key from Vipps/MobilePay portal"/>
-                        <field name="vipps_client_id" 
-                               placeholder="Your client ID"
-                               help="Client ID for access token generation"/>
-                        <field name="vipps_client_secret" 
-                               password="True"
-                               placeholder="Your client secret"
-                               help="Client Secret for access token generation"/>
+                        <field name="vipps_merchant_serial_number" placeholder="e.g., 123456" help="Your Merchant Serial Number from Vipps/MobilePay portal"/>
+                        <field name="vipps_subscription_key" password="True" placeholder="Your subscription key" help="Ocp-Apim-Subscription-Key from Vipps/MobilePay portal"/>
+                        <field name="vipps_client_id" placeholder="Your client ID" help="Client ID for access token generation"/>
+                        <field name="vipps_client_secret" password="True" placeholder="Your client secret" help="Client Secret for access token generation"/>
                     </group>
 
                     <!-- Feature Configuration -->
                     <group string="Payment Configuration" col="2">
-                        <field name="vipps_capture_mode" 
-                               widget="radio" 
-                               help="Manual capture is required for ecommerce compliance"/>
-                        <field name="vipps_collect_user_info" 
-                               help="Collect customer information during payment for improved profiles"/>
+                        <field name="vipps_capture_mode" widget="radio" help="Manual capture is required for ecommerce compliance"/>
+                        <field name="vipps_collect_user_info" help="Collect customer information during payment for improved profiles"/>
                     </group>
 
                     <!-- Credential Validation -->
                     <group string="Credential Validation" col="2" groups="base.group_system">
                         <field name="vipps_credentials_validated" readonly="1"/>
-                        <button name="action_validate_vipps_credentials" 
-                                string="Validate Credentials" 
-                                type="object" 
-                                class="btn-primary"
-                                invisible="vipps_credentials_validated"/>
+                        <button name="action_validate_vipps_credentials" string="Validate Credentials" type="object" class="btn-primary" invisible="vipps_credentials_validated"/>
                     </group>
                 </div>
             </xpath>
