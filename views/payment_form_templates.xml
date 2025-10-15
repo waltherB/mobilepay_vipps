@@ -13,13 +13,7 @@
                     </div>
                 </div>
             </div>
-            
             <!-- Let Odoo handle the redirect automatically -->
-                            '<a href="/shop/cart" class="btn btn-secondary">Return to Cart</a>';
-                    }
-                });
-                ]]>
-            </script>
         </template>
     </data>
 </odoo>
