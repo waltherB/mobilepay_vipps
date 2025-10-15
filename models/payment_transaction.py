@@ -276,17 +276,15 @@ class PaymentTransaction(models.Model):
                 _logger.info("🔧 DEBUG: Payment Response: %s", payment_response)
             
             if payment_response and payment_response.get('url'):
-                redirect_url = payment_response['url']
+                # Return processing values for redirect template
+                res.update({
+                    'api_url': payment_response['url'],
+                    'vipps_payment_id': payment_response.get('orderId'),
+                    'transaction_id': self.id,
+                })
                 
                 if self.provider_id.vipps_environment == 'test':
-                    _logger.info("✅ DEBUG: Payment request successful - Redirect URL: %s", redirect_url)
-                
-                # Return direct redirect action to bypass frontend issues
-                return {
-                    'type': 'ir.actions.act_url',
-                    'url': redirect_url,
-                    'target': 'self'
-                }
+                    _logger.info("✅ DEBUG: Payment request successful - Redirect URL: %s", payment_response['url'])
                 
             else:
                 # If no redirect URL, there was an error
