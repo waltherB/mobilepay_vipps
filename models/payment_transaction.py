@@ -276,20 +276,25 @@ class PaymentTransaction(models.Model):
                 _logger.info("🔧 DEBUG: Payment Response: %s", payment_response)
             
             if payment_response and payment_response.get('url'):
-                # Return the redirect URL for the payment form
-                res.update({
-                    'redirection_url': payment_response['url'],
-                    'vipps_payment_id': payment_response.get('orderId'),
-                })
+                # For Odoo 17, return a direct redirect action
+                redirect_url = payment_response['url']
                 
                 if self.provider_id.vipps_environment == 'test':
-                    _logger.info("✅ DEBUG: Payment request successful - Redirect URL: %s", payment_response['url'])
+                    _logger.info("✅ DEBUG: Payment request successful - Redirect URL: %s", redirect_url)
+                
+                # Return redirect action that Odoo will execute automatically
+                return {
+                    'type': 'ir.actions.act_url',
+                    'url': redirect_url,
+                    'target': 'self'
+                }
                 
             else:
                 # If no redirect URL, there was an error
                 if self.provider_id.vipps_environment == 'test':
                     _logger.error("❌ DEBUG: No redirect URL in payment response")
                 self._set_error("Failed to create Vipps payment request")
+                return res
         except Exception as e:
             _logger.error("Error getting processing values for transaction %s: %s", self.reference, str(e))
             if self.provider_id.vipps_environment == 'test':
