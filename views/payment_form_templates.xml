@@ -2,15 +2,8 @@
 <odoo>
     <data>
         <!-- Vipps/MobilePay Redirect Form Template -->
+        <!-- Simplified to work with Odoo 17's standard payment flow -->
         <template id="vipps_redirect_form" name="Vipps/MobilePay Redirect Form">
-            <t t-set="redirect_form_html">
-                <![CDATA[
-                <form id="o_payment_redirect_form" method="get" t-att-action="api_url">
-                    <input type="hidden" name="vipps_payment_id" t-att-value="vipps_payment_id"/>
-                </form>
-                ]]>
-            </t>
-            
             <div class="card">
                 <div class="card-body text-center">
                     <h4>Redirecting to Vipps/MobilePay...</h4>
@@ -21,33 +14,7 @@
                 </div>
             </div>
             
-            <t t-raw="redirect_form_html"/>
-            
-            <script type="text/javascript">
-                <![CDATA[
-                // Auto-redirect to Vipps payment page
-                document.addEventListener('DOMContentLoaded', function() {
-                    var apiUrl = ']]><t t-esc="api_url"/><![CDATA[';
-                    console.log('Vipps API URL:', apiUrl);
-                    
-                    if (apiUrl && apiUrl !== 'False' && apiUrl !== 'None' && apiUrl !== '') {
-                        console.log('Redirecting to Vipps:', apiUrl);
-                        // Try to find and submit the redirect form
-                        var form = document.getElementById('o_payment_redirect_form');
-                        if (form) {
-                            console.log('Submitting redirect form');
-                            form.submit();
-                        } else {
-                            console.log('No form found, using direct redirect');
-                            window.location.href = apiUrl;
-                        }
-                    } else {
-                        console.error('No valid API URL found:', apiUrl);
-                        // Show error if no redirect URL
-                        document.querySelector('.card-body').innerHTML = 
-                            '<h4 class="text-danger">Payment Error</h4>' +
-                            '<p>Unable to initialize payment. Please try again.</p>' +
-                            '<p><small>Debug: API URL = "' + apiUrl + '"</small></p>' +
+            <!-- Let Odoo handle the redirect automatically -->
                             '<a href="/shop/cart" class="btn btn-secondary">Return to Cart</a>';
                     }
                 });
