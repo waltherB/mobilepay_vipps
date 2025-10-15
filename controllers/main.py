@@ -40,10 +40,75 @@ class VippsController(http.Controller):
                 'error_msg': 'Payment initialization failed'
             })
 
-    @http.route('/payment/vipps/test_redirect', type='http', auth='public', methods=['GET'], csrf=False)
-    def vipps_test_redirect(self, **kwargs):
-        """Test redirect to see if direct redirects work"""
-        return request.redirect('https://pay-mt.mobilepay.dk/?token=test')
+    @http.route('/payment/vipps/pay/<int:transaction_id>', type='http', auth='public', methods=['GET'], csrf=False)
+    def vipps_direct_pay(self, transaction_id, **kwargs):
+        """Direct payment link that bypasses Odoo's payment form entirely"""
+        try:
+            # Find the transaction
+            transaction = request.env['payment.transaction'].sudo().browse(transaction_id)
+            
+            if not transaction.exists() or transaction.provider_code != 'vipps':
+                return request.render('http_routing.404')
+            
+            # Create payment with Vipps and redirect immediately
+            payment_response = transaction._send_payment_request()
+            
+            if payment_response and payment_response.get('url'):
+                # Log the redirect for debugging
+                if transaction.provider_id.vipps_environment == 'test':
+                    _logger.info("🔧 DEBUG: Direct payment redirect to: %s", payment_response['url'])
+                
+                # Direct redirect to MobilePay
+                return request.redirect(payment_response['url'])
+            else:
+                # Return simple error page
+                return request.make_response(
+                    '<html><body><h1>Payment Error</h1><p>Failed to initialize payment. Please try again.</p></body></html>',
+                    headers={'Content-Type': 'text/html'}
+                )
+                
+        except Exception as e:
+            _logger.error("Error in direct Vipps payment: %s", str(e))
+            return request.make_response(
+                f'<html><body><h1>Payment Error</h1><p>Error: {str(e)}</p></body></html>',
+                headers={'Content-Type': 'text/html'}
+            )
+
+    @http.route('/payment/vipps/test', type='http', auth='public', methods=['GET'], csrf=False)
+    def vipps_test_page(self, **kwargs):
+        """Simple test page to test direct payment links"""
+        # Find the latest Vipps transaction for testing
+        transaction = request.env['payment.transaction'].sudo().search([
+            ('provider_code', '=', 'vipps')
+        ], limit=1, order='id desc')
+        
+        if transaction:
+            test_url = f"/payment/vipps/pay/{transaction.id}"
+            html = f'''
+            <html>
+            <head><title>Vipps Payment Test</title></head>
+            <body>
+                <h1>Vipps Payment Test</h1>
+                <p>Latest transaction: {transaction.reference}</p>
+                <p>Amount: {transaction.amount} {transaction.currency_id.name}</p>
+                <p><a href="{test_url}" style="background: #e60026; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                    Pay with Vipps/MobilePay (Direct Link)
+                </a></p>
+                <p><small>This bypasses Odoo's payment form entirely</small></p>
+            </body>
+            </html>
+            '''
+        else:
+            html = '''
+            <html>
+            <body>
+                <h1>No Vipps Transactions Found</h1>
+                <p>Create a payment transaction first</p>
+            </body>
+            </html>
+            '''
+        
+        return request.make_response(html, headers={'Content-Type': 'text/html'})
 
     @http.route('/payment/vipps/status/<int:transaction_id>', type='json', auth='public', methods=['GET'], csrf=False)
     def vipps_payment_status(self, transaction_id, **kwargs):
@@ -326,6 +391,26 @@ class VippsController(http.Controller):
     @http.route(['/payment/vipps/return', '/payment/mobilepay/return'], type='http', auth='public', methods=['GET'], csrf=False)
     def vipps_return(self, **kwargs):
         """Handle customer return from Vipps/MobilePay payment flow"""
+        
+        # Check if this is a direct payment request (has transaction_id parameter)
+        if 'transaction_id' in kwargs:
+            try:
+                transaction_id = int(kwargs['transaction_id'])
+                transaction = request.env['payment.transaction'].sudo().browse(transaction_id)
+                
+                if transaction.exists() and transaction.provider_code == 'vipps':
+                    # Create payment and redirect directly
+                    payment_response = transaction._send_payment_request()
+                    
+                    if payment_response and payment_response.get('url'):
+                        _logger.info("🔧 DEBUG: Direct payment redirect via return route: %s", payment_response['url'])
+                        return request.redirect(payment_response['url'])
+                    else:
+                        return request.make_response('Payment initialization failed', status=400)
+                        
+            except (ValueError, Exception) as e:
+                _logger.error("Error in direct payment via return route: %s", str(e))
+                return request.make_response('Invalid transaction', status=400)
         reference = kwargs.get('reference')
         
         try:
