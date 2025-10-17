@@ -110,6 +110,51 @@ class VippsController(http.Controller):
         
         return request.make_response(html, headers={'Content-Type': 'text/html'})
 
+    @http.route('/payment/vipps/get_payment_url', type='json', auth='public', methods=['POST'])
+    def vipps_get_payment_url(self, provider_id, reference, amount, currency_id, partner_id, **kwargs):
+        """
+        Get payment URL with proper Odoo redirect form (following your suggested pattern)
+        This is called by JavaScript on the payment page.
+        """
+        try:
+            # Find the transaction
+            tx_sudo = request.env['payment.transaction'].sudo().search([
+                ('reference', '=', reference),
+                ('provider_code', '=', 'vipps')
+            ], limit=1)
+            
+            if not tx_sudo:
+                return {'error': 'Transaction not found'}
+            
+            # Create payment with Vipps API
+            payment_response = tx_sudo._send_payment_request()
+            
+            if not payment_response or not payment_response.get('url'):
+                return {'error': 'Could not generate payment link. Please contact support.'}
+            
+            payment_link = payment_response['url']
+            
+            # Build standard Odoo redirect form
+            from odoo.addons.payment.utils import build_redirect_form
+            
+            redirect_form_html = build_redirect_form(
+                provider_code='vipps',
+                url=payment_link,
+                data={},
+                method='GET'
+            )
+            
+            if tx_sudo.provider_id.vipps_environment == 'test':
+                _logger.info("🔧 DEBUG: Controller generated redirect form for: %s", payment_link)
+            
+            return {
+                'redirect_form_html': redirect_form_html,
+            }
+            
+        except Exception as e:
+            _logger.error("Error in vipps_get_payment_url: %s", str(e))
+            return {'error': 'Payment initialization failed'}
+
     @http.route('/payment/vipps/status/<int:transaction_id>', type='json', auth='public', methods=['GET'], csrf=False)
     def vipps_payment_status(self, transaction_id, **kwargs):
         """Check payment status for Vipps-compliant polling"""
