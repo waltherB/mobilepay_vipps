@@ -280,20 +280,25 @@ class PaymentTransaction(models.Model):
                 
                 if self.provider_id.vipps_environment == 'test':
                     _logger.info("✅ DEBUG: Payment request successful - Redirect URL: %s", redirect_url)
-                    _logger.info("🔧 DEBUG: Returning direct redirect action to bypass Odoo payment processing")
+                    _logger.info("🔧 DEBUG: Building proper Odoo redirect form")
                 
-                # Return direct redirect action - this should bypass Odoo's payment dialog
-                from odoo.http import request
-                if hasattr(request, 'redirect'):
-                    # If we're in a web request context, do immediate redirect
-                    return request.redirect(redirect_url)
-                else:
-                    # Return action for Odoo to execute
-                    return {
-                        'type': 'ir.actions.act_url',
-                        'url': redirect_url,
-                        'target': 'self'
-                    }
+                # Build proper Odoo redirect form using the standard utility
+                from odoo.addons.payment.utils import build_redirect_form
+                
+                redirect_form_html = build_redirect_form(
+                    provider_code='vipps',
+                    url=redirect_url,
+                    data={},  # No additional form data needed for GET redirect
+                    method='GET'
+                )
+                
+                # Return the redirect form HTML that Odoo's frontend expects
+                res.update({
+                    'redirect_form_html': redirect_form_html,
+                })
+                
+                if self.provider_id.vipps_environment == 'test':
+                    _logger.info("🔧 DEBUG: Redirect form HTML generated successfully")
                 
             else:
                 # If no redirect URL, there was an error
