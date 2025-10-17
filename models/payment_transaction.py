@@ -299,6 +299,8 @@ class PaymentTransaction(models.Model):
                 
                 if self.provider_id.vipps_environment == 'test':
                     _logger.info("🔧 DEBUG: Redirect form HTML generated successfully")
+                    _logger.info("🔧 DEBUG: Redirect form HTML content: %s", redirect_form_html[:200] + "..." if len(redirect_form_html) > 200 else redirect_form_html)
+                    _logger.info("🔧 DEBUG: Full processing values returned: %s", {k: v for k, v in res.items() if k != 'redirect_form_html'})
                 
             else:
                 # If no redirect URL, there was an error
