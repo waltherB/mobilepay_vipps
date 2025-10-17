@@ -20,22 +20,26 @@ class VippsController(http.Controller):
             transaction = request.env['payment.transaction'].sudo().browse(transaction_id)
             
             if not transaction.exists() or transaction.provider_code != 'vipps':
+                _logger.error("Transaction %s not found or not Vipps", transaction_id)
                 return request.not_found()
             
             # Get the redirect URL by calling the payment processing
             payment_response = transaction._send_payment_request()
             
             if payment_response and payment_response.get('url'):
+                redirect_url = payment_response['url']
+                _logger.info("🔧 DEBUG: Direct redirect from controller to: %s", redirect_url)
                 # Direct redirect to Vipps
-                return request.redirect(payment_response['url'])
+                return request.redirect(redirect_url)
             else:
+                _logger.error("No redirect URL in payment response for transaction %s", transaction_id)
                 # Return error page
                 return request.render('payment.payment_error', {
                     'error_msg': 'Failed to initialize Vipps payment'
                 })
                 
         except Exception as e:
-            _logger.error("Error in Vipps redirect: %s", str(e))
+            _logger.error("Error in Vipps redirect for transaction %s: %s", transaction_id, str(e))
             return request.render('payment.payment_error', {
                 'error_msg': 'Payment initialization failed'
             })
