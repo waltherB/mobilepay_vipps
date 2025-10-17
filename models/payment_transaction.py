@@ -282,25 +282,19 @@ class PaymentTransaction(models.Model):
                     _logger.info("✅ DEBUG: Payment request successful - Redirect URL: %s", redirect_url)
                     _logger.info("🔧 DEBUG: Building proper Odoo redirect form")
                 
-                # Build proper Odoo redirect form using the standard utility
-                from odoo.addons.payment.utils import build_redirect_form
-                
-                redirect_form_html = build_redirect_form(
-                    provider_code='vipps',
-                    url=redirect_url,
-                    data={},  # No additional form data needed for GET redirect
-                    method='GET'
-                )
-                
-                # Return the redirect form HTML that Odoo's frontend expects
-                res.update({
-                    'redirect_form_html': redirect_form_html,
-                })
-                
+                # Return direct redirect action to bypass Odoo's complex frontend processing
+                # This prevents the _processRedirectFlow JavaScript error
                 if self.provider_id.vipps_environment == 'test':
-                    _logger.info("🔧 DEBUG: Redirect form HTML generated successfully")
-                    _logger.info("🔧 DEBUG: Redirect form HTML content: %s", redirect_form_html[:200] + "..." if len(redirect_form_html) > 200 else redirect_form_html)
-                    _logger.info("🔧 DEBUG: Full processing values returned: %s", {k: v for k, v in res.items() if k != 'redirect_form_html'})
+                    _logger.info("🔧 DEBUG: Returning direct redirect action to bypass frontend processing")
+                    _logger.info("🔧 DEBUG: Redirect URL: %s", redirect_url)
+                
+                # Return direct redirect action instead of processing values
+                # This prevents the TypeError: Cannot read properties of null (reading 'setAttribute') error
+                return {
+                    'type': 'ir.actions.act_url',
+                    'url': redirect_url,
+                    'target': 'self'
+                }
                 
             else:
                 # If no redirect URL, there was an error
