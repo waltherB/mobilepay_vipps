@@ -101,7 +101,7 @@ Website: https://github.com/waltherB/mobilepay_vipps
     ],
     'assets': {
         'web.assets_frontend': [
-            'mobilepay_vipps/static/src/js/payment_form.js',
+            # No frontend JavaScript needed - let Odoo handle payment flow naturally
         ],
         'web.assets_backend': [],
     },
