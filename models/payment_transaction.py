@@ -288,11 +288,16 @@ class PaymentTransaction(models.Model):
                     _logger.info("🔧 DEBUG: Returning direct redirect action to bypass frontend processing")
                     _logger.info("🔧 DEBUG: Redirect URL: %s", redirect_url)
                 
-                # Return direct redirect action - this bypasses all frontend JavaScript processing
+                from odoo.addons.payment.utils import build_redirect_form
+                redirect_form_html = build_redirect_form(
+                    provider_code='vipps',
+                    url=redirect_url,
+                    data={},
+                    method='GET'
+                )
+                
                 return {
-                    'type': 'ir.actions.act_url',
-                    'url': redirect_url,
-                    'target': 'self'
+                    'redirect_form_html': redirect_form_html,
                 }
                 
             else:

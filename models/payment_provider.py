@@ -300,14 +300,14 @@ class PaymentProvider(models.Model):
         
         return scope_mapping.get(self.vipps_profile_scope, [])
 
-    def _get_redirect_form_view(self, **kwargs):
-        """Get the redirect form view for Vipps payments"""
-        self.ensure_one()
-        if self.code == 'vipps':
-            # Return None to prevent Odoo from trying to use a redirect form
-            # We use direct redirect actions instead
-            return None
-        return super()._get_redirect_form_view(**kwargs)
+#    def _get_redirect_form_view(self, **kwargs):
+#        """Get the redirect form view for Vipps payments"""
+#        self.ensure_one()
+#        if self.code == 'vipps':
+#            # Return None to prevent Odoo from trying to use a redirect form
+#            # We use direct redirect actions instead
+#            return None
+#        return super()._get_redirect_form_view(**kwargs)
 
     def _track_api_call(self, success=True):
         """Track API call statistics for monitoring"""
