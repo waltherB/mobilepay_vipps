@@ -275,18 +275,12 @@ class PaymentTransaction(models.Model):
             if self.provider_id.vipps_environment == 'test':
                 _logger.info("🔧 DEBUG: Payment Response: %s", payment_response)
             
-            if payment_response and payment_response.get('url'):
-                redirect_url = payment_response['url']
+            if payment_response and payment_response.get('redirectUrl'):
+                redirect_url = payment_response['redirectUrl']
                 
                 if self.provider_id.vipps_environment == 'test':
                     _logger.info("✅ DEBUG: Payment request successful - Redirect URL: %s", redirect_url)
                     _logger.info("🔧 DEBUG: Building proper Odoo redirect form")
-                
-                # Return direct redirect action to completely bypass Odoo's frontend processing
-                # This prevents the _processRedirectFlow JavaScript error entirely
-                if self.provider_id.vipps_environment == 'test':
-                    _logger.info("🔧 DEBUG: Returning direct redirect action to bypass frontend processing")
-                    _logger.info("🔧 DEBUG: Redirect URL: %s", redirect_url)
                 
                 redirect_form_html = self.provider_id._build_redirect_form(
                     url=redirect_url,
@@ -422,12 +416,7 @@ class PaymentTransaction(models.Model):
                 self.reference, payment_reference
             )
 
-            # Return redirect action
-            return {
-                'type': 'ir.actions.act_url',
-                'url': response.get('redirectUrl'),
-                'target': 'self'
-            }
+            return response
 
         except VippsAPIException as e:
             _logger.error(
