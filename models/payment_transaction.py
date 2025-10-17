@@ -282,19 +282,17 @@ class PaymentTransaction(models.Model):
                     _logger.info("✅ DEBUG: Payment request successful - Redirect URL: %s", redirect_url)
                     _logger.info("🔧 DEBUG: Building proper Odoo redirect form")
                 
-                # Return direct redirect action to bypass Odoo's complex frontend processing
-                # This prevents the _processRedirectFlow JavaScript error
+                # Return processing values with redirect URL - let Odoo handle the redirect
                 if self.provider_id.vipps_environment == 'test':
-                    _logger.info("🔧 DEBUG: Returning direct redirect action to bypass frontend processing")
+                    _logger.info("🔧 DEBUG: Returning processing values with redirect URL")
                     _logger.info("🔧 DEBUG: Redirect URL: %s", redirect_url)
                 
-                # Return direct redirect action instead of processing values
-                # This prevents the TypeError: Cannot read properties of null (reading 'setAttribute') error
-                return {
-                    'type': 'ir.actions.act_url',
-                    'url': redirect_url,
-                    'target': 'self'
-                }
+                # Return standard processing values with redirect URL
+                res.update({
+                    'redirection_url': redirect_url,
+                })
+                
+                return res
                 
             else:
                 # If no redirect URL, there was an error
