@@ -1,22 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Vipps/MobilePay Meta Refresh Redirect Template -->
+        <!-- Vipps/MobilePay Landing Page Redirect Template -->
         <template id="vipps_redirect_form" name="Vipps/MobilePay Redirect">
             <!-- Use whichever URL variable is available -->
             <t t-set="redirect_url" t-value="redirection_url or api_url"/>
             
-            <!-- Meta refresh for immediate redirect - most reliable method -->
             <t t-if="redirect_url">
+                <!-- Immediate redirect using window.location for proper app-switch -->
+                <script type="text/javascript">
+                    // Immediate redirect to ensure app-switch works within 3 seconds
+                    // This follows Vipps MobilePay landing page specifications
+                    console.log('Redirecting to Vipps/MobilePay landing page:', '<t t-esc="redirect_url"/>');
+                    window.location.href = '<t t-esc="redirect_url"/>';
+                </script>
+                
+                <!-- Fallback meta refresh for browsers that block JavaScript -->
                 <meta http-equiv="refresh" t-attf-content="0; url={{redirect_url}}"/>
             </t>
             
             <div class="card" style="border: 3px solid red;">
                 <div class="card-body text-center">
-                    <h4 style="color: red;">VIPPS REDIRECT TEMPLATE LOADED</h4>
+                    <h4 style="color: red;">VIPPS LANDING PAGE REDIRECT</h4>
                     <h4>Redirecting to Vipps/MobilePay...</h4>
                     <p>Please wait while we redirect you to complete your payment.</p>
-                    <p><strong>Debug - Redirect URL:</strong> <span t-esc="redirect_url"/></p>
+                    <p><strong>Debug - Landing Page URL:</strong> <span t-esc="redirect_url"/></p>
                     <div class="spinner-border text-primary" role="status">
                         <span class="sr-only">Redirecting...</span>
                     </div>
@@ -26,6 +34,7 @@
                             <a t-att-href="redirect_url" class="btn btn-primary btn-lg" target="_self">
                                 Click here to pay with Vipps/MobilePay
                             </a>
+                            <p class="mt-2"><small>This will open the Vipps/MobilePay app or landing page</small></p>
                         </t>
                         <t t-else="">
                             <p style="color: red;"><strong>ERROR: No redirect URL provided!</strong></p>
