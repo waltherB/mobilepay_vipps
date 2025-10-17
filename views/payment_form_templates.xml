@@ -3,9 +3,12 @@
     <data>
         <!-- Vipps/MobilePay Meta Refresh Redirect Template -->
         <template id="vipps_redirect_form" name="Vipps/MobilePay Redirect">
+            <!-- Use whichever URL variable is available -->
+            <t t-set="redirect_url" t-value="redirection_url or api_url"/>
+            
             <!-- Meta refresh for immediate redirect - most reliable method -->
-            <t t-if="redirection_url">
-                <meta http-equiv="refresh" t-attf-content="0; url={{redirection_url}}"/>
+            <t t-if="redirect_url">
+                <meta http-equiv="refresh" t-attf-content="0; url={{redirect_url}}"/>
             </t>
             
             <div class="card" style="border: 3px solid red;">
@@ -13,14 +16,14 @@
                     <h4 style="color: red;">VIPPS REDIRECT TEMPLATE LOADED</h4>
                     <h4>Redirecting to Vipps/MobilePay...</h4>
                     <p>Please wait while we redirect you to complete your payment.</p>
-                    <p><strong>Debug - Redirect URL:</strong> <span t-esc="redirection_url"/></p>
+                    <p><strong>Debug - Redirect URL:</strong> <span t-esc="redirect_url"/></p>
                     <div class="spinner-border text-primary" role="status">
                         <span class="sr-only">Redirecting...</span>
                     </div>
                     <div class="mt-3">
-                        <t t-if="redirection_url">
+                        <t t-if="redirect_url">
                             <p><strong>If you are not redirected automatically:</strong></p>
-                            <a t-att-href="redirection_url" class="btn btn-primary btn-lg" target="_self">
+                            <a t-att-href="redirect_url" class="btn btn-primary btn-lg" target="_self">
                                 Click here to pay with Vipps/MobilePay
                             </a>
                         </t>

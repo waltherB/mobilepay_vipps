@@ -282,14 +282,16 @@ class PaymentTransaction(models.Model):
                     _logger.info("✅ DEBUG: Payment request successful - Redirect URL: %s", redirect_url)
                     _logger.info("🔧 DEBUG: Building proper Odoo redirect form")
                 
-                # Return processing values with redirect URL - let Odoo handle the redirect
+                # Return processing values in the exact format Odoo expects
+                # This should trigger Odoo's standard redirect mechanism
                 if self.provider_id.vipps_environment == 'test':
                     _logger.info("🔧 DEBUG: Returning processing values with redirect URL")
                     _logger.info("🔧 DEBUG: Redirect URL: %s", redirect_url)
                 
-                # Return standard processing values with redirect URL
+                # Use the exact field names that Odoo's payment system expects
                 res.update({
                     'redirection_url': redirect_url,
+                    'api_url': redirect_url,  # Some versions expect this
                 })
                 
                 return res
