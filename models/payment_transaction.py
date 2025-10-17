@@ -282,19 +282,18 @@ class PaymentTransaction(models.Model):
                     _logger.info("✅ DEBUG: Payment request successful - Redirect URL: %s", redirect_url)
                     _logger.info("🔧 DEBUG: Building proper Odoo redirect form")
                 
-                # Return processing values in the exact format Odoo expects
-                # This should trigger Odoo's standard redirect mechanism
+                # Return direct redirect action to completely bypass Odoo's frontend processing
+                # This prevents the _processRedirectFlow JavaScript error entirely
                 if self.provider_id.vipps_environment == 'test':
-                    _logger.info("🔧 DEBUG: Returning processing values with redirect URL")
+                    _logger.info("🔧 DEBUG: Returning direct redirect action to bypass frontend processing")
                     _logger.info("🔧 DEBUG: Redirect URL: %s", redirect_url)
                 
-                # Use the exact field names that Odoo's payment system expects
-                res.update({
-                    'redirection_url': redirect_url,
-                    'api_url': redirect_url,  # Some versions expect this
-                })
-                
-                return res
+                # Return direct redirect action - this bypasses all frontend JavaScript processing
+                return {
+                    'type': 'ir.actions.act_url',
+                    'url': redirect_url,
+                    'target': 'self'
+                }
                 
             else:
                 # If no redirect URL, there was an error
