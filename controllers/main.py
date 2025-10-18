@@ -199,10 +199,46 @@ class VippsController(http.Controller):
 
     def _validate_webhook_ip(self, request_ip):
         """Validate webhook source IP against Vipps IP ranges"""
-        # Vipps webhook IP ranges (these should be configurable in production)
+        # Vipps webhook IP ranges. This list is generated from the hostnames in the Vipps MobilePay documentation
+        # and may change. A more robust solution would be to perform DNS lookups at runtime.
         vipps_ip_ranges = [
-            '213.52.3.0/24',    # Vipps production IPs
-            '213.52.4.0/24',    # Vipps production IPs  
+            '51.105.122.55',
+            '51.105.122.60',
+            '51.105.122.61',
+            '51.105.122.59',
+            '13.79.229.87',
+            '51.105.193.245',
+            '51.105.193.243',
+            '51.105.122.54',
+            '51.105.122.50',
+            '51.105.122.48',
+            '51.105.122.52',
+            '51.105.122.53',
+            '51.105.122.63',
+            '51.105.122.49',
+            '40.114.204.190',
+            '104.40.255.223',
+            '40.114.197.70',
+            '104.40.250.173',
+            '104.40.251.114',
+            '40.91.205.141',
+            '13.69.68.37',
+            '104.40.249.200',
+            '40.113.120.168',
+            '104.40.253.225',
+            '52.232.113.216',
+            '104.45.17.199',
+            '168.63.12.69',
+            '104.45.28.230',
+            '104.45.8.62',
+            '40.91.220.139',
+            '51.144.117.82',
+            '40.91.218.4',
+            '13.69.68.12',
+            '40.91.218.91',
+            '13.79.231.118',
+            '40.114.249.97',
+            '13.79.231.176',
             '127.0.0.1',        # Localhost for testing
             '::1'               # IPv6 localhost
         ]
