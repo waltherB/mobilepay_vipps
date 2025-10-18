@@ -258,6 +258,9 @@ class PaymentProvider(models.Model):
         for record in self:
             if record.code == 'vipps':
                 base_url = record.get_base_url().rstrip('/')
+                # Vipps requires HTTPS for webhook URLs
+                if base_url.startswith('http://'):
+                    base_url = base_url.replace('http://', 'https://', 1)
                 record.vipps_webhook_url = f"{base_url}/payment/vipps/webhook"
             else:
                 record.vipps_webhook_url = False
@@ -266,6 +269,9 @@ class PaymentProvider(models.Model):
         """Get webhook URL for Vipps configuration"""
         self.ensure_one()
         base_url = self.get_base_url().rstrip('/')
+        # Vipps requires HTTPS for webhook URLs
+        if base_url.startswith('http://'):
+            base_url = base_url.replace('http://', 'https://', 1)
         return f"{base_url}/payment/vipps/webhook"
 
     def _get_profile_scope_string(self):
