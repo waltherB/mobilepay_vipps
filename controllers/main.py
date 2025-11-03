@@ -395,8 +395,13 @@ class VippsController(http.Controller):
             # Extract validated data
             webhook_data = validation_result.get('webhook_data')
             if not webhook_data:
-                _logger.error("No webhook data in validation result")
-                return request.make_response('Bad Request: Invalid webhook data', status=400)
+                # Fallback: try to parse payload directly
+                try:
+                    webhook_data = json.loads(payload) if payload else {}
+                    _logger.warning("Using fallback webhook data parsing")
+                except json.JSONDecodeError:
+                    _logger.error("No webhook data in validation result and payload is invalid JSON")
+                    return request.make_response('Bad Request: Invalid webhook data', status=400)
                 
             reference = webhook_data.get('reference')
             webhook_id = webhook_data.get('eventId') or validation_result.get('headers', {}).get('vipps_idempotency_key')

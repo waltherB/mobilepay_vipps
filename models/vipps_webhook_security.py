@@ -106,6 +106,10 @@ class VippsWebhookSecurity(models.AbstractModel):
                     'details': f"Potential replay attack from IP: {client_ip}",
                     'ip': client_ip
                 })
+                # Still set webhook_data for processing even if replay detected
+                validation_result['webhook_data'] = payload_validation['data']
+                validation_result['client_ip'] = client_ip
+                validation_result['headers'] = headers
                 return validation_result
             
             # 7. Validate idempotency
@@ -126,6 +130,12 @@ class VippsWebhookSecurity(models.AbstractModel):
         except Exception as e:
             _logger.error("Critical error in webhook validation: %s", str(e))
             validation_result['errors'].append(f"Internal validation error: {str(e)}")
+            # Try to set webhook_data from payload if possible
+            try:
+                if payload:
+                    validation_result['webhook_data'] = json.loads(payload)
+            except:
+                pass
             return validation_result
 
     def _get_client_ip(self, request):
