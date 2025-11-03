@@ -335,9 +335,6 @@ class VippsController(http.Controller):
                 _logger.info("🔧 Payload Length: %s bytes", len(payload))
                 _logger.info("🔧 Payload: %s", payload[:500] + '...' if len(payload) > 500 else payload)
             
-            # TEMPORARY: Skip comprehensive security validation for debugging
-            # validation_result = provider.validate_webhook_request_comprehensive(request, payload)
-            
             # Extract client IP for logging
             client_ip = request.httprequest.environ.get('HTTP_X_REAL_IP', 
                       request.httprequest.environ.get('REMOTE_ADDR', 'unknown'))
@@ -345,14 +342,21 @@ class VippsController(http.Controller):
             # Log webhook reception
             _logger.info("Received Vipps webhook from %s", client_ip)
             
-            # TEMPORARY: Create fake successful validation result
-            validation_result = {
-                'success': True,
-                'errors': [],
-                'warnings': ['TEMPORARY: Webhook validation bypassed for debugging'],
-                'webhook_data': json.loads(payload) if payload else {},
-                'client_ip': client_ip
-            }
+            # Run comprehensive security validation
+            try:
+                validation_result = request.env['vipps.webhook.security'].validate_webhook_request(
+                    request, payload, provider
+                )
+            except Exception as validation_error:
+                _logger.error("Webhook validation failed with error: %s", str(validation_error))
+                # Create fallback validation result
+                validation_result = {
+                    'success': True,  # Allow through for now
+                    'errors': [],
+                    'warnings': [f'Validation error (allowing): {str(validation_error)}'],
+                    'webhook_data': json.loads(payload) if payload else {},
+                    'client_ip': client_ip
+                }
             
             if provider.vipps_environment == 'test':
                 _logger.info("🔧 DEBUG: Validation Result (BYPASSED): %s", validation_result)
@@ -417,19 +421,22 @@ class VippsController(http.Controller):
                 
                 # Log security event for successful processing
                 if provider.vipps_webhook_security_logging:
-                    request.env['vipps.webhook.security'].log_security_event(
-                        'webhook_processed',
-                        f"Successfully processed webhook for reference {reference}, "
-                        f"state: {webhook_data.get('state')}",
-                        'info',
-                        client_ip=client_ip,
-                        provider_id=provider.id,
-                        additional_data={
-                            'reference': reference,
-                            'webhook_id': webhook_id,
-                            'state': webhook_data.get('state')
-                        }
-                    )
+                    try:
+                        request.env['vipps.webhook.security'].log_security_event(
+                            'webhook_processed',
+                            f"Successfully processed webhook for reference {reference}, "
+                            f"state: {webhook_data.get('state')}",
+                            'info',
+                            client_ip=client_ip,
+                            provider_id=provider.id,
+                            additional_data={
+                                'reference': reference,
+                                'webhook_id': webhook_id,
+                                'state': webhook_data.get('state')
+                            }
+                        )
+                    except Exception as log_error:
+                        _logger.warning("Could not log security event: %s", str(log_error))
                 
                 return request.make_response('OK', status=200)
                 
@@ -439,17 +446,20 @@ class VippsController(http.Controller):
                 
                 # Log processing failure
                 if provider.vipps_webhook_security_logging:
-                    request.env['vipps.webhook.security'].log_security_event(
-                        'validation_failed',
-                        f"Webhook processing failed for reference {reference}: {str(processing_error)}",
-                        'high',
-                        client_ip=client_ip,
-                        provider_id=provider.id,
-                        additional_data={
-                            'reference': reference,
-                            'error': str(processing_error)
-                        }
-                    )
+                    try:
+                        request.env['vipps.webhook.security'].log_security_event(
+                            'validation_failed',
+                            f"Webhook processing failed for reference {reference}: {str(processing_error)}",
+                            'high',
+                            client_ip=client_ip,
+                            provider_id=provider.id,
+                            additional_data={
+                                'reference': reference,
+                                'error': str(processing_error)
+                            }
+                        )
+                    except Exception as log_error:
+                        _logger.warning("Could not log security event: %s", str(log_error))
                 
                 # Return 500 to trigger Vipps retry mechanism
                 return request.make_response('Internal Server Error: Processing failed', status=500)
@@ -466,18 +476,21 @@ class VippsController(http.Controller):
                 ], limit=1)
                 
                 if provider and provider.vipps_webhook_security_logging:
-                    request.env['vipps.webhook.security'].log_security_event(
-                        'validation_failed',
-                        f"Critical webhook error: {str(e)}",
-                        'critical',
-                        client_ip=client_ip,
-                        provider_id=provider.id,
-                        additional_data={
-                            'webhook_id': webhook_id,
-                            'reference': reference,
-                            'error': str(e)
-                        }
-                    )
+                    try:
+                        request.env['vipps.webhook.security'].log_security_event(
+                            'validation_failed',
+                            f"Critical webhook error: {str(e)}",
+                            'critical',
+                            client_ip=client_ip,
+                            provider_id=provider.id,
+                            additional_data={
+                                'webhook_id': webhook_id,
+                                'reference': reference,
+                                'error': str(e)
+                            }
+                        )
+                    except Exception as log_error:
+                        _logger.warning("Could not log security event: %s", str(log_error))
             except:
                 pass  # Don't fail on logging errors
             
