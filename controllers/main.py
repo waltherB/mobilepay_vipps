@@ -197,74 +197,59 @@ class VippsController(http.Controller):
             _logger.error("Error checking Vipps payment status: %s", str(e))
             return {'status': 'error', 'message': 'Status check failed'}
 
-    def _validate_webhook_ip(self, request_ip):
-        """Validate webhook source IP against Vipps IP ranges"""
-        # Vipps webhook IP ranges. This list is generated from the hostnames in the Vipps MobilePay documentation
-        # and may change. A more robust solution would be to perform DNS lookups at runtime.
-        vipps_ip_ranges = [
-            '51.105.122.55',
-            '51.105.122.60',
-            '51.105.122.61',
-            '51.105.122.59',
-            '13.79.229.87',
-            '51.105.193.245',
-            '51.105.193.243',
-            '51.105.122.54',
-            '51.105.122.50',
-            '51.105.122.48',
-            '51.105.122.52',
-            '51.105.122.53',
-            '51.105.122.63',
-            '51.105.122.49',
-            '40.114.204.190',
-            '104.40.255.223',
-            '40.114.197.70',
-            '104.40.250.173',
-            '104.40.251.114',
-            '40.91.205.141',
-            '13.69.68.37',
-            '104.40.249.200',
-            '40.113.120.168',
-            '104.40.253.225',
-            '52.232.113.216',
-            '104.45.17.199',
-            '168.63.12.69',
-            '104.45.28.230',
-            '104.45.8.62',
-            '40.91.220.139',
-            '51.144.117.82',
-            '40.91.218.4',
-            '13.69.68.12',
-            '40.91.218.91',
-            '13.79.231.118',
-            '40.114.249.97',
-            '13.79.231.176',
-            '127.0.0.1',        # Localhost for testing
-            '::1'               # IPv6 localhost
-        ]
+    def _validate_webhook_ip(self, request_ip, provider):
+        """Validate webhook source IP against Vipps/MobilePay server hostnames"""
+        # Use hostname-based validation instead of hardcoded IPs
+        # This is more robust as Vipps can change IPs without notice
         
         try:
             import ipaddress
+            import socket
+            
             request_addr = ipaddress.ip_address(request_ip)
             
-            for ip_range in vipps_ip_ranges:
+            # Get environment-specific hostnames
+            if provider.vipps_environment == 'production':
+                vipps_hostnames = [
+                    'callback-1.vipps.no',
+                    'callback-2.vipps.no', 
+                    'callback-3.vipps.no',
+                    'callback-4.vipps.no',
+                ]
+            else:
+                # Test environment (MobilePay Test servers)
+                vipps_hostnames = [
+                    'callback-mt-1.vipps.no',
+                    'callback-mt-2.vipps.no',
+                ]
+            
+            # Resolve hostnames and check if request IP matches
+            for hostname in vipps_hostnames:
                 try:
-                    if '/' in ip_range:
-                        network = ipaddress.ip_network(ip_range, strict=False)
-                        if request_addr in network:
+                    addr_info = socket.getaddrinfo(hostname, None)
+                    for info in addr_info:
+                        resolved_ip = ipaddress.ip_address(info[4][0])
+                        if request_addr == resolved_ip:
+                            _logger.info("Webhook from authorized Vipps server: %s (%s)", hostname, request_ip)
                             return True
-                    else:
-                        allowed_addr = ipaddress.ip_address(ip_range)
-                        if request_addr == allowed_addr:
-                            return True
-                except ValueError:
+                except (socket.gaierror, ValueError) as e:
+                    _logger.warning("Failed to resolve %s: %s", hostname, str(e))
                     continue
+            
+            # Allow localhost and private networks for testing
+            if request_addr.is_loopback:
+                _logger.info("Webhook from localhost: %s", request_ip)
+                return True
+                
+            if provider.vipps_environment == 'test' and request_addr.is_private:
+                _logger.info("Webhook from private network in test environment: %s", request_ip)
+                return True
                     
             return False
             
-        except (ValueError, ImportError):
+        except (ValueError, ImportError) as e:
             # If IP validation fails, log warning but allow (fail open)
-            _logger.warning("Could not validate webhook IP: %s", request_ip)
+            _logger.warning("Could not validate webhook IP %s: %s", request_ip, str(e))
             return True
 
     def _check_rate_limit(self, identifier, max_requests=100, window_seconds=300):

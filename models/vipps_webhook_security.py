@@ -218,32 +218,37 @@ class VippsWebhookSecurity(models.AbstractModel):
         return headers
 
     def _validate_source_ip(self, client_ip, provider):
-        """Validate webhook source IP against allowed ranges"""
+        """Validate webhook source IP against Vipps/MobilePay server hostnames"""
         try:
-            # Get allowed IP ranges from provider configuration or system parameters
-            allowed_ranges = self._get_allowed_ip_ranges(provider)
+            # Get allowed hostnames based on environment
+            allowed_hostnames = self._get_allowed_hostnames(provider)
             
-            if not allowed_ranges:
-                # If no IP restrictions configured, allow all (with warning)
-                _logger.warning("No IP restrictions configured for webhook validation")
+            if not allowed_hostnames:
+                # If no hostname restrictions configured, allow all (with warning)
+                _logger.warning("No hostname restrictions configured for webhook validation")
                 return {'valid': True}
             
-            # Validate IP against allowed ranges
+            # Resolve hostnames to IP addresses and validate
             client_addr = ipaddress.ip_address(client_ip)
             
-            for ip_range in allowed_ranges:
+            for hostname in allowed_hostnames:
                 try:
-                    if '/' in ip_range:
-                        network = ipaddress.ip_network(ip_range, strict=False)
-                        if client_addr in network:
+                    # Resolve hostname to IP addresses
+                    resolved_ips = self._resolve_hostname_to_ips(hostname)
+                    
+                    for resolved_ip in resolved_ips:
+                        if client_addr == resolved_ip:
+                            _logger.info("Webhook from authorized Vipps server: %s (%s)", hostname, client_ip)
                             return {'valid': True}
-                    else:
-                        allowed_addr = ipaddress.ip_address(ip_range)
-                        if client_addr == allowed_addr:
-                            return {'valid': True}
-                except ValueError as e:
-                    _logger.warning("Invalid IP range configuration: %s - %s", ip_range, str(e))
+                            
+                except Exception as e:
+                    _logger.warning("Failed to resolve hostname %s: %s", hostname, str(e))
                     continue
+            
+            # Check if it's a development/testing IP
+            if self._is_development_ip(client_ip, provider):
+                _logger.info("Webhook from development/testing IP: %s", client_ip)
+                return {'valid': True}
             
             return {
                 'valid': False,
@@ -257,45 +262,84 @@ class VippsWebhookSecurity(models.AbstractModel):
                 'error': f"Invalid IP format: {client_ip}"
             }
 
-    def _get_allowed_ip_ranges(self, provider):
-        """Get allowed IP ranges for webhook validation"""
+    def _get_allowed_hostnames(self, provider):
+        """Get allowed hostnames for webhook validation based on environment"""
         # Check provider-specific configuration first
-        if hasattr(provider, 'vipps_webhook_allowed_ips') and provider.vipps_webhook_allowed_ips:
-            return provider.vipps_webhook_allowed_ips.split(',')
+        if hasattr(provider, 'vipps_webhook_allowed_hostnames') and provider.vipps_webhook_allowed_hostnames:
+            return [hostname.strip() for hostname in provider.vipps_webhook_allowed_hostnames.split(',') if hostname.strip()]
         
         # Fall back to system parameter
-        allowed_ips = self.env['ir.config_parameter'].sudo().get_param(
-            'vipps.webhook.allowed_ips', ''
+        allowed_hostnames = self.env['ir.config_parameter'].sudo().get_param(
+            'vipps.webhook.allowed_hostnames', ''
         )
         
-        if allowed_ips:
-            return [ip.strip() for ip in allowed_ips.split(',') if ip.strip()]
+        if allowed_hostnames:
+            return [hostname.strip() for hostname in allowed_hostnames.split(',') if hostname.strip()]
         
-        # Default Vipps IP ranges (should be configurable in production)
-        default_ranges = [
-            '51.105.122.55', '51.105.122.60', '51.105.122.61', '51.105.122.59',
-            '13.79.229.87', '51.105.193.245', '51.105.193.243', '51.105.122.54',
-            '51.105.122.50', '51.105.122.48', '51.105.122.52', '51.105.122.53',
-            '51.105.122.63', '51.105.122.49', '40.114.204.190', '104.40.255.223',
-            '40.114.197.70', '104.40.250.173', '104.40.251.114', '40.91.205.141',
-            '13.69.68.37', '104.40.249.200', '40.113.120.168', '104.40.253.225',
-            '52.232.113.216', '104.45.17.199', '168.63.12.69', '104.45.28.230',
-            '104.45.8.62', '40.91.220.139', '51.144.117.82', '40.91.218.4',
-            '13.69.68.12', '40.91.218.91', '13.79.231.118', '40.114.249.97',
-            '13.79.231.176',
-            '127.0.0.1',        # Localhost for testing
-            '::1'               # IPv6 localhost
-        ]
-        
-        # In test environment, be more permissive
-        if provider.vipps_environment == 'test':
-            default_ranges.extend([
-                '10.0.0.0/8',       # Private networks for testing
-                '172.16.0.0/12',
-                '192.168.0.0/16'
-            ])
-        
-        return default_ranges
+        # Default Vipps/MobilePay hostnames based on environment
+        # According to https://developer.vippsmobilepay.com/docs/knowledge-base/servers/
+        if provider.vipps_environment == 'production':
+            return [
+                'callback-1.vipps.no',
+                'callback-2.vipps.no',
+                'callback-3.vipps.no',
+                'callback-4.vipps.no',
+            ]
+        else:
+            # Test environment hostnames (MobilePay Test servers)
+            return [
+                'callback-mt-1.vipps.no',
+                'callback-mt-2.vipps.no',
+            ]
+
+    def _resolve_hostname_to_ips(self, hostname):
+        """Resolve hostname to list of IP addresses"""
+        import socket
+        try:
+            # Get all IP addresses for the hostname (both IPv4 and IPv6)
+            addr_info = socket.getaddrinfo(hostname, None)
+            ip_addresses = []
+            
+            for info in addr_info:
+                ip_str = info[4][0]
+                try:
+                    ip_addr = ipaddress.ip_address(ip_str)
+                    if ip_addr not in ip_addresses:
+                        ip_addresses.append(ip_addr)
+                except ValueError:
+                    continue
+                    
+            return ip_addresses
+            
+        except socket.gaierror as e:
+            _logger.warning("Failed to resolve hostname %s: %s", hostname, str(e))
+            return []
+
+    def _is_development_ip(self, client_ip, provider):
+        """Check if IP is from development/testing environment"""
+        try:
+            client_addr = ipaddress.ip_address(client_ip)
+            
+            # Allow localhost for development
+            if client_addr.is_loopback:
+                return True
+                
+            # Allow private networks in test environment
+            if provider.vipps_environment == 'test':
+                private_networks = [
+                    ipaddress.ip_network('10.0.0.0/8'),      # Private Class A
+                    ipaddress.ip_network('172.16.0.0/12'),   # Private Class B  
+                    ipaddress.ip_network('192.168.0.0/16'),  # Private Class C
+                ]
+                
+                for network in private_networks:
+                    if client_addr in network:
+                        return True
+                        
+            return False
+            
+        except ValueError:
+            return False
 
     def _check_rate_limit(self, client_ip, user_agent):
         """Check rate limiting for webhook requests"""
