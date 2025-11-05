@@ -514,6 +514,58 @@ class PaymentProvider(models.Model):
                 }
             }
 
+    def action_force_webhook_reregistration(self):
+        """Force webhook re-registration with new secret (for environment changes)"""
+        self.ensure_one()
+        
+        try:
+            _logger.info("🔧 DEBUG: Force webhook re-registration for %s environment", self.vipps_environment)
+            
+            # First unregister existing webhook
+            self._unregister_webhook()
+            
+            # Clear existing webhook data
+            self.sudo().write({
+                'vipps_webhook_id': False,
+                'vipps_webhook_secret': False,
+            })
+            
+            # Register new webhook with fresh secret
+            if self._register_webhook():
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _('Success'),
+                        'message': _('Webhook re-registered successfully with new secret for %s environment!') % self.vipps_environment,
+                        'type': 'success',
+                        'sticky': False,
+                    }
+                }
+            else:
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': _('Re-registration Failed'),
+                        'message': _('Failed to re-register webhook. Please check your credentials and environment settings.'),
+                        'type': 'danger',
+                        'sticky': True,
+                    }
+                }
+        except Exception as e:
+            _logger.error("Error in webhook re-registration: %s", str(e))
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Error'),
+                    'message': _('Error during webhook re-registration: %s') % str(e),
+                    'type': 'danger',
+                    'sticky': True,
+                }
+            }
+
     def action_list_webhooks(self):
         """List all registered webhooks"""
         self.ensure_one()

@@ -30,6 +30,12 @@
                         <field name="vipps_credentials_validated" readonly="1"/>
                         <button name="action_validate_vipps_credentials" string="Validate Credentials" type="object" class="btn-primary" invisible="vipps_credentials_validated"/>
                     </group>
+
+                    <!-- Webhook Management -->
+                    <group string="Webhook Management" col="2" groups="base.group_system">
+                        <button name="action_register_webhook" string="Register Webhook" type="object" class="btn-secondary"/>
+                        <button name="action_force_webhook_reregistration" string="Re-register Webhook (New Secret)" type="object" class="btn-warning" confirm="This will unregister the current webhook and create a new one with a fresh secret. Continue?"/>
+                    </group>
                 </div>
             </xpath>
         </field>
