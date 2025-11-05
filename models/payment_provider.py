@@ -665,20 +665,26 @@ class PaymentProvider(models.Model):
     def _get_vipps_api_url(self):
         """Return the appropriate API base URL based on environment"""
         self.ensure_one()
-        # According to official Vipps documentation, both production and test use same API server
-        return "https://api.vipps.no/epayment/v1/"
+        if self.vipps_environment == 'production':
+            return "https://api.vipps.no/epayment/v1/"
+        else:
+            return "https://apitest.vipps.no/epayment/v1/"
     
     def _get_vipps_access_token_url(self):
         """Return the access token endpoint URL based on environment"""
         self.ensure_one()
-        # According to official Vipps documentation, both production and test use same API server
-        return "https://api.vipps.no/accesstoken/get"
+        if self.vipps_environment == 'production':
+            return "https://api.vipps.no/accesstoken/get"
+        else:
+            return "https://apitest.vipps.no/accesstoken/get"
 
     def _get_vipps_webhook_api_url(self):
         """Return the webhook API base URL based on environment"""
         self.ensure_one()
-        # According to official Vipps documentation, both production and test use same API server
-        return "https://api.vipps.no/"
+        if self.vipps_environment == 'production':
+            return "https://api.vipps.no/"
+        else:
+            return "https://apitest.vipps.no/"
 
     def _get_vipps_api_client(self):
         """

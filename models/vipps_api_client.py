@@ -79,13 +79,17 @@ class VippsAPIClient:
 
     def _get_api_base_url(self):
         """Get API base URL based on environment"""
-        # According to official Vipps documentation, both production and test use same API server
-        return "https://api.vipps.no/epayment/v1"
+        if self.provider.vipps_environment == 'production':
+            return "https://api.vipps.no/epayment/v1"
+        else:
+            return "https://apitest.vipps.no/epayment/v1"
 
     def _get_access_token_url(self):
         """Get access token endpoint URL based on environment"""
-        # According to official Vipps documentation, both production and test use same API server
-        return "https://api.vipps.no/accesstoken/get"
+        if self.provider.vipps_environment == 'production':
+            return "https://api.vipps.no/accesstoken/get"
+        else:
+            return "https://apitest.vipps.no/accesstoken/get"
 
     def _generate_idempotency_key(self):
         """Generate cryptographically secure idempotency key"""
