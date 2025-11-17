@@ -345,20 +345,20 @@ class PaymentProvider(models.Model):
             if self.vipps_environment == 'test':
                 _logger.info("🔧 DEBUG: Webhook URL: %s", webhook_url)
             
-            # Generate webhook secret if not exists
-            if not self.vipps_webhook_secret:
-                import secrets
-                webhook_secret = secrets.token_urlsafe(32)
-                self.sudo().write({'vipps_webhook_secret': webhook_secret})
-                if self.vipps_environment == 'test':
-                    _logger.info("🔧 DEBUG: Generated new webhook secret")
-            
             # Webhook registration payload according to Vipps Webhooks API
-            # Start with basic payment created event as per Vipps documentation
+            # Vipps will generate and return the webhook secret
+            # Do NOT generate a local secret - use the one Vipps provides
             payload = {
                 "url": webhook_url,
                 "events": [
-                    "epayments.payment.created.v1"
+                    "epayments.payment.created.v1",
+                    "epayments.payment.aborted.v1",
+                    "epayments.payment.expired.v1",
+                    "epayments.payment.cancelled.v1",
+                    "epayments.payment.captured.v1",
+                    "epayments.payment.refunded.v1",
+                    "epayments.payment.authorized.v1",
+                    "epayments.payment.terminated.v1"
                 ]
             }
             

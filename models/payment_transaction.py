@@ -128,12 +128,79 @@ class PaymentTransaction(models.Model):
         store=True
     )
 
+    # Per-payment webhook fields
+    vipps_webhook_id = fields.Char(
+        string="Webhook ID",
+        copy=False,
+        help="Webhook ID for this specific payment from Vipps"
+    )
+    vipps_webhook_secret = fields.Char(
+        string="Webhook Secret",
+        copy=False,
+        help="Webhook secret for this specific payment from Vipps"
+    )
+
     def _get_vipps_api_client(self):
         """Get Vipps API client instance"""
         self.ensure_one()
         if self.provider_code != 'vipps':
             raise ValidationError(_("This method is only available for Vipps transactions"))
         return VippsAPIClient(self.provider_id)
+
+    def _register_payment_webhook(self, payment_reference):
+        """Register webhook for this specific payment using Webhooks API"""
+        self.ensure_one()
+        
+        try:
+            # Build webhook URL for this payment
+            webhook_url = self.provider_id._get_vipps_webhook_url()
+            
+            # Webhook registration payload for this payment
+            payload = {
+                "url": webhook_url,
+                "events": [
+                    "epayments.payment.created.v1",
+                    "epayments.payment.authorized.v1",
+                    "epayments.payment.captured.v1",
+                    "epayments.payment.cancelled.v1",
+                    "epayments.payment.aborted.v1",
+                    "epayments.payment.expired.v1",
+                    "epayments.payment.refunded.v1",
+                    "epayments.payment.terminated.v1"
+                ]
+            }
+            
+            if self.provider_id.vipps_environment == 'test':
+                _logger.info("🔧 DEBUG: Registering webhook for payment %s", payment_reference)
+                _logger.info("🔧 DEBUG: Webhook URL: %s", webhook_url)
+            
+            # Register webhook using provider's webhook API method
+            response = self.provider_id._make_webhook_api_request(
+                'POST', 
+                'webhooks/v1/webhooks', 
+                payload=payload
+            )
+            
+            if response and response.get('secret'):
+                # Store webhook secret for this payment
+                self.write({
+                    'vipps_webhook_id': response.get('id'),
+                    'vipps_webhook_secret': response.get('secret')
+                })
+                
+                if self.provider_id.vipps_environment == 'test':
+                    _logger.info("✅ DEBUG: Webhook registered for payment %s", payment_reference)
+                    _logger.info("✅ DEBUG: Webhook ID: %s", response.get('id'))
+                    _logger.info("✅ DEBUG: Webhook secret received: Yes")
+                
+                return True
+            else:
+                _logger.warning("Webhook registration for payment %s returned no secret", payment_reference)
+                return False
+                
+        except Exception as e:
+            _logger.error("Failed to register webhook for payment %s: %s", payment_reference, str(e))
+            return False
 
     def _get_payment_context(self):
         """
@@ -329,6 +396,11 @@ class PaymentTransaction(models.Model):
             if self.provider_id.vipps_environment == 'test':
                 _logger.info("🔧 DEBUG: Generated Payment Reference: %s", payment_reference)
                 _logger.info("🔧 DEBUG: Idempotency Key: %s", idempotency_key)
+            
+            # Register webhook for this specific payment
+            webhook_result = self._register_payment_webhook(payment_reference)
+            if not webhook_result:
+                _logger.warning("Failed to register webhook for payment %s, continuing anyway", payment_reference)
             
             # Build payment payload according to Vipps API specification
             return_url = self._get_return_url()

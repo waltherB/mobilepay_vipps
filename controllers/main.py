@@ -327,10 +327,20 @@ class VippsController(http.Controller):
             # Log webhook reception
             _logger.info("Received Vipps webhook from %s", client_ip)
             
-            # Run comprehensive security validation
+            # Find transaction first to get per-payment webhook secret
+            webhook_data_temp = json.loads(payload) if payload else {}
+            reference_temp = webhook_data_temp.get('reference')
+            transaction_for_validation = None
+            
+            if reference_temp:
+                transaction_for_validation = request.env['payment.transaction'].sudo().search([
+                    ('vipps_payment_reference', '=', reference_temp)
+                ], limit=1)
+            
+            # Run comprehensive security validation with transaction
             try:
                 validation_result = request.env['vipps.webhook.security'].validate_webhook_request(
-                    request, payload, provider
+                    request, payload, provider, transaction_for_validation
                 )
             except Exception as validation_error:
                 _logger.error("Webhook validation failed with error: %s", str(validation_error))

@@ -22,7 +22,7 @@ class VippsWebhookSecurity(models.AbstractModel):
     _description = 'Vipps Webhook Security Manager'
 
     @api.model
-    def validate_webhook_request(self, request, payload, provider):
+    def validate_webhook_request(self, request, payload, provider, transaction=None):
         """
         Comprehensive webhook request validation
         
@@ -30,6 +30,7 @@ class VippsWebhookSecurity(models.AbstractModel):
             request: HTTP request object
             payload: Raw webhook payload
             provider: Payment provider record
+            transaction: Payment transaction record (for per-payment webhook secret)
             
         Returns:
             dict: Validation result with success status and details
@@ -58,17 +59,19 @@ class VippsWebhookSecurity(models.AbstractModel):
                 })
                 # Continue validation for logging purposes
             
-            # 3. Check rate limiting
-            rate_limit_result = self._check_rate_limit(client_ip, headers.get('user_agent', ''))
-            if not rate_limit_result['allowed']:
-                validation_result['errors'].append(rate_limit_result['error'])
-                validation_result['security_events'].append({
-                    'type': 'rate_limit_exceeded',
-                    'severity': 'medium',
-                    'details': f"Rate limit exceeded for IP: {client_ip}",
-                    'ip': client_ip
-                })
-                return validation_result
+            # 3. Check rate limiting (disabled to avoid database conflicts)
+            # Rate limiting causes concurrent update issues with multiple simultaneous webhooks
+            # TODO: Implement Redis-based rate limiting for production
+            # rate_limit_result = self._check_rate_limit(client_ip, headers.get('user_agent', ''))
+            # if not rate_limit_result['allowed']:
+            #     validation_result['errors'].append(rate_limit_result['error'])
+            #     validation_result['security_events'].append({
+            #         'type': 'rate_limit_exceeded',
+            #         'severity': 'medium',
+            #         'details': f"Rate limit exceeded for IP: {client_ip}",
+            #         'ip': client_ip
+            #     })
+            #     return validation_result
             
             # 4. Validate payload structure
             payload_validation = self._validate_payload(payload)
@@ -79,7 +82,7 @@ class VippsWebhookSecurity(models.AbstractModel):
             # 5. Validate HMAC signature
             try:
                 signature_validation = self._validate_hmac_signature(
-                    payload, headers, provider
+                    payload, headers, provider, transaction
                 )
                 _logger.info("🔧 DEBUG: Signature validation result: %s", signature_validation)
                 
@@ -465,7 +468,7 @@ class VippsWebhookSecurity(models.AbstractModel):
                 'error': f'Invalid JSON payload: {str(e)}'
             }
 
-    def _validate_hmac_signature(self, payload, headers, provider):
+    def _validate_hmac_signature(self, payload, headers, provider, transaction=None):
         """Validate HMAC signature for webhook authenticity according to Vipps specification"""
         authorization = headers.get('authorization', '')
         ms_date = headers.get('x_ms_date', '')
@@ -490,8 +493,15 @@ class VippsWebhookSecurity(models.AbstractModel):
             }
         
         try:
-            # Get webhook secret
-            webhook_secret = provider.vipps_webhook_secret_decrypted
+            # Get webhook secret - prefer transaction-specific secret for per-payment webhooks
+            webhook_secret = None
+            if transaction and transaction.vipps_webhook_secret:
+                webhook_secret = transaction.vipps_webhook_secret
+                _logger.info("Using per-payment webhook secret for transaction %s", transaction.reference)
+            else:
+                webhook_secret = provider.vipps_webhook_secret_decrypted
+                _logger.info("Using provider-level webhook secret")
+            
             if not webhook_secret:
                 return {
                     'valid': False,

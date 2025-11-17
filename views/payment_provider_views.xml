@@ -42,7 +42,7 @@
                                help="Client Secret for access token generation (automatically encrypted)"/>
                         <field name="vipps_credentials_encrypted" readonly="1" invisible="1"/>
                         <div colspan="2" class="alert alert-success" role="alert" invisible="not vipps_credentials_encrypted">
-                            <i class="fa fa-lock"/> <strong>Security:</strong> Credentials are automatically encrypted and stored securely.
+                            <i class="fa fa-lock" title="Encrypted"/> <strong>Security:</strong> Credentials are automatically encrypted and stored securely.
                         </div>
                     </group>
 
