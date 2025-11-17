@@ -626,8 +626,14 @@ class VippsWebhookSecurity(models.AbstractModel):
                 _logger.info("🔧 DEBUG: Webhook-Id present: %s", webhook_id)
             
             # Calculate expected signature
-            # Vipps webhook secret is provided as a plain string, not base64 encoded
-            secret_bytes = webhook_secret.encode('utf-8')
+            # Vipps webhook secret from Webhooks API is base64 encoded - decode it first
+            try:
+                secret_bytes = base64.b64decode(webhook_secret)
+                _logger.info("🔧 DEBUG: Using base64-decoded secret (%d bytes)", len(secret_bytes))
+            except Exception as e:
+                # Fallback to UTF-8 encoding if not base64 (for provider-level secrets)
+                _logger.warning("Failed to base64 decode secret, using UTF-8: %s", str(e))
+                secret_bytes = webhook_secret.encode('utf-8')
             
             expected_signature_bytes = hmac.new(
                 secret_bytes,
