@@ -199,7 +199,8 @@ class VippsWebhookSecurity(models.AbstractModel):
             'x-ms-content-sha256',
             'Host',
             'Content-Type',
-            'User-Agent'
+            'User-Agent',
+            'Webhook-Id'  # Unique ID for each webhook delivery attempt
         ]
         
         # Extract headers with case-insensitive matching
@@ -495,14 +496,26 @@ class VippsWebhookSecurity(models.AbstractModel):
         try:
             # Get webhook secret - prefer transaction-specific secret for per-payment webhooks
             webhook_secret = None
+            webhook_id = headers.get('webhook_id', '')
+            
             if transaction and transaction.vipps_webhook_secret:
                 webhook_secret = transaction.vipps_webhook_secret
                 _logger.info("✅ Using per-payment webhook secret for transaction %s", transaction.reference)
                 _logger.info("✅ Per-payment secret length: %d", len(webhook_secret))
+                _logger.info("✅ Transaction webhook ID: %s", transaction.vipps_webhook_id)
+                _logger.info("✅ Incoming webhook ID: %s", webhook_id)
+                
+                # Verify webhook ID matches
+                if transaction.vipps_webhook_id and webhook_id:
+                    if transaction.vipps_webhook_id != webhook_id:
+                        _logger.warning("⚠️ Webhook ID mismatch! Transaction: %s, Incoming: %s",
+                                      transaction.vipps_webhook_id, webhook_id)
             else:
                 webhook_secret = provider.vipps_webhook_secret_decrypted
                 if transaction:
                     _logger.warning("⚠️ Transaction %s has no per-payment secret, using provider secret", transaction.reference)
+                    _logger.warning("⚠️ Transaction webhook ID: %s", transaction.vipps_webhook_id or 'NOT SET')
+                    _logger.warning("⚠️ Incoming webhook ID: %s", webhook_id or 'NOT SET')
                 else:
                     _logger.warning("⚠️ No transaction provided, using provider secret")
                 if webhook_secret:
@@ -601,10 +614,16 @@ class VippsWebhookSecurity(models.AbstractModel):
             # - x-ms-date header value
             # - host header value  
             # - x-ms-content-sha256 header value
+            # NOTE: Check if webhook-id should be included
+            webhook_id = headers.get('webhook_id', '')
+            
             canonical_headers = f"x-ms-date:{ms_date}\nhost:{host}\nx-ms-content-sha256:{content_sha256}\n"
             
             # Create string to sign
             string_to_sign = canonical_headers
+            
+            if webhook_id:
+                _logger.info("🔧 DEBUG: Webhook-Id present: %s", webhook_id)
             
             # Calculate expected signature
             # Vipps webhook secret is provided as a plain string, not base64 encoded
