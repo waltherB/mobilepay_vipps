@@ -183,19 +183,29 @@ class PaymentTransaction(models.Model):
             
             if response and response.get('secret'):
                 # Store webhook secret for this payment
+                webhook_id = response.get('id')
+                webhook_secret = response.get('secret')
+                
                 self.write({
-                    'vipps_webhook_id': response.get('id'),
-                    'vipps_webhook_secret': response.get('secret')
+                    'vipps_webhook_id': webhook_id,
+                    'vipps_webhook_secret': webhook_secret
                 })
                 
-                if self.provider_id.vipps_environment == 'test':
-                    _logger.info("✅ DEBUG: Webhook registered for payment %s", payment_reference)
-                    _logger.info("✅ DEBUG: Webhook ID: %s", response.get('id'))
-                    _logger.info("✅ DEBUG: Webhook secret received: Yes")
+                _logger.info("✅ Webhook registered for payment %s", payment_reference)
+                _logger.info("✅ Webhook ID: %s", webhook_id)
+                _logger.info("✅ Webhook secret length: %d", len(webhook_secret) if webhook_secret else 0)
+                _logger.info("✅ Webhook secret stored in transaction: %s", self.reference)
+                
+                # Verify it was stored
+                self.env.cr.commit()  # Ensure it's committed
+                self.invalidate_cache()  # Clear cache
+                stored_secret = self.vipps_webhook_secret
+                _logger.info("✅ Verification: Secret in DB: %s", 'Yes' if stored_secret else 'No')
                 
                 return True
             else:
-                _logger.warning("Webhook registration for payment %s returned no secret", payment_reference)
+                _logger.error("❌ Webhook registration for payment %s returned no secret", payment_reference)
+                _logger.error("❌ Response: %s", response)
                 return False
                 
         except Exception as e:

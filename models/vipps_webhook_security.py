@@ -497,10 +497,16 @@ class VippsWebhookSecurity(models.AbstractModel):
             webhook_secret = None
             if transaction and transaction.vipps_webhook_secret:
                 webhook_secret = transaction.vipps_webhook_secret
-                _logger.info("Using per-payment webhook secret for transaction %s", transaction.reference)
+                _logger.info("✅ Using per-payment webhook secret for transaction %s", transaction.reference)
+                _logger.info("✅ Per-payment secret length: %d", len(webhook_secret))
             else:
                 webhook_secret = provider.vipps_webhook_secret_decrypted
-                _logger.info("Using provider-level webhook secret")
+                if transaction:
+                    _logger.warning("⚠️ Transaction %s has no per-payment secret, using provider secret", transaction.reference)
+                else:
+                    _logger.warning("⚠️ No transaction provided, using provider secret")
+                if webhook_secret:
+                    _logger.info("Provider secret length: %d", len(webhook_secret))
             
             if not webhook_secret:
                 return {
