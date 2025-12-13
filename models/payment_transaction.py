@@ -312,7 +312,12 @@ class PaymentTransaction(models.Model):
             })
             
             # Handle state transitions according to Odoo 17 payment flow
-            if payment_state == 'AUTHORIZED':
+            if payment_state == 'CREATED':
+                # Payment created in MobilePay - keep transaction in pending state
+                _logger.info("Payment created in MobilePay for transaction %s", self.reference)
+                # Transaction stays in 'pending' state until authorized
+                
+            elif payment_state == 'AUTHORIZED':
                 self._set_authorized()
                 _logger.info("Payment authorized for transaction %s", self.reference)
                 
