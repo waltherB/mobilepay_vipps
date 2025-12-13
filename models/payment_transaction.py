@@ -498,20 +498,101 @@ class PaymentTransaction(models.Model):
                 if scope_string:
                     payload["scope"] = scope_string
 
-            # Add order details if available
+            # Add order details (receipt) if available
             if self.sale_order_ids:
+                order = self.sale_order_ids[0]  # Get the first order
                 order_lines = []
-                for line in self.sale_order_ids.order_line:
-                    order_lines.append({
-                        "name": line.name,
-                        "quantity": line.product_uom_qty,
+                
+                for line in order.order_line:
+                    # Calculate amounts
+                    unit_price = int(line.price_unit * 100)  # In minor units (øre/cents)
+                    quantity = line.product_uom_qty
+                    
+                    # Calculate tax rate from Odoo tax configuration
+                    tax_rate = 0.0
+                    if line.tax_id:
+                        # Get the first tax rate (assuming single tax per line)
+                        tax_rate = line.tax_id[0].amount if line.tax_id else 0.0
+                    
+                    # Calculate amounts
+                    total_amount = int(line.price_subtotal * 100)  # Subtotal is usually tax excluded in Odoo
+                    total_tax_amount = int(line.price_tax * 100)  # Tax amount
+                    
+                    # Odoo stores price_subtotal (excl tax) and price_total (incl tax)
+                    # MobilePay expects "totalAmount" (incl tax) and "totalAmountExcludingTax"
+                    total_amount_incl_tax = int(line.price_total * 100)
+                    total_amount_excl_tax = int(line.price_subtotal * 100)
+                    
+                    # Calculate discount if any
+                    discount_amount = 0
+                    if line.discount > 0:
+                        # line.price_unit * quantity is the base price before discount
+                        base_price = line.price_unit * quantity
+                        discount_val = base_price * (line.discount / 100)
+                        discount_amount = int(discount_val * 100)
+                    
+                    order_line_data = {
+                        "id": str(line.id),
+                        "name": line.name[:100],  # Limit to 100 chars
+                        "quantity": quantity,
                         "unitPrice": {
                             "currency": self.currency_id.name,
-                            "value": int(line.price_unit * 100)
+                            "value": unit_price
+                        },
+                        "totalAmount": {
+                            "currency": self.currency_id.name,
+                            "value": total_amount_incl_tax
+                        },
+                        "totalAmountExcludingTax": {
+                            "currency": self.currency_id.name,
+                            "value": total_amount_excl_tax
+                        },
+                        "totalTaxAmount": {
+                            "currency": self.currency_id.name,
+                            "value": total_tax_amount
+                        },
+                        "taxRate": tax_rate,
+                        "isReturn": False,
+                        "isShipping": line.product_id.type == 'service' and 'shipping' in line.name.lower()
+                    }
+                    
+                    # Add discount if present
+                    if discount_amount > 0:
+                        order_line_data["discount"] = {
+                            "currency": self.currency_id.name,
+                            "value": discount_amount
                         }
-                    })
-                payload["orderDetails"] = {
-                    "orderLines": order_lines
+                    
+                    # Add product URL if available
+                    if hasattr(line.product_id, 'website_url') and line.product_id.website_url:
+                        base_url = self.provider_id.get_base_url()
+                        order_line_data["productUrl"] = f"{base_url}{line.product_id.website_url}"
+                    
+                    order_lines.append(order_line_data)
+                
+                # Build bottom line (order totals)
+                bottom_line = {
+                    "currency": self.currency_id.name,
+                    "tipAmount": 0,  # Odoo doesn't typically have tips
+                    "receiptNumber": order.name,  # Order reference
+                }
+                
+                # Add payment sources (all from card/wallet in this case)
+                bottom_line["paymentSources"] = {
+                    "giftCard": 0,
+                    "card": int(self.amount * 100),
+                    "voucher": 0,
+                    "cash": 0
+                }
+                
+                # Add terminal ID if in POS context
+                if hasattr(self, 'pos_session_id') and self.pos_session_id:
+                    bottom_line["terminalId"] = f"POS-{self.pos_session_id}"
+                
+                # Build receipt object (correct API structure)
+                payload["receipt"] = {
+                    "orderLines": order_lines,
+                    "bottomLine": bottom_line
                 }
 
             # Make API request
