@@ -508,20 +508,17 @@ class PaymentTransaction(models.Model):
                     unit_price = int(line.price_unit * 100)  # In minor units (øre/cents)
                     quantity = line.product_uom_qty
                     
-                    # Calculate tax rate from Odoo tax configuration
-                    tax_rate = 0.0
+                    # Calculate tax rate (basis points: 25% -> 2500)
+                    tax_rate = 0
                     if line.tax_id:
                         # Get the first tax rate (assuming single tax per line)
-                        tax_rate = line.tax_id[0].amount if line.tax_id else 0.0
+                        tax_rate = int(line.tax_id[0].amount * 100) if line.tax_id else 0
                     
                     # Calculate amounts
-                    total_amount = int(line.price_subtotal * 100)  # Subtotal is usually tax excluded in Odoo
-                    total_tax_amount = int(line.price_tax * 100)  # Tax amount
-                    
                     # Odoo stores price_subtotal (excl tax) and price_total (incl tax)
-                    # MobilePay expects "totalAmount" (incl tax) and "totalAmountExcludingTax"
                     total_amount_incl_tax = int(line.price_total * 100)
                     total_amount_excl_tax = int(line.price_subtotal * 100)
+                    total_tax_amount = total_amount_incl_tax - total_amount_excl_tax
                     
                     # Calculate discount if any
                     discount_amount = 0
@@ -535,33 +532,18 @@ class PaymentTransaction(models.Model):
                         "id": str(line.id),
                         "name": line.name[:100],  # Limit to 100 chars
                         "quantity": quantity,
-                        "unitPrice": {
-                            "currency": self.currency_id.name,
-                            "value": unit_price
-                        },
-                        "totalAmount": {
-                            "currency": self.currency_id.name,
-                            "value": total_amount_incl_tax
-                        },
-                        "totalAmountExcludingTax": {
-                            "currency": self.currency_id.name,
-                            "value": total_amount_excl_tax
-                        },
-                        "totalTaxAmount": {
-                            "currency": self.currency_id.name,
-                            "value": total_tax_amount
-                        },
-                        "taxRate": tax_rate,
+                        "unitPrice": unit_price,  # Integer minor units
+                        "totalAmount": total_amount_incl_tax,  # Integer minor units
+                        "totalAmountExcludingTax": total_amount_excl_tax,  # Integer minor units
+                        "totalTaxAmount": total_tax_amount,  # Integer minor units
+                        "taxRate": tax_rate,  # Integer basis points
                         "isReturn": False,
                         "isShipping": line.product_id.type == 'service' and 'shipping' in line.name.lower()
                     }
                     
                     # Add discount if present
                     if discount_amount > 0:
-                        order_line_data["discount"] = {
-                            "currency": self.currency_id.name,
-                            "value": discount_amount
-                        }
+                        order_line_data["discount"] = discount_amount  # Integer minor units
                     
                     # Add product URL if available
                     if hasattr(line.product_id, 'website_url') and line.product_id.website_url:
@@ -573,7 +555,7 @@ class PaymentTransaction(models.Model):
                 # Build bottom line (order totals)
                 bottom_line = {
                     "currency": self.currency_id.name,
-                    "tipAmount": 0,  # Odoo doesn't typically have tips
+                    "tipAmount": 0,  # Integer
                     "receiptNumber": order.name,  # Order reference
                 }
                 
