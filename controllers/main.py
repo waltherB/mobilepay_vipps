@@ -354,10 +354,10 @@ class VippsController(http.Controller):
                 }
             
             if provider.vipps_environment == 'test':
-                _logger.info("🔧 DEBUG: Validation Result (BYPASSED): %s", validation_result)
+                _logger.info("🔧 DEBUG: Validation Result: %s", validation_result)
             
-            # TEMPORARY: Always proceed as if validation passed
-            if False:  # Changed from: if not validation_result['success']:
+            # Validate webhook signature and security checks
+            if not validation_result['success']:
                 # Log all errors
                 for error in validation_result['errors']:
                     _logger.error("Webhook validation failed: %s", error)

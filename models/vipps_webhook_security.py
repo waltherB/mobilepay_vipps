@@ -506,10 +506,12 @@ class VippsWebhookSecurity(models.AbstractModel):
                 _logger.info("✅ Incoming webhook ID: %s", webhook_id)
                 
                 # Verify webhook ID matches
+                # Note: Transaction webhook ID is the registration ID,
+                # incoming webhook ID is the event ID - these are different by design
                 if transaction.vipps_webhook_id and webhook_id:
                     if transaction.vipps_webhook_id != webhook_id:
-                        _logger.warning("⚠️ Webhook ID mismatch! Transaction: %s, Incoming: %s",
-                                      transaction.vipps_webhook_id, webhook_id)
+                        _logger.debug("Webhook event ID: %s (registration ID: %s)",
+                                      webhook_id, transaction.vipps_webhook_id)
             else:
                 webhook_secret = provider.vipps_webhook_secret_decrypted
                 if transaction:

@@ -292,7 +292,13 @@ class PaymentTransaction(models.Model):
         
         try:
             # Extract payment state from notification
-            payment_state = notification_data.get('state') or notification_data.get('transactionInfo', {}).get('status')
+            # MobilePay uses 'name' field for event type (CREATED, AUTHORIZED, CAPTURED, etc.)
+            # Vipps may use 'state' or 'transactionInfo.status'
+            payment_state = (
+                notification_data.get('state') or 
+                notification_data.get('name') or  # MobilePay event name
+                notification_data.get('transactionInfo', {}).get('status')
+            )
             
             if not payment_state:
                 _logger.warning("No payment state found in notification data for transaction %s", self.reference)
