@@ -316,6 +316,7 @@ class PaymentTransaction(models.Model):
                 # Payment created in MobilePay - keep transaction in pending state
                 _logger.info("Payment created in MobilePay for transaction %s", self.reference)
                 # Transaction stays in 'pending' state until authorized
+                return  # Early return to prevent falling through
                 
             elif payment_state == 'AUTHORIZED':
                 self._set_authorized()
@@ -1739,11 +1740,13 @@ class PaymentTransaction(models.Model):
         
         try:
             # Extract and validate webhook data
-            payment_state = webhook_data.get('state')
+            # Vipps/MobilePay webhooks use 'name' field for event type (CREATED, AUTHORIZED, etc.)
+            # Some may use 'state' field instead
+            payment_state = webhook_data.get('state') or webhook_data.get('name')
             if not payment_state:
                 _logger.warning(
-                    "Webhook for transaction %s missing payment state (event: %s)",
-                    self.reference, event_id
+                    "Webhook for transaction %s missing payment state (event: %s). Available keys: %s",
+                    self.reference, event_id, list(webhook_data.keys())
                 )
                 return
 
