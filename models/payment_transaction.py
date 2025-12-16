@@ -196,7 +196,16 @@ class PaymentTransaction(models.Model):
     def _get_return_url(self):
         """Generate return URL for customer redirect after payment"""
         self.ensure_one()
-        base_url = self.provider_id.get_base_url()
+        # Use web.base.url from system parameters to ensure consistency and public access
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        if not base_url:
+            base_url = self.provider_id.get_base_url()
+            
+        # Clean URL to prevent double slashes and ensure HTTPS
+        base_url = base_url.rstrip('/')
+        if base_url.startswith('http://'):
+            base_url = base_url.replace('http://', 'https://', 1)
+            
         return f"{base_url}/payment/vipps/return?reference={self.vipps_payment_reference or self.reference}"
 
     def _process_notification_data(self, notification_data):
