@@ -390,15 +390,22 @@ class PaymentTransaction(models.Model):
                 "userFlow": "WEB_REDIRECT"
             }
             
-            # Debug: Comment out customer phone to rule out format issues
-            # if hasattr(self, 'partner_phone') and self.partner_phone: 
-            #    ...
-                # Clean phone number to match Vipps regex: ^\d{9,15}$
-                # clean_phone = ''.join(filter(str.isdigit, self.partner_phone))
-                # if len(clean_phone) >= 9 and len(clean_phone) <= 15:
-                #     payload["customer"] = {
-                #         "phoneNumber": clean_phone
-                #     }
+            # Add customer phone number if available and valid
+            if hasattr(self, 'partner_phone') and self.partner_phone:
+                # Clean phone number to match Vipps regex
+                clean_phone = ''.join(filter(str.isdigit, self.partner_phone))
+                
+                # Fix common double-prefix issue (e.g. 454581...)
+                # If number starts with 4545 and is 12 digits, strip first 45
+                if clean_phone.startswith('4545') and len(clean_phone) == 12:
+                    clean_phone = clean_phone[2:]
+                
+                # Ensure correct format (Denmark: 10 digits starting with 45)
+                # This is a basic check, can be expanded for NO/FI
+                if len(clean_phone) >= 8 and len(clean_phone) <= 15:
+                     payload["customer"] = {
+                        "phoneNumber": clean_phone
+                     }
             
             # Do NOT send callbackAuthorizationToken - let Vipps sign the request with HMAC
             # payload["merchantInfo"]["callbackAuthorizationToken"] = self.provider_id.vipps_webhook_secret
