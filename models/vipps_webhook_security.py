@@ -665,7 +665,7 @@ class VippsWebhookSecurity(models.AbstractModel):
             # If we reach here, no variant matched
             # Since we have IP authorization confirmed (checked before this method),
             # we can allow the request but log a warning for future debugging.
-            _logger.warning("Signature validation failed for authorized IP %s. Proceeding.", client_ip)
+            _logger.warning("Signature validation failed. Proceeding as IP is authorized.")
             
             # Return valid to allow processing
             return {'valid': True}
