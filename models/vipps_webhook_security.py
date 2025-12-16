@@ -494,34 +494,15 @@ class VippsWebhookSecurity(models.AbstractModel):
             }
         
         try:
-            # Get webhook secret - prefer transaction-specific secret for per-payment webhooks
-            webhook_secret = None
-            webhook_id = headers.get('webhook_id', '')
+            # Get webhook secret - always use provider's global secret
+            # Vipps/MobilePay ePayment API uses global webhooks signed with the secret returned during registration
+            webhook_secret = provider.vipps_webhook_secret_decrypted
             
-            if transaction and transaction.vipps_webhook_secret:
-                webhook_secret = transaction.vipps_webhook_secret
-                _logger.info("✅ Using per-payment webhook secret for transaction %s", transaction.reference)
-                _logger.info("✅ Per-payment secret length: %d", len(webhook_secret))
-                _logger.info("✅ Transaction webhook ID: %s", transaction.vipps_webhook_id)
-                _logger.info("✅ Incoming webhook ID: %s", webhook_id)
-                
-                # Verify webhook ID matches
-                # Note: Transaction webhook ID is the registration ID,
-                # incoming webhook ID is the event ID - these are different by design
-                if transaction.vipps_webhook_id and webhook_id:
-                    if transaction.vipps_webhook_id != webhook_id:
-                        _logger.debug("Webhook event ID: %s (registration ID: %s)",
-                                      webhook_id, transaction.vipps_webhook_id)
-            else:
-                webhook_secret = provider.vipps_webhook_secret_decrypted
-                if transaction:
-                    _logger.warning("⚠️ Transaction %s has no per-payment secret, using provider secret", transaction.reference)
-                    _logger.warning("⚠️ Transaction webhook ID: %s", transaction.vipps_webhook_id or 'NOT SET')
-                    _logger.warning("⚠️ Incoming webhook ID: %s", webhook_id or 'NOT SET')
-                else:
-                    _logger.warning("⚠️ No transaction provided, using provider secret")
-                if webhook_secret:
-                    _logger.info("Provider secret length: %d", len(webhook_secret))
+            if transaction:
+                _logger.info("🔧 DEBUG: Validating webhook for transaction %s", transaction.reference)
+            
+            if webhook_secret:
+                _logger.info("Provider secret length: %d", len(webhook_secret))
             
             if not webhook_secret:
                 return {

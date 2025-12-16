@@ -128,17 +128,9 @@ class PaymentTransaction(models.Model):
         store=True
     )
 
-    # Per-payment webhook fields
-    vipps_webhook_id = fields.Char(
-        string="Webhook ID",
-        copy=False,
-        help="Webhook ID for this specific payment from Vipps"
-    )
-    vipps_webhook_secret = fields.Char(
-        string="Webhook Secret",
-        copy=False,
-        help="Webhook secret for this specific payment from Vipps"
-    )
+    # Per-payment webhook fields - REMOVED as we use global webhooks
+    # vipps_webhook_id = fields.Char()
+    # vipps_webhook_secret = fields.Char()
 
     def _get_vipps_api_client(self):
         """Get Vipps API client instance"""
@@ -147,83 +139,7 @@ class PaymentTransaction(models.Model):
             raise ValidationError(_("This method is only available for Vipps transactions"))
         return VippsAPIClient(self.provider_id)
 
-    def _register_payment_webhook(self, payment_reference):
-        """Register webhook for this specific payment using Webhooks API"""
-        self.ensure_one()
-        
-        _logger.info("🔧 DEBUG: _register_payment_webhook called for payment %s", payment_reference)
-        _logger.info("🔧 DEBUG: Transaction reference: %s", self.reference)
-        _logger.info("🔧 DEBUG: Provider: %s (env: %s)", self.provider_id.name, self.provider_id.vipps_environment)
-        
-        try:
-            # Build webhook URL for this payment
-            _logger.info("🔧 DEBUG: Getting webhook URL from provider")
-            webhook_url = self.provider_id._get_vipps_webhook_url()
-            _logger.info("🔧 DEBUG: Webhook URL: %s", webhook_url)
-            
-            # Webhook registration payload for this payment
-            payload = {
-                "url": webhook_url,
-                "events": [
-                    "epayments.payment.created.v1",
-                    "epayments.payment.authorized.v1",
-                    "epayments.payment.captured.v1",
-                    "epayments.payment.cancelled.v1",
-                    "epayments.payment.aborted.v1",
-                    "epayments.payment.expired.v1",
-                    "epayments.payment.refunded.v1",
-                    "epayments.payment.terminated.v1"
-                ]
-            }
-            
-            _logger.info("🔧 DEBUG: Registering webhook for payment %s", payment_reference)
-            _logger.info("🔧 DEBUG: Webhook registration payload: %s", payload)
-            
-            # Register webhook using provider's webhook API method
-            _logger.info("🔧 DEBUG: Calling _make_webhook_api_request")
-            response = self.provider_id._make_webhook_api_request(
-                'POST', 
-                'webhooks/v1/webhooks', 
-                payload=payload
-            )
-            _logger.info("🔧 DEBUG: Webhook API response received: %s", response)
-            
-            if response and response.get('secret'):
-                # Store webhook secret for this payment
-                webhook_id = response.get('id')
-                webhook_secret = response.get('secret')
-                
-                self.write({
-                    'vipps_webhook_id': webhook_id,
-                    'vipps_webhook_secret': webhook_secret
-                })
-                
-                _logger.info("✅ Webhook registered for payment %s", payment_reference)
-                _logger.info("✅ Webhook ID: %s", webhook_id)
-                _logger.info("✅ Webhook secret length: %d", len(webhook_secret) if webhook_secret else 0)
-                _logger.info("✅ Webhook secret stored in transaction: %s", self.reference)
-                
-                # Flush to ensure write is applied (but don't commit - let Odoo handle that)
-                self.env.cr.flush()
-                
-                # Verify it was stored by re-reading from self
-                if self.vipps_webhook_id == webhook_id and self.vipps_webhook_secret == webhook_secret:
-                    _logger.info("✅ Verification: Webhook data successfully stored")
-                    return True
-                else:
-                    _logger.error("❌ Verification failed: Data not in record after write")
-                    _logger.error("   Expected ID: %s, Got: %s", webhook_id, self.vipps_webhook_id)
-                    _logger.error("   Expected secret length: %d, Got: %d", 
-                                len(webhook_secret), len(self.vipps_webhook_secret or ''))
-                    return False
-            else:
-                _logger.error("❌ Webhook registration for payment %s returned no secret", payment_reference)
-                _logger.error("❌ Response: %s", response)
-                return False
-                
-        except Exception as e:
-            _logger.error("Failed to register webhook for payment %s: %s", payment_reference, str(e))
-            return False
+    # _register_payment_webhook method removed - using global webhook registration instead
 
     def _get_payment_context(self):
         """
@@ -432,25 +348,9 @@ class PaymentTransaction(models.Model):
                 _logger.info("🔧 DEBUG: Generated Payment Reference: %s", payment_reference)
                 _logger.info("🔧 DEBUG: Idempotency Key: %s", idempotency_key)
             
-            # Register webhook for this specific payment using Webhooks API
-            # This gives us a unique secret per payment for proper signature validation
-            _logger.info("🔧 DEBUG: About to register webhook for payment %s", payment_reference)
-            try:
-                webhook_result = self._register_payment_webhook(payment_reference)
-                if webhook_result:
-                    _logger.info("✅ Successfully registered webhook for payment %s", payment_reference)
-                    # Verify the secret was stored
-                    if self.vipps_webhook_id and self.vipps_webhook_secret:
-                        _logger.info("✅ Webhook ID: %s", self.vipps_webhook_id)
-                        _logger.info("✅ Webhook secret stored: %d chars", len(self.vipps_webhook_secret))
-                    else:
-                        _logger.error("❌ Webhook registered but fields not populated!")
-                else:
-                    _logger.error("❌ Failed to register webhook for payment %s", payment_reference)
-            except Exception as webhook_error:
-                _logger.error("❌ Exception during webhook registration: %s", str(webhook_error))
-                _logger.exception("Full webhook registration exception:")
-                # Continue anyway - webhook registration failure shouldn't block payment
+            # Webhook registration removed - using global webhook
+            if self.provider_id.vipps_environment == 'test':
+                _logger.info("🔧 DEBUG: Using global webhook configuration")
             
             # Build payment payload according to Vipps API specification
             return_url = self._get_return_url()
@@ -489,9 +389,8 @@ class PaymentTransaction(models.Model):
                         "phoneNumber": clean_phone
                     }
             
-            # Add callback authorization token if configured
-            if self.provider_id.vipps_webhook_secret:
-                payload["merchantInfo"]["callbackAuthorizationToken"] = self.provider_id.vipps_webhook_secret
+            # Do NOT send callbackAuthorizationToken - let Vipps sign the request with HMAC
+            # payload["merchantInfo"]["callbackAuthorizationToken"] = self.provider_id.vipps_webhook_secret
 
             # Add profile scope if user info collection is enabled
             if self.provider_id.vipps_collect_user_info:

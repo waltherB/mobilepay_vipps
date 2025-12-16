@@ -11,6 +11,7 @@ This is a production-ready Odoo 17 CE module providing Vipps/MobilePay payment i
 ## Common Development Commands
 
 ### Testing
+
 ```bash
 # Run all tests
 python -m pytest tests/ -v
@@ -26,6 +27,7 @@ python -m pytest tests/ --cov=. --cov-report=html
 ```
 
 ### Validation & Deployment
+
 ```bash
 # Validate Odoo 17 compatibility
 python3 odoo17_compatibility_audit.py
@@ -47,6 +49,7 @@ python deploy.py list
 ```
 
 ### Database & Webhook Management
+
 ```bash
 # Update database schema
 python update_database_schema.py
@@ -65,6 +68,7 @@ python test_webhook_fix.py
 ```
 
 ### Odoo Module Commands
+
 ```bash
 # Install dependencies
 pip install -r requirements.txt
@@ -85,6 +89,7 @@ python validate_translations.py
 ## Architecture Overview
 
 ### Core Design Pattern
+
 This module follows **Odoo's MVC architecture** with a payment provider pattern:
 
 1. **Models** (`models/`) - Business logic and data structures
@@ -94,6 +99,7 @@ This module follows **Odoo's MVC architecture** with a payment provider pattern:
 ### Key Architectural Components
 
 #### Payment Flow Architecture
+
 ```
 Customer → Odoo Transaction → Vipps API Client → Vipps/MobilePay API
                 ↓                      ↓
@@ -101,6 +107,7 @@ Customer → Odoo Transaction → Vipps API Client → Vipps/MobilePay API
 ```
 
 **Critical Design Decisions:**
+
 - **Idempotent Operations**: Every payment operation uses idempotency keys to prevent duplicate transactions
 - **Webhook-Driven Status**: Payment states are primarily updated via webhooks (not polling)
 - **Per-Transaction Webhooks**: Each payment transaction registers its own webhook for isolation
@@ -110,6 +117,7 @@ Customer → Odoo Transaction → Vipps API Client → Vipps/MobilePay API
 #### Model Hierarchy & Responsibilities
 
 **`payment_provider.py`** (PaymentProvider)
+
 - Extends `payment.provider` - Odoo's base payment provider model
 - Configuration management (credentials, environment, features)
 - Access token lifecycle management
@@ -118,6 +126,7 @@ Customer → Odoo Transaction → Vipps API Client → Vipps/MobilePay API
 - Credential encryption/decryption
 
 **`payment_transaction.py`** (PaymentTransaction)  
+
 - Extends `payment.transaction` - Odoo's payment transaction model
 - Payment creation and processing (`_send_payment_request`)
 - Webhook notification handling (`_process_notification_data`)
@@ -126,6 +135,7 @@ Customer → Odoo Transaction → Vipps API Client → Vipps/MobilePay API
 - Profile data collection and customer record updates
 
 **`vipps_api_client.py`** (VippsAPIClient)
+
 - Centralized API communication layer
 - Automatic token refresh and retry logic
 - Circuit breaker pattern for API failures
@@ -134,6 +144,7 @@ Customer → Odoo Transaction → Vipps API Client → Vipps/MobilePay API
 - Idempotency key management
 
 **`vipps_webhook_security.py`** (PaymentProviderWebhookSecurity)
+
 - HMAC signature validation for webhook authenticity
 - IP address whitelisting for Vipps servers
 - Replay attack prevention with timestamps
@@ -142,6 +153,7 @@ Customer → Odoo Transaction → Vipps API Client → Vipps/MobilePay API
 #### Controller Architecture
 
 **`main.py`** (VippsController)
+
 - `/payment/vipps/webhook` - Receives payment status updates from Vipps
 - `/payment/vipps/redirect/<tx_id>` - Handles customer redirects from Vipps
 - `/payment/vipps/return` - Success/failure return endpoints
@@ -149,6 +161,7 @@ Customer → Odoo Transaction → Vipps API Client → Vipps/MobilePay API
 - Transaction state updates based on webhook events
 
 **`pos_payment.py`** (VippsPosController)
+
 - POS-specific payment endpoints
 - QR code generation for customer scanning
 - Manual shop number verification flow
@@ -157,6 +170,7 @@ Customer → Odoo Transaction → Vipps API Client → Vipps/MobilePay API
 ### Security Architecture
 
 **Multi-Layer Security:**
+
 1. **Credential Encryption**: All sensitive credentials encrypted at rest using `cryptography` library
 2. **Webhook Validation**: HMAC-SHA256 signature verification + IP whitelisting
 3. **Replay Prevention**: Timestamp validation (5-minute window) + duplicate detection
@@ -164,6 +178,7 @@ Customer → Odoo Transaction → Vipps API Client → Vipps/MobilePay API
 5. **Access Controls**: Group-based field visibility (`base.group_system`)
 
 **Compliance Features:**
+
 - **GDPR**: Data retention policies, explicit consent flows, customer data management
 - **PCI DSS**: No card data storage, tokenized payments, audit logging
 
@@ -188,24 +203,28 @@ Customer → Odoo Transaction → Vipps API Client → Vipps/MobilePay API
 ## Module Structure & Key Files
 
 ### Critical Files for Payment Logic
+
 - `models/payment_provider.py` - Provider configuration, credentials, token management
 - `models/payment_transaction.py` - Payment creation, state management, webhook processing
 - `models/vipps_api_client.py` - API communication, error handling, retries
 - `controllers/main.py` - Webhook endpoint, signature validation, redirect handling
 
 ### Security & Validation
+
 - `models/vipps_webhook_security.py` - HMAC validation, IP filtering, replay prevention
 - `models/vipps_security.py` - Credential encryption, security features
 - `tests/test_webhook_security.py` - Webhook security test suite
 - `tests/test_security_compliance_comprehensive.py` - GDPR/PCI DSS tests
 
 ### Configuration & Setup
+
 - `__manifest__.py` - Module metadata, dependencies, version
 - `data/payment_method_data.xml` - Default payment method configuration
 - `views/payment_provider_views.xml` - Provider configuration UI
 - `models/vipps_onboarding_wizard.py` - Setup wizard for initial configuration
 
 ### Validation & Deployment
+
 - `odoo17_compatibility_audit.py` - Validates Odoo 17 API compatibility
 - `production_readiness_validator.py` - System readiness checks
 - `run_production_validation.py` - Orchestrates all validation suites
@@ -214,21 +233,27 @@ Customer → Odoo Transaction → Vipps API Client → Vipps/MobilePay API
 ## Important Implementation Details
 
 ### Odoo 17 Compatibility
+
 This module is **specifically built for Odoo 17 CE**:
+
 - Uses modern `_process_notification_data()` for webhooks (not deprecated `_handle_notification_data`)
 - Implements required provider methods: `_get_supported_currencies()`, `_get_supported_countries()`, `_get_default_payment_method_codes()`
 - JavaScript uses `/** @odoo-module **/` decorator (not old module system)
 - XML views avoid deprecated `attrs` syntax
 
 ### Webhook Registration Pattern
+
 **Important**: The module uses **per-payment webhooks** (not global provider webhooks):
+
 - Each payment transaction registers its own webhook via Webhooks API v1
 - Webhook URL format: `https://domain.com/payment/vipps/webhook`
 - Transaction reference embedded in webhook payload (not URL path)
 - This allows proper transaction isolation and concurrent payment handling
 
 ### Credential Management
+
 **Always use decrypted accessors**:
+
 ```python
 # DON'T access encrypted fields directly
 self.provider.vipps_client_secret_encrypted  # ❌ This is encrypted
@@ -240,6 +265,7 @@ self.provider.vipps_client_secret_decrypted  # ✅ Returns plaintext
 The `vipps_security.py` model provides automatic encryption/decryption via computed fields.
 
 ### API Client Usage Pattern
+
 ```python
 # Always get client from transaction or provider
 api_client = transaction._get_vipps_api_client()
@@ -252,6 +278,7 @@ api_client = transaction._get_vipps_api_client()
 ```
 
 ### Environment-Specific Endpoints
+
 ```python
 # Test environment
 test_api_base = "https://apitest.vipps.no/epayment/v1"
@@ -265,6 +292,7 @@ prod_token_url = "https://api.vipps.no/accesstoken/get"
 ## Testing Strategy
 
 ### Test Suite Organization
+
 - **Unit Tests**: `test_payment_vipps.py`, `test_api_client_comprehensive.py`
 - **Integration Tests**: `test_ecommerce_payment_flow.py`, `test_pos_payment_flow.py`
 - **Security Tests**: `test_webhook_security.py`, `test_penetration_testing.py`
@@ -272,7 +300,9 @@ prod_token_url = "https://api.vipps.no/accesstoken/get"
 - **Production Tests**: `test_production_*.py` (system, performance, disaster recovery)
 
 ### Mock vs Real API
+
 Tests use mocks by default (`unittest.mock`). For real API testing:
+
 1. Set test credentials in provider configuration
 2. Use `vipps_environment = 'test'`
 3. Tests will hit real Vipps test API endpoints
@@ -280,6 +310,7 @@ Tests use mocks by default (`unittest.mock`). For real API testing:
 ## Common Development Patterns
 
 ### Creating a Payment Transaction
+
 ```python
 # E-commerce flow
 transaction = env['payment.transaction'].create({
@@ -293,6 +324,7 @@ transaction._send_payment_request()  # Returns {'url': 'https://...', 'reference
 ```
 
 ### Processing Webhook Data
+
 ```python
 # Controller receives webhook
 webhook_data = {
@@ -310,7 +342,9 @@ transaction._process_notification_data(webhook_data)
 ```
 
 ### Adding New API Endpoints
+
 When adding new Vipps API integrations:
+
 1. Add method to `VippsAPIClient` in `vipps_api_client.py`
 2. Use `_make_api_request()` for standard calls
 3. Include proper error handling with `VippsAPIException`
@@ -328,6 +362,7 @@ When adding new Vipps API integrations:
 ## Troubleshooting
 
 ### Webhook Not Receiving Updates
+
 ```bash
 # Check webhook registration
 python diagnose_webhook_registration.py
@@ -342,6 +377,7 @@ curl -X POST https://your-domain.com/payment/vipps/webhook \
 ```
 
 ### API Credential Errors
+
 ```bash
 # Validate credentials
 python check_provider_config.py
@@ -352,7 +388,9 @@ tail -f /var/log/odoo/odoo.log | grep -i vipps
 ```
 
 ### Payment State Not Updating
+
 Check Odoo logs for:
+
 - `vipps_webhook_security` - Signature validation failures
 - `payment.transaction` - Transaction state transition errors
 - `vipps.api.client` - API communication errors
@@ -360,16 +398,19 @@ Check Odoo logs for:
 ## Module Dependencies
 
 **Required Odoo Modules:**
+
 - `base` - Core Odoo framework
 - `payment` - Odoo payment provider framework
 - `website_sale` - E-commerce integration
 
 **Optional Odoo Modules:**
+
 - `point_of_sale` - For POS payment features
 - `account` - For invoice integration
 - `sale` - For sales order integration
 
 **Python Dependencies (requirements.txt):**
+
 - `requests>=2.31.0` - HTTP client for API calls
 - `cryptography>=41.0.0` - Credential encryption
 - `qrcode[pil]>=7.4.0` - QR code generation for POS
@@ -386,11 +427,11 @@ Check Odoo logs for:
 
 ## Version Compatibility
 
-| Odoo Version | Module Version | Status |
-|--------------|----------------|--------|
-| 17.0 CE      | 1.0.0+        | ✅ Full support |
-| 16.0 CE      | -             | ❌ Not supported |
-| 15.0 CE      | -             | ❌ Not supported |
+| Odoo Version | Module Version | Status          |
+| ------------ | -------------- | --------------- |
+| 17.0 CE      | 1.0.0+         | ✅ Full support  |
+| 16.0 CE      | -              | ❌ Not supported |
+| 15.0 CE      | -              | ❌ Not supported |
 
 **Python**: 3.8+  
 **PostgreSQL**: 12+
