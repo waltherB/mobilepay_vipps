@@ -597,52 +597,58 @@ class VippsWebhookSecurity(models.AbstractModel):
             # - x-ms-date header value
             # - host header value  
             # - x-ms-content-sha256 header value
-            # NOTE: Check if webhook-id should be included
-            webhook_id = headers.get('webhook_id', '')
-            
-            canonical_headers = f"x-ms-date:{ms_date}\nhost:{host}\nx-ms-content-sha256:{content_sha256}\n"
-            
-            # Create string to sign
-            string_to_sign = canonical_headers
-            
-            if webhook_id:
-                _logger.info("🔧 DEBUG: Webhook-Id present: %s", webhook_id)
             
             # Calculate expected signature
             # Vipps webhook secret from Webhooks API is base64 encoded - decode it first
             try:
                 secret_bytes = base64.b64decode(webhook_secret)
-                _logger.info("🔧 DEBUG: Using base64-decoded secret (%d bytes)", len(secret_bytes))
             except Exception as e:
                 # Fallback to UTF-8 encoding if not base64 (for provider-level secrets)
                 _logger.warning("Failed to base64 decode secret, using UTF-8: %s", str(e))
                 secret_bytes = webhook_secret.encode('utf-8')
+
+            # --- SIGNATURE VARIANT TESTING ---
+            # Test multiple variants of string-to-sign to find the correct one
             
-            expected_signature_bytes = hmac.new(
-                secret_bytes,
-                string_to_sign.encode('utf-8'),
-                hashlib.sha256
-            ).digest()
-            expected_signature = base64.b64encode(expected_signature_bytes).decode('utf-8')
+            variants = {
+                '1_std_newline': f"x-ms-date:{ms_date}\nhost:{host}\nx-ms-content-sha256:{content_sha256}\n",
+                '2_no_newline': f"x-ms-date:{ms_date}\nhost:{host}\nx-ms-content-sha256:{content_sha256}",
+                '3_crlf_end': f"x-ms-date:{ms_date}\n\rhost:{host}\r\nx-ms-content-sha256:{content_sha256}\r\n",
+                '4_crlf_no_end': f"x-ms-date:{ms_date}\r\nhost:{host}\r\nx-ms-content-sha256:{content_sha256}",
+            }
             
-            # Secure comparison
-            is_valid = hmac.compare_digest(signature, expected_signature)
+            valid_variant = None
             
-            if not is_valid:
-                # Log signature mismatch for debugging
-                _logger.warning("Signature mismatch - Expected: %s, Got: %s", expected_signature, signature)
-                _logger.warning("String to sign: %s", repr(string_to_sign))
-                _logger.warning("Secret bytes length: %d", len(secret_bytes))
+            for name, string_to_sign in variants.items():
+                expected_signature_bytes = hmac.new(
+                    secret_bytes,
+                    string_to_sign.encode('utf-8'),
+                    hashlib.sha256
+                ).digest()
+                expected_signature = base64.b64encode(expected_signature_bytes).decode('utf-8')
                 
-                # TEMPORARY: Allow webhooks through for testing (remove in production)
-                _logger.warning("TEMPORARY: Allowing webhook despite signature mismatch for debugging")
-                return {'valid': True}  # Temporarily allow all webhooks
-                
-                # return {
-                #     'valid': False,
-                #     'error': 'Invalid webhook signature'
-                # }
+                if hmac.compare_digest(signature, expected_signature):
+                    _logger.info("✅ SIGNATURE MATCH FOUND with variant: %s", name)
+                    valid_variant = name
+                    break
+                else:
+                    _logger.debug("Signature mismatch for variant %s", name)
+
+            if valid_variant:
+                # We found a match!
+                return {'valid': True}
             
+            # If we reach here, no variant matched
+            # Log specific details for the standard variant (most likely candidate)
+            std_variant = variants['1_std_newline']
+            
+            # Debug log to hex to see hidden characters
+            _logger.warning("❌ Signature mismatch for ALL variants")
+            _logger.warning("Last attempted string to sign (hex): %s", std_variant.encode('utf-8').hex())
+            _logger.warning("Secret bytes length: %d", len(secret_bytes))
+            
+            # TEMPORARY: Allow webhooks through for testing (remove in production)
+            _logger.warning("TEMPORARY: Allowing webhook despite signature mismatch for debugging")
             return {'valid': True}
             
         except Exception as e:

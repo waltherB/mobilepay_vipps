@@ -794,3 +794,64 @@ class VippsController(http.Controller):
         except Exception as e:
             _logger.error("Manual payment verification failed: %s", str(e))
             return {'success': False, 'error': str(e)}
+
+    @http.route('/payment/vipps/debug/signature', type='http', auth='public', methods=['GET'], csrf=False)
+    def debug_signature_variants(self, **kwargs):
+        """Temporary endpoint to debug signature variants using stored secret and log values"""
+        output = []
+        try:
+            # 1. Get the provider and secret
+            provider = request.env['payment.provider'].sudo().search([('code', '=', 'vipps'), ('state', '!=', 'disabled')], limit=1)
+            if not provider:
+                return "No Vipps provider found"
+
+            secret = provider.vipps_webhook_secret_decrypted
+            if not secret:
+                return "No secret found"
+
+            # 2. Values from the log that failed validation (Hardcoded from logs)
+            # Log: 2025-12-16 10:54:30
+            ms_date = "Tue, 16 Dec 2025 10:54:30 GMT"
+            host = "odoo17dev.sme-it.dk"
+            content_sha256 = "f44cyBIrQuffADVKiS/jvEY16a5dPJ40gxYXU7LXp44="
+            target_signature = "4U/t2kTXC7tjHKBVVMX8RbbPhNJbxt+8HAo5MyaWwUo="
+
+            try:
+                secret_bytes = base64.b64decode(secret)
+            except:
+                secret_bytes = secret.encode('utf-8')
+
+            variants = {
+                '1_std_newline': f"x-ms-date:{ms_date}\nhost:{host}\nx-ms-content-sha256:{content_sha256}\n",
+                '2_no_newline': f"x-ms-date:{ms_date}\nhost:{host}\nx-ms-content-sha256:{content_sha256}",
+                '3_crlf_end': f"x-ms-date:{ms_date}\n\rhost:{host}\r\nx-ms-content-sha256:{content_sha256}\r\n",
+                '4_crlf_no_end': f"x-ms-date:{ms_date}\r\nhost:{host}\r\nx-ms-content-sha256:{content_sha256}",
+            }
+
+            output.append(f"Testing against signature: {target_signature}")
+            output.append(f"Secret length: {len(secret_bytes)}")
+
+            match_found = False
+            for name, string_to_sign in variants.items():
+                expected_signature_bytes = hmac.new(
+                    secret_bytes,
+                    string_to_sign.encode('utf-8'),
+                    hashlib.sha256
+                ).digest()
+                expected_signature = base64.b64encode(expected_signature_bytes).decode('utf-8')
+                
+                output.append(f"Variant: {name}")
+                output.append(f"  String: {repr(string_to_sign)}")
+                output.append(f"  Sig   : {expected_signature}")
+                
+                if hmac.compare_digest(target_signature, expected_signature):
+                    output.append(f"✅ MATCH FOUND! Variant: {name}")
+                    match_found = True
+            
+            if not match_found:
+                output.append("❌ No match found with standard variants.")
+            
+            return "<pre>" + "\n".join(output) + "</pre>"
+            
+        except Exception as e:
+            return f"Error: {str(e)}"
