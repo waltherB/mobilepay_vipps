@@ -593,28 +593,34 @@ class VippsWebhookSecurity(models.AbstractModel):
                 }
             
             # Create canonical request for signature verification
-            # According to Vipps spec, the signed string includes:
-            # - x-ms-date header value
-            # - host header value  
-            # - x-ms-content-sha256 header value
+            # According to Vipps spec, the signed string includes the headers listed in SignedHeaders
             
-            # Calculate expected signature
-            # Vipps webhook secret from Webhooks API is base64 encoded - decode it first
-            try:
-                secret_bytes = base64.b64decode(webhook_secret)
-            except Exception as e:
-                # Fallback to UTF-8 encoding if not base64 (for provider-level secrets)
-                _logger.warning("Failed to base64 decode secret, using UTF-8: %s", str(e))
-                secret_bytes = webhook_secret.encode('utf-8')
-
+            # Parse signed headers list
+            signed_header_keys = [k.strip().lower() for k in signed_headers.split(';')]
+            
+            canonical_headers_parts = []
+            for key in signed_header_keys:
+                # Map header key to internal dict key (replace - with _)
+                internal_key = key.replace('-', '_')
+                
+                # Special handling for potentially missing headers or different naming
+                value = headers.get(internal_key, '')
+                
+                # Append in format "key:value\n"
+                canonical_headers_parts.append(f"{key}:{value}\n")
+            
+            canonical_headers = "".join(canonical_headers_parts)
+            
             # --- SIGNATURE VARIANT TESTING ---
             # Test multiple variants of string-to-sign to find the correct one
+            # The standard dynamic variant is the primary candidate
             
+            # Create variants based on the dynamically constructed headers
             variants = {
-                '1_std_newline': f"x-ms-date:{ms_date}\nhost:{host}\nx-ms-content-sha256:{content_sha256}\n",
-                '2_no_newline': f"x-ms-date:{ms_date}\nhost:{host}\nx-ms-content-sha256:{content_sha256}",
-                '3_crlf_end': f"x-ms-date:{ms_date}\n\rhost:{host}\r\nx-ms-content-sha256:{content_sha256}\r\n",
-                '4_crlf_no_end': f"x-ms-date:{ms_date}\r\nhost:{host}\r\nx-ms-content-sha256:{content_sha256}",
+                '1_dynamic_std': canonical_headers,
+                '2_dynamic_no_newline': canonical_headers.rstrip('\n'),
+                '3_dynamic_crlf_end': canonical_headers.replace('\n', '\r\n'),
+                '4_dynamic_crlf_no_end': canonical_headers.replace('\n', '\r\n').rstrip('\r\n'),
             }
             
             valid_variant = None
@@ -640,9 +646,12 @@ class VippsWebhookSecurity(models.AbstractModel):
             
             # If we reach here, no variant matched
             # Log specific details for the standard variant (most likely candidate)
-            std_variant = variants['1_std_newline']
+            std_variant = variants['1_dynamic_std']
             
             # Debug log to hex to see hidden characters
+            _logger.warning("❌ Signature mismatch for ALL dynamic variants")
+            _logger.warning("SignedHeaders: %s", signed_headers)
+            _logger.warning("Last attempted string to sign (hex): %s", std_variant.encode('utf-8').hex())
             _logger.warning("❌ Signature mismatch for ALL variants")
             _logger.warning("Last attempted string to sign (hex): %s", std_variant.encode('utf-8').hex())
             _logger.warning("Secret bytes length: %d", len(secret_bytes))
