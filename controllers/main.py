@@ -867,6 +867,10 @@ class VippsController(http.Controller):
             
         results = []
         try:
+            # 0. Check Base URL
+            base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
+            results.append(f"Current web.base.url: {base_url}")
+            
             # 1. Get List
             response = provider._make_webhook_api_request('GET', 'webhooks/v1/webhooks')
             if response and 'webhooks' in response:
