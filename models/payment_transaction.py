@@ -376,7 +376,7 @@ class PaymentTransaction(models.Model):
                 "merchantInfo": {
                     "merchantSerialNumber": self.provider_id.vipps_merchant_serial_number,
                     "callbackPrefix": self.provider_id._get_vipps_webhook_url(),
-                    "fallBack": return_url
+                    # "fallBack": return_url  # Comment out for debugging
                 },
                 "transaction": {
                     "amount": {
@@ -389,8 +389,9 @@ class PaymentTransaction(models.Model):
                 "userFlow": "WEB_REDIRECT"
             }
             
-            # Add customer phone number if available and valid
-            if hasattr(self, 'partner_phone') and self.partner_phone:
+            # Debug: Comment out customer phone to rule out format issues
+            # if hasattr(self, 'partner_phone') and self.partner_phone: 
+            #    ...
                 # Clean phone number to match Vipps regex: ^\d{9,15}$
                 clean_phone = ''.join(filter(str.isdigit, self.partner_phone))
                 if len(clean_phone) >= 9 and len(clean_phone) <= 15:
