@@ -373,19 +373,20 @@ class PaymentTransaction(models.Model):
                 "paymentMethod": {
                     "type": "WALLET"
                 },
-                "merchantInfo": {
-                    "merchantSerialNumber": self.provider_id.vipps_merchant_serial_number,
-                    "callbackPrefix": self.provider_id._get_vipps_webhook_url(),
-                    "fallBack": return_url
-                },
-                "transaction": {
-                    "amount": {
-                        "currency": self.currency_id.name,
-                        "value": int(self.amount * 100)
-                    },
-                    "transactionText": f"Payment for order {self.reference}",
-                    "reference": payment_reference
-                },
+                # "merchantInfo": {
+                #     "merchantSerialNumber": self.provider_id.vipps_merchant_serial_number,
+                #     "callbackPrefix": self.provider_id._get_vipps_webhook_url(),
+                #     "fallBack": return_url
+                # },
+                "paymentDescription": f"Payment for order {self.reference}",
+                # "transaction": {
+                #     "amount": {
+                #         "currency": self.currency_id.name,
+                #         "value": int(self.amount * 100)
+                #     },
+                #     "transactionText": f"Payment for order {self.reference}",
+                #     "reference": payment_reference
+                # },
                 "userFlow": "WEB_REDIRECT"
             }
             
