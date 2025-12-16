@@ -331,11 +331,11 @@ class PaymentTransaction(models.Model):
 
         self.ensure_one()
         
-        # Enhanced debug logging for test environment
-        if self.provider_id.vipps_environment == 'test':
-            _logger.info("🔧 DEBUG: Sending Payment Request to Vipps API")
-            _logger.info("🔧 Environment: %s", self.provider_id.vipps_environment)
-            _logger.info("🔧 Transaction: %s", self.reference)
+        # Enhanced debug logging (Unconditional for debugging)
+        _logger.info("🔧 DEBUG: Sending Payment Request to Vipps API")
+        _logger.info("🔧 Environment: %s", self.provider_id.vipps_environment)
+        _logger.info("🔧 Transaction: %s", self.reference)
+        _logger.info("🔧 Provider: %s", self.provider_id.name)
         
         try:
             api_client = self._get_vipps_api_client()
@@ -476,6 +476,9 @@ class PaymentTransaction(models.Model):
                     "orderLines": order_lines,
                     "bottomLine": bottom_line
                 }
+            
+            # Enhanced debug logging (Unconditional)
+            _logger.info("🔧 DEBUG: Payment Request Payload: %s", json.dumps(payload))
 
             # Make API request
             response = api_client._make_request(
