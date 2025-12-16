@@ -376,7 +376,7 @@ class PaymentTransaction(models.Model):
                 "merchantInfo": {
                     "merchantSerialNumber": self.provider_id.vipps_merchant_serial_number,
                     "callbackPrefix": self.provider_id._get_vipps_webhook_url(),
-                    # "fallBack": return_url  # Comment out for debugging
+                    "fallBack": return_url
                 },
                 "transaction": {
                     "amount": {
