@@ -393,11 +393,11 @@ class PaymentTransaction(models.Model):
             # if hasattr(self, 'partner_phone') and self.partner_phone: 
             #    ...
                 # Clean phone number to match Vipps regex: ^\d{9,15}$
-                clean_phone = ''.join(filter(str.isdigit, self.partner_phone))
-                if len(clean_phone) >= 9 and len(clean_phone) <= 15:
-                    payload["customer"] = {
-                        "phoneNumber": clean_phone
-                    }
+                # clean_phone = ''.join(filter(str.isdigit, self.partner_phone))
+                # if len(clean_phone) >= 9 and len(clean_phone) <= 15:
+                #     payload["customer"] = {
+                #         "phoneNumber": clean_phone
+                #     }
             
             # Do NOT send callbackAuthorizationToken - let Vipps sign the request with HMAC
             # payload["merchantInfo"]["callbackAuthorizationToken"] = self.provider_id.vipps_webhook_secret
