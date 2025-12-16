@@ -257,7 +257,13 @@ class PaymentProvider(models.Model):
         """Compute webhook URL for Vipps configuration"""
         for record in self:
             if record.code == 'vipps':
-                base_url = record.get_base_url().rstrip('/')
+                # Force use of web.base.url from system parameters to avoid IP address issues
+                base_url = record.env['ir.config_parameter'].sudo().get_param('web.base.url')
+                if not base_url:
+                    base_url = record.get_base_url()
+                
+                base_url = base_url.rstrip('/')
+                
                 # Vipps requires HTTPS for webhook URLs
                 if base_url.startswith('http://'):
                     base_url = base_url.replace('http://', 'https://', 1)
@@ -268,7 +274,13 @@ class PaymentProvider(models.Model):
     def _get_vipps_webhook_url(self):
         """Get webhook URL for Vipps configuration"""
         self.ensure_one()
-        base_url = self.get_base_url().rstrip('/')
+        # Force use of web.base.url from system parameters to avoid IP address issues
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        if not base_url:
+            base_url = self.get_base_url()
+            
+        base_url = base_url.rstrip('/')
+        
         # Vipps requires HTTPS for webhook URLs
         if base_url.startswith('http://'):
             base_url = base_url.replace('http://', 'https://', 1)
