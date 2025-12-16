@@ -611,6 +611,14 @@ class VippsWebhookSecurity(models.AbstractModel):
             
             canonical_headers = "".join(canonical_headers_parts)
             
+            # Variant: Space after colon (e.g. "key: value\n")
+            canonical_headers_parts_space = []
+            for key in signed_header_keys:
+                internal_key = key.replace('-', '_')
+                value = headers.get(internal_key, '')
+                canonical_headers_parts_space.append(f"{key}: {value}\n")
+            canonical_headers_space = "".join(canonical_headers_parts_space)
+            
             # Decode secret - handle both base64 and potential raw utf-8
             try:
                 secret_bytes = base64.b64decode(webhook_secret)
@@ -629,6 +637,8 @@ class VippsWebhookSecurity(models.AbstractModel):
                 '2_dynamic_no_newline': canonical_headers.rstrip('\n'),
                 '3_dynamic_crlf_end': canonical_headers.replace('\n', '\r\n'),
                 '4_dynamic_crlf_no_end': canonical_headers.replace('\n', '\r\n').rstrip('\r\n'),
+                '5_space_std': canonical_headers_space,
+                '6_space_no_newline': canonical_headers_space.rstrip('\n'),
             }
             
             valid_variant = None
