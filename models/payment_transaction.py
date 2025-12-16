@@ -482,10 +482,18 @@ class PaymentTransaction(models.Model):
                     bottom_line["terminalId"] = f"POS-{self.pos_session_id}"
                 
                 # Build receipt object (correct API structure)
-                payload["receipt"] = {
-                    "orderLines": order_lines,
-                    "bottomLine": bottom_line
-                }
+                # payload["receipt"] = {
+                #     "orderLines": order_lines,
+                #     "bottomLine": bottom_line
+                # }
+            # }
+
+            # Debug: Comment out receipt to rule out data format issues
+            # if order_lines:
+            #     payload["receipt"] = {
+            #         "orderLines": order_lines,
+            #         "bottomLine": bottom_line
+            #     }
             
             # Enhanced debug logging (Unconditional)
             _logger.info("🔧 DEBUG: Payment Request Payload: %s", json.dumps(payload))
