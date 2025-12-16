@@ -611,6 +611,14 @@ class VippsWebhookSecurity(models.AbstractModel):
             
             canonical_headers = "".join(canonical_headers_parts)
             
+            # Decode secret - handle both base64 and potential raw utf-8
+            try:
+                secret_bytes = base64.b64decode(webhook_secret)
+            except Exception as e:
+                # Fallback to UTF-8 encoding if not base64 (for provider-level secrets)
+                _logger.warning("Failed to base64 decode secret, using UTF-8: %s", str(e))
+                secret_bytes = webhook_secret.encode('utf-8')
+            
             # --- SIGNATURE VARIANT TESTING ---
             # Test multiple variants of string-to-sign to find the correct one
             # The standard dynamic variant is the primary candidate
