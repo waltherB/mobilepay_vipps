@@ -855,3 +855,49 @@ class VippsController(http.Controller):
             
         except Exception as e:
             return f"Error: {str(e)}"
+
+    @http.route('/payment/vipps/debug/cleanup', type='http', auth='public', csrf=False)
+    def debug_cleanup_webhooks(self):
+        """
+        Temporary endpoint to clean up ALL registered webhooks to fix duplicate issues.
+        """
+        provider = request.env['payment.provider'].sudo().search([('code', '=', 'vipps')], limit=1)
+        if not provider:
+            return "Vipps provider not found"
+            
+        results = []
+        try:
+            # 1. Get List
+            response = provider._make_webhook_api_request('GET', 'webhooks/v1/webhooks')
+            if response and 'webhooks' in response:
+                webhooks = response['webhooks']
+                results.append(f"Found {len(webhooks)} webhooks.")
+                
+                # 2. Delete ALL
+                for wh in webhooks:
+                    wh_id = wh.get('id')
+                    try:
+                        provider._make_webhook_api_request('DELETE', f"webhooks/v1/webhooks/{wh_id}")
+                        results.append(f"Deleted webhook {wh_id}")
+                    except Exception as e:
+                        results.append(f"Failed to delete {wh_id}: {str(e)}")
+                        
+                # 3. Clear Odoo
+                provider.write({
+                    'vipps_webhook_id': False,
+                    'vipps_webhook_secret': False
+                })
+                results.append("Cleared Odoo webhook config.")
+                
+                # 4. Register NEW
+                if provider._register_webhook():
+                     results.append(f"Successfully registered NEW webhook: {provider.vipps_webhook_id}")
+                else:
+                     results.append("Failed to register new webhook.")
+            else:
+                results.append("No webhooks found to clean up.")
+                
+        except Exception as e:
+            results.append(f"Error: {str(e)}")
+            
+        return request.make_response("<pre>" + "\n".join(results) + "</pre>")
