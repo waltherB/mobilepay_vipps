@@ -197,6 +197,46 @@ class VippsController(http.Controller):
             _logger.error("Error checking Vipps payment status: %s", str(e))
             return {'status': 'error', 'message': 'Status check failed'}
 
+    def _validate_webhook_timestamp(self, request):
+        """Prevent replay attacks by validating timestamp"""
+        from datetime import datetime, timezone, timedelta
+        
+        timestamp_header = request.httprequest.headers.get('X-Vipps-Timestamp')
+        if not timestamp_header:
+            _logger.warning("Missing X-Vipps-Timestamp header")
+            return True  # Allow for backward compatibility
+        
+        try:
+            # Parse ISO timestamp
+            if timestamp_header.endswith('Z'):
+                webhook_time = datetime.fromisoformat(timestamp_header.replace('Z', '+00:00'))
+            else:
+                webhook_time = datetime.fromisoformat(timestamp_header)
+            
+            # Ensure timezone awareness
+            if webhook_time.tzinfo is None:
+                webhook_time = webhook_time.replace(tzinfo=timezone.utc)
+            
+            current_time = datetime.now(timezone.utc)
+            time_diff = abs((current_time - webhook_time).total_seconds())
+            
+            # Reject webhooks older than 5 minutes (300 seconds)
+            if time_diff > 300:
+                _logger.error("Webhook timestamp too old: %s seconds (max 300)", time_diff)
+                return False
+            
+            # Reject webhooks from the future (more than 1 minute)
+            if (webhook_time - current_time).total_seconds() > 60:
+                _logger.error("Webhook timestamp from future: %s seconds ahead", 
+                            (webhook_time - current_time).total_seconds())
+                return False
+            
+            return True
+            
+        except (ValueError, AttributeError) as e:
+            _logger.error("Invalid timestamp format '%s': %s", timestamp_header, str(e))
+            return False
+
     def _validate_webhook_ip(self, request_ip, provider):
         """Validate webhook source IP against Vipps/MobilePay server hostnames"""
         # Use hostname-based validation instead of hardcoded IPs
@@ -326,6 +366,11 @@ class VippsController(http.Controller):
             
             # Log webhook reception
             _logger.info("Received Vipps webhook from %s", client_ip)
+            
+            # Validate webhook timestamp (replay attack prevention)
+            if not self._validate_webhook_timestamp(request):
+                _logger.error("Webhook timestamp validation failed from %s", client_ip)
+                return request.make_response('Bad Request: Invalid timestamp', status=400)
             
             # Find transaction first to get per-payment webhook secret
             webhook_data_temp = json.loads(payload) if payload else {}

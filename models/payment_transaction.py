@@ -8,6 +8,26 @@ from .vipps_api_client import VippsAPIClient, VippsAPIException
 
 _logger = logging.getLogger(__name__)
 
+# User-friendly error messages for Vipps/MobilePay
+VIPPS_ERROR_MESSAGES = {
+    'INSUFFICIENT_FUNDS': _('Insufficient funds. Please check your account balance.'),
+    'CARD_DECLINED': _('Payment declined. Please try a different payment method.'),
+    'EXPIRED_CARD': _('Payment method expired. Please update your payment information.'),
+    'NETWORK_ERROR': _('Connection issue. Please check your internet and try again.'),
+    'TIMEOUT': _('Payment timed out. Please try again.'),
+    'CANCELLED_BY_USER': _('Payment was cancelled.'),
+    'INVALID_AMOUNT': _('Invalid payment amount.'),
+    'MERCHANT_NOT_AVAILABLE': _('Payment service temporarily unavailable. Please try again later.'),
+    'INVALID_PHONE_NUMBER': _('Invalid phone number. Please check and try again.'),
+    'PAYMENT_LIMIT_EXCEEDED': _('Payment amount exceeds your limit.'),
+    'ACCOUNT_BLOCKED': _('Your account is temporarily blocked. Please contact support.'),
+    'INVALID_MERCHANT': _('Payment service configuration error. Please contact support.'),
+    'DUPLICATE_PAYMENT': _('This payment has already been processed.'),
+    'REFUND_NOT_POSSIBLE': _('Refund is not possible for this payment.'),
+    'CAPTURE_NOT_POSSIBLE': _('Payment capture is not possible at this time.'),
+    'CANCEL_NOT_POSSIBLE': _('Payment cannot be cancelled at this time.'),
+}
+
 
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
@@ -128,6 +148,13 @@ class PaymentTransaction(models.Model):
         store=True
     )
 
+    # Payment expiry field for timeout handling
+    vipps_payment_expires_at = fields.Datetime(
+        string="Payment Expires At",
+        copy=False,
+        help="When this payment will automatically expire"
+    )
+
     # Per-payment webhook fields - REMOVED as we use global webhooks
     # vipps_webhook_id = fields.Char()
     # vipps_webhook_secret = fields.Char()
@@ -216,18 +243,37 @@ class PaymentTransaction(models.Model):
             return super()._process_notification_data(notification_data)
         
         try:
-            # Extract payment state from notification
-            # MobilePay uses 'name' field for event type (CREATED, AUTHORIZED, CAPTURED, etc.)
-            # Vipps may use 'state' or 'transactionInfo.status'
-            payment_state = (
-                notification_data.get('state') or 
-                notification_data.get('name') or  # MobilePay event name
-                notification_data.get('transactionInfo', {}).get('status')
-            )
+            # Extract event type from 'name' field and map to payment state
+            event_name = notification_data.get('name', '')
+            event_id = notification_data.get('eventId')
+            
+            # Check for duplicate webhook events (replay attack prevention)
+            if event_id and self._is_webhook_event_processed(event_id):
+                _logger.info("Webhook event %s already processed for transaction %s, skipping", 
+                           event_id, self.reference)
+                return
+            
+            # Map event names to payment states according to Vipps API specification
+            event_state_mapping = {
+                'epayments.payment.created.v1': 'CREATED',
+                'epayments.payment.authorized.v1': 'AUTHORIZED',
+                'epayments.payment.captured.v1': 'CAPTURED',
+                'epayments.payment.cancelled.v1': 'CANCELLED',
+                'epayments.payment.refunded.v1': 'REFUNDED',
+                'epayments.payment.aborted.v1': 'ABORTED',
+                'epayments.payment.expired.v1': 'EXPIRED',
+                'epayments.payment.terminated.v1': 'TERMINATED'
+            }
+            
+            payment_state = event_state_mapping.get(event_name)
             
             if not payment_state:
-                _logger.warning("No payment state found in notification data for transaction %s", self.reference)
+                _logger.warning("Unknown event type '%s' for transaction %s", event_name, self.reference)
                 return
+            
+            # Store event ID to prevent reprocessing
+            if event_id:
+                self._store_webhook_event(event_id, event_name)
             
             # Update Vipps-specific fields
             self.write({
@@ -271,6 +317,151 @@ class PaymentTransaction(models.Model):
         except Exception as e:
             _logger.error("Error processing Vipps notification for transaction %s: %s", self.reference, str(e))
             self._set_error(f"Notification processing failed: {str(e)}")
+
+    def _is_webhook_event_processed(self, event_id):
+        """Check if webhook event has already been processed"""
+        self.ensure_one()
+        
+        # Check if we have a record of this event ID
+        existing_event = self.env['ir.config_parameter'].sudo().get_param(
+            f'vipps.webhook.event.{event_id}', False
+        )
+        
+        return bool(existing_event)
+    
+    def _store_webhook_event(self, event_id, event_name):
+        """Store webhook event ID to prevent reprocessing"""
+        self.ensure_one()
+        
+        # Store event with timestamp for cleanup
+        event_data = {
+            'transaction_id': self.id,
+            'event_name': event_name,
+            'processed_at': fields.Datetime.now().isoformat()
+        }
+        
+        # Store in system parameters (simple approach)
+        self.env['ir.config_parameter'].sudo().set_param(
+            f'vipps.webhook.event.{event_id}',
+            json.dumps(event_data)
+        )
+        
+        _logger.info("Stored webhook event %s for transaction %s", event_id, self.reference)
+
+    def _set_user_friendly_error(self, error_code, technical_message=""):
+        """Set user-friendly error message for customers"""
+        self.ensure_one()
+        
+        # Get user-friendly message
+        user_message = VIPPS_ERROR_MESSAGES.get(error_code, _('Payment failed. Please try again.'))
+        
+        # Log technical details for debugging
+        if technical_message:
+            _logger.error("Vipps payment error for transaction %s: %s (Technical: %s)", 
+                         self.reference, user_message, technical_message)
+        else:
+            _logger.error("Vipps payment error for transaction %s: %s", 
+                         self.reference, user_message)
+        
+        # Set user-friendly error message
+        self._set_error(user_message)
+        
+        # Store technical details for support
+        if technical_message:
+            self.write({
+                'state_message': f"{user_message} (Ref: {self.reference})"
+            })
+
+    def _extract_error_code_from_response(self, error_response):
+        """Extract error code from Vipps API error response"""
+        self.ensure_one()
+        
+        if not error_response:
+            return 'UNKNOWN_ERROR'
+        
+        # Handle different error response formats
+        if isinstance(error_response, dict):
+            # Standard Vipps error format
+            error_type = error_response.get('type', '')
+            error_detail = error_response.get('detail', '')
+            
+            # Map common error types to user-friendly codes
+            if 'insufficient' in error_detail.lower() or 'funds' in error_detail.lower():
+                return 'INSUFFICIENT_FUNDS'
+            elif 'declined' in error_detail.lower() or 'rejected' in error_detail.lower():
+                return 'CARD_DECLINED'
+            elif 'expired' in error_detail.lower():
+                return 'EXPIRED_CARD'
+            elif 'timeout' in error_detail.lower() or 'time' in error_detail.lower():
+                return 'TIMEOUT'
+            elif 'cancelled' in error_detail.lower() or 'canceled' in error_detail.lower():
+                return 'CANCELLED_BY_USER'
+            elif 'amount' in error_detail.lower() and 'invalid' in error_detail.lower():
+                return 'INVALID_AMOUNT'
+            elif 'phone' in error_detail.lower() or 'number' in error_detail.lower():
+                return 'INVALID_PHONE_NUMBER'
+            elif 'limit' in error_detail.lower() or 'exceed' in error_detail.lower():
+                return 'PAYMENT_LIMIT_EXCEEDED'
+            elif 'blocked' in error_detail.lower() or 'suspended' in error_detail.lower():
+                return 'ACCOUNT_BLOCKED'
+            elif 'merchant' in error_detail.lower() and 'invalid' in error_detail.lower():
+                return 'INVALID_MERCHANT'
+            elif 'duplicate' in error_detail.lower():
+                return 'DUPLICATE_PAYMENT'
+            elif 'network' in error_detail.lower() or 'connection' in error_detail.lower():
+                return 'NETWORK_ERROR'
+            elif 'service' in error_detail.lower() and 'unavailable' in error_detail.lower():
+                return 'MERCHANT_NOT_AVAILABLE'
+        
+        return 'UNKNOWN_ERROR'
+
+    def _set_payment_expiry(self, minutes=30):
+        """Set payment expiry time for timeout handling"""
+        self.ensure_one()
+        
+        expiry_time = datetime.now() + timedelta(minutes=minutes)
+        self.write({'vipps_payment_expires_at': expiry_time})
+        
+        _logger.info("Set payment expiry for transaction %s: %s", 
+                    self.reference, expiry_time.isoformat())
+
+    @api.model
+    def _cancel_expired_payments(self):
+        """Cron job to cancel expired payments"""
+        expired_payments = self.search([
+            ('provider_code', '=', 'vipps'),
+            ('state', 'in', ['pending', 'draft']),
+            ('vipps_payment_expires_at', '<', datetime.now()),
+            ('vipps_payment_expires_at', '!=', False)
+        ])
+        
+        cancelled_count = 0
+        for payment in expired_payments:
+            try:
+                # Try to cancel via API first
+                if payment.vipps_payment_reference:
+                    try:
+                        payment._cancel_payment("Payment expired")
+                        _logger.info("Cancelled expired payment via API: %s", payment.reference)
+                    except Exception as api_error:
+                        _logger.warning("API cancel failed for expired payment %s: %s", 
+                                      payment.reference, str(api_error))
+                        # Fall back to local cancellation
+                        payment._set_user_friendly_error('TIMEOUT', 'Payment expired')
+                else:
+                    # Local cancellation for payments that never reached Vipps
+                    payment._set_user_friendly_error('TIMEOUT', 'Payment expired before processing')
+                
+                cancelled_count += 1
+                
+            except Exception as e:
+                _logger.error("Failed to cancel expired payment %s: %s", 
+                            payment.reference, str(e))
+        
+        if cancelled_count > 0:
+            _logger.info("Cancelled %d expired Vipps payments", cancelled_count)
+        
+        return cancelled_count
 
     def _get_processing_values(self):
         """
@@ -390,6 +581,7 @@ class PaymentTransaction(models.Model):
                 "userFlow": "WEB_REDIRECT"
             }
             
+<<<<<<< HEAD
             # Add customer phone number if available and valid
             if hasattr(self, 'partner_phone') and self.partner_phone:
                 # Clean phone number to match Vipps regex
@@ -406,6 +598,19 @@ class PaymentTransaction(models.Model):
                      payload["customer"] = {
                         "phoneNumber": clean_phone
                      }
+=======
+            # Add customer information if available
+            if self.partner_id and self.partner_id.phone:
+                # Clean phone number to match Vipps regex: ^\d{9,15}$
+                clean_phone = ''.join(filter(str.isdigit, self.partner_id.phone))
+                if len(clean_phone) >= 9 and len(clean_phone) <= 15:
+                    payload["customer"] = {
+                        "phoneNumber": clean_phone
+                    }
+                    
+                    if self.provider_id.vipps_environment == 'test':
+                        _logger.info("🔧 DEBUG: Added customer phone: %s", clean_phone)
+>>>>>>> d8a6796 (## 4. Webhook Security (IMPLEMENTED))
             
             # Do NOT send callbackAuthorizationToken - let Vipps sign the request with HMAC
             # payload["merchantInfo"]["callbackAuthorizationToken"] = self.provider_id.vipps_webhook_secret
@@ -424,7 +629,7 @@ class PaymentTransaction(models.Model):
                 for line in order.order_line:
                     # Calculate amounts
                     unit_price = int(line.price_unit * 100)  # In minor units (øre/cents)
-                    quantity = line.product_uom_qty
+                    quantity = int(line.product_uom_qty)  # Must be integer
                     
                     # Calculate tax rate (basis points: 25% -> 2500)
                     tax_rate = 0
@@ -490,18 +695,14 @@ class PaymentTransaction(models.Model):
                 #     bottom_line["terminalId"] = f"POS-{self.pos_session_id}"
                 
                 # Build receipt object (correct API structure)
-                # payload["receipt"] = {
-                #     "orderLines": order_lines,
-                #     "bottomLine": bottom_line
-                # }
-            # }
-
-            # Debug: Comment out receipt to rule out data format issues
-            # if order_lines:
-            #     payload["receipt"] = {
-            #         "orderLines": order_lines,
-            #         "bottomLine": bottom_line
-            #     }
+                if order_lines:
+                    payload["receipt"] = {
+                        "orderLines": order_lines,
+                        "bottomLine": bottom_line
+                    }
+                    
+                    if self.provider_id.vipps_environment == 'test':
+                        _logger.info("🔧 DEBUG: Added receipt with %d order lines", len(order_lines))
             
             # Enhanced debug logging (Unconditional)
             _logger.info("🔧 DEBUG: Payment Request Payload: %s", json.dumps(payload))
@@ -524,6 +725,9 @@ class PaymentTransaction(models.Model):
                 'vipps_psp_reference': response.get('reference')
             })
 
+            # Set payment expiry (30 minutes for eCommerce)
+            self._set_payment_expiry(minutes=30)
+
             _logger.info(
                 "Created Vipps payment for transaction %s with reference %s",
                 self.reference, payment_reference
@@ -532,12 +736,24 @@ class PaymentTransaction(models.Model):
             return response
 
         except VippsAPIException as e:
+            # Extract error code and set user-friendly message
+            error_code = self._extract_error_code_from_response(getattr(e, 'response_data', None))
+            self._set_user_friendly_error(error_code, str(e))
+            
             _logger.error(
                 "Vipps payment creation failed for transaction %s: %s",
                 self.reference, str(e)
             )
-            self._set_error(_("Payment creation failed: %s") % str(e))
-            raise UserError(_("Payment creation failed: %s") % str(e))
+            raise UserError(VIPPS_ERROR_MESSAGES.get(error_code, _("Payment creation failed. Please try again.")))
+
+        except Exception as e:
+            # Handle unexpected errors
+            self._set_user_friendly_error('NETWORK_ERROR', str(e))
+            _logger.error(
+                "Unexpected error creating Vipps payment for transaction %s: %s",
+                self.reference, str(e)
+            )
+            raise UserError(_("Payment service temporarily unavailable. Please try again."))
 
     def _handle_return_from_vipps(self):
         """Handle customer return from Vipps payment flow and update order status"""
@@ -1307,17 +1523,26 @@ class PaymentTransaction(models.Model):
             }
 
         except VippsAPIException as e:
+            # Extract error code and set user-friendly message
+            error_code = self._extract_error_code_from_response(getattr(e, 'response_data', None))
+            if 'capture' in str(e).lower() and 'not possible' in str(e).lower():
+                error_code = 'CAPTURE_NOT_POSSIBLE'
+            
+            self._set_user_friendly_error(error_code, str(e))
+            
             _logger.error(
                 "Failed to capture payment for transaction %s: %s",
                 self.reference, str(e)
             )
-            raise UserError(_("Payment capture failed: %s") % str(e))
+            raise UserError(VIPPS_ERROR_MESSAGES.get(error_code, _("Payment capture failed. Please try again.")))
+            
         except Exception as e:
+            self._set_user_friendly_error('NETWORK_ERROR', str(e))
             _logger.error(
                 "Unexpected error capturing payment for transaction %s: %s",
                 self.reference, str(e)
             )
-            raise UserError(_("Payment capture failed due to system error: %s") % str(e))
+            raise UserError(_("Payment capture failed due to system error. Please try again."))
 
     def _refund_payment(self, amount=None, reason=None):
         """Process refund for captured payment with partial refund support"""
@@ -1407,17 +1632,26 @@ class PaymentTransaction(models.Model):
             }
 
         except VippsAPIException as e:
+            # Extract error code and set user-friendly message
+            error_code = self._extract_error_code_from_response(getattr(e, 'response_data', None))
+            if 'refund' in str(e).lower() and 'not possible' in str(e).lower():
+                error_code = 'REFUND_NOT_POSSIBLE'
+            
+            self._set_user_friendly_error(error_code, str(e))
+            
             _logger.error(
                 "Failed to refund payment for transaction %s: %s",
                 self.reference, str(e)
             )
-            raise UserError(_("Payment refund failed: %s") % str(e))
+            raise UserError(VIPPS_ERROR_MESSAGES.get(error_code, _("Payment refund failed. Please try again.")))
+            
         except Exception as e:
+            self._set_user_friendly_error('NETWORK_ERROR', str(e))
             _logger.error(
                 "Unexpected error refunding payment for transaction %s: %s",
                 self.reference, str(e)
             )
-            raise UserError(_("Payment refund failed due to system error: %s") % str(e))
+            raise UserError(_("Payment refund failed due to system error. Please try again."))
 
     def _get_total_refunded_amount(self):
         """Calculate total amount already refunded for this transaction"""

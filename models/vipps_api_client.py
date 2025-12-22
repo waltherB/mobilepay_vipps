@@ -397,7 +397,7 @@ class VippsAPIClient:
 
     def _make_request(self, method, endpoint, payload=None, idempotency_key=None, max_retries=3):
         """
-        Make HTTP request with comprehensive error handling and retry logic
+        Make HTTP request with comprehensive error handling and enhanced retry logic
         
         Args:
             method: HTTP method (GET, POST, PUT, etc.)
@@ -419,7 +419,8 @@ class VippsAPIClient:
         url = f"{self._get_api_base_url()}/{endpoint.lstrip('/')}"
         headers = self._get_api_headers(include_auth=True, idempotency_key=idempotency_key)
         
-        # Implement exponential backoff retry logic
+        # Enhanced retry logic with exponential backoff and jitter
+        import random
         retry_delay = 1  # Start with 1 second
         last_exception = None
         
@@ -461,14 +462,15 @@ class VippsAPIClient:
                     except (ValueError, json.JSONDecodeError):
                         return {}
                 
-                # Handle retryable errors (5xx server errors)
-                elif response.status_code >= 500 and attempt < max_retries - 1:
+                # Handle retryable errors (5xx server errors and specific 4xx errors)
+                elif self._is_retryable_error(response.status_code) and attempt < max_retries - 1:
                     _logger.warning(
-                        "Server error %d on attempt %d/%d for %s %s, retrying in %d seconds",
+                        "Retryable error %d on attempt %d/%d for %s %s, retrying in %.2f seconds",
                         response.status_code, attempt + 1, max_retries, method, endpoint, retry_delay
                     )
                     time.sleep(retry_delay)
-                    retry_delay = min(retry_delay * 2, 60)  # Cap at 60 seconds
+                    # Exponential backoff with jitter: 1s, 2s, 4s + random(0-1s)
+                    retry_delay = min((2 ** attempt) + random.uniform(0, 1), 60)  # Cap at 60 seconds
                     continue
                 
                 # Handle non-retryable errors
@@ -480,11 +482,11 @@ class VippsAPIClient:
                 last_exception = e
                 if attempt < max_retries - 1:
                     _logger.warning(
-                        "Timeout on attempt %d/%d for %s %s, retrying in %d seconds",
+                        "Timeout on attempt %d/%d for %s %s, retrying in %.2f seconds",
                         attempt + 1, max_retries, method, endpoint, retry_delay
                     )
                     time.sleep(retry_delay)
-                    retry_delay = min(retry_delay * 2, 60)
+                    retry_delay = min((2 ** attempt) + random.uniform(0, 1), 60)
                     continue
                 else:
                     self._record_failure()
@@ -494,11 +496,11 @@ class VippsAPIClient:
                 last_exception = e
                 if attempt < max_retries - 1:
                     _logger.warning(
-                        "Connection error on attempt %d/%d for %s %s, retrying in %d seconds",
+                        "Connection error on attempt %d/%d for %s %s, retrying in %.2f seconds",
                         attempt + 1, max_retries, method, endpoint, retry_delay
                     )
                     time.sleep(retry_delay)
-                    retry_delay = min(retry_delay * 2, 60)
+                    retry_delay = min((2 ** attempt) + random.uniform(0, 1), 60)
                     continue
                 else:
                     self._record_failure()
@@ -514,6 +516,23 @@ class VippsAPIClient:
             raise VippsAPIException(f"All retry attempts failed. Last error: {str(last_exception)}")
         else:
             raise VippsAPIException("All retry attempts failed")
+
+    def _is_retryable_error(self, status_code):
+        """Determine if an HTTP status code indicates a retryable error"""
+        # 5xx server errors are always retryable
+        if 500 <= status_code < 600:
+            return True
+        
+        # Some 4xx errors are retryable
+        retryable_4xx = [
+            408,  # Request Timeout
+            429,  # Too Many Requests
+            502,  # Bad Gateway
+            503,  # Service Unavailable
+            504,  # Gateway Timeout
+        ]
+        
+        return status_code in retryable_4xx
 
     def validate_webhook_signature(self, payload, signature, timestamp):
         """
