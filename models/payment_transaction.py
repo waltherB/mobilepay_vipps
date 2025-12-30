@@ -657,23 +657,15 @@ class PaymentTransaction(models.Model):
                     order_lines.append(order_line_data)
                 
                 # Bottom line
-                # bottom_line = {
-                #     "currency": self.currency_id.name,
-                #     "tipAmount": 0,
-                #     "receiptNumber": self.reference.split('-')[0],
-                # }
-
-                # ... (receipt handling commented out)
-                pass
-                
-                # Add payment sources (all from card/wallet in this case)
-                #     "voucher": 0,
-                #     "cash": 0
-                # }
+                bottom_line = {
+                    "currency": self.currency_id.name,
+                    "tipAmount": 0,
+                    "receiptNumber": self.reference.split('-')[0],
+                }
                 
                 # Add terminal ID if in POS context
-                # if hasattr(self, 'pos_session_id') and self.pos_session_id:
-                #     bottom_line["terminalId"] = f"POS-{self.pos_session_id}"
+                if hasattr(self, 'pos_session_id') and self.pos_session_id:
+                    bottom_line["terminalId"] = f"POS-{self.pos_session_id}"
                 
                 # Build receipt object (correct API structure)
                 if order_lines:
